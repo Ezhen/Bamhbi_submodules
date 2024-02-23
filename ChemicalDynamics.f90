@@ -191,43 +191,43 @@
     tf = Q10Factor (temp,Q10chem)
    ! Compute ammonium oxidation by oxygen 
     lim = michaelis(DOX,ksoxnhsdox)
-    Nitrification_Rate = tf*Roxnhs*lim
+    Nitrification_Rate = tf*self%Roxnhs*lim
    ! Compute Ammonium oxidation by nitrate 
              !lim   = inhibition(ODU,kinoxnhsodu) ! REMOVE (POSSIBLY)
     lim   = michaelis(NOS,0.3_wp)
     inhib = inhibition(DOX,kinoxnhsdox)
-    Ammonium_Oxidation_rate_by_Nitrate = tf*Roxnhsnos*inhib*lim*inhibition(ODU,kinoxnhsodu)  ! BUG TEST 2019-01-21
+    Ammonium_Oxidation_rate_by_Nitrate = tf*self%Roxnhsnos*inhib*lim*inhibition(ODU,kinoxnhsodu)  ! BUG TEST 2019-01-21
    ! Compute ODU oxidation by oxygen 
     lim = michaelis(DOX,ksoxodudox)
-    ODU_Oxidation_Rate_by_oxygen = tf*Roxodu*lim
+    ODU_Oxidation_Rate_by_oxygen = tf*self%Roxodu*lim
    ! Compute ODU oxidation by nitrate 
     lim = michaelis(NOS,ksoxodunos)
     inhib = inhibition(DOX,kinoxodudox)
-    ODU_Oxidation_Rate_by_nitrate = tf*Roxodunos*inhib*lim
+    ODU_Oxidation_Rate_by_nitrate = tf*self%Roxodunos*inhib*lim
    ! ADJUSTING THE RATE OF CHANGE 
    ! oxidation of Ammonium by oxygen consumes oxygen and ammonium and produces nitrate 
    _ADD_SOURCE_(self%id_nos,1.0*( Nitrification_Rate*NHS)) 
    _ADD_SOURCE_(self%id_nhs,-1.0*( Nitrification_Rate*NHS)) 
-   _ADD_SOURCE_(self%id_dox,-1.0*( Nitrification_Rate*NHS*ONoxnhsr)) 
+   _ADD_SOURCE_(self%id_dox,-1.0*( Nitrification_Rate*NHS*self%ONoxnhsr)) 
    ! Oxidation of ammonium by nitrate consumes nitrate and ammonium and produces N2 which is definitely lost for the system 
 #ifdef testcons 
     Ammonium_Oxidation_rate_by_Nitrate=0.
 #endif 
-   _ADD_SOURCE_(self%id_nos,-1.0*( Ammonium_Oxidation_rate_by_Nitrate*NHS*NOsNHsr)) 
+   _ADD_SOURCE_(self%id_nos,-1.0*( Ammonium_Oxidation_rate_by_Nitrate*NHS*self%NOsNHsr)) 
    _ADD_SOURCE_(self%id_nhs,-1.0*( Ammonium_Oxidation_rate_by_Nitrate*NHS)) 
    !oxidation of ODU by oxygen consumes oxygen and ODU and produces oxydant not modelled 
-   _ADD_SOURCE_(self%id_dox,-1.0*( ODU_Oxidation_Rate_by_oxygen*ODU*OODUr)) 
+   _ADD_SOURCE_(self%id_dox,-1.0*( ODU_Oxidation_Rate_by_oxygen*ODU*self%OODUr)) 
    _ADD_SOURCE_(self%id_odu,-1.0*( ODU_Oxidation_Rate_by_oxygen*ODU)) 
    ! oxidation of ODU by nitrate consumes nitrate and ODU and produces oxydant not modelled 
 #ifdef testcons 
     ODU_Oxidation_Rate_by_nitrate=0.
 #endif 
    _ADD_SOURCE_(self%id_odu,-1.0*( ODU_Oxidation_Rate_by_nitrate*ODU)) 
-   _ADD_SOURCE_(self%id_nos,-1.0*( ODU_Oxidation_Rate_by_nitrate*ODU*NODUr)) 
+   _ADD_SOURCE_(self%id_nos,-1.0*( ODU_Oxidation_Rate_by_nitrate*ODU*self%NODUr)) 
    ! Diagnostics Compute auxillary variables 
 #ifdef biodiag2 
-          Oxidation_by_oxygen =  ODU_Oxidation_Rate_by_oxygen* ODU*OODUr + Nitrification_Rate*NHS*ONoxnhsr
-          Oxidation_by_nitrate = ODU_Oxidation_Rate_by_nitrate*ODU*NODUr + Ammonium_Oxidation_rate_by_Nitrate*NHS*NOsNHsr
+          Oxidation_by_oxygen =  ODU_Oxidation_Rate_by_oxygen* ODU*self%OODUr + Nitrification_Rate*NHS*self%ONoxnhsr
+          Oxidation_by_nitrate = ODU_Oxidation_Rate_by_nitrate*ODU*self%NODUr + Ammonium_Oxidation_rate_by_Nitrate*NHS*self%NOsNHsr
 #endif 
 #ifdef biodiag1 
           Nitrification=Nitrification_Rate*NHS

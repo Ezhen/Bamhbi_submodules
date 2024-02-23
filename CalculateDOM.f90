@@ -173,9 +173,9 @@
    ! The rate of hydrolysis is assumed to be proportional to the POC and PON concentration and the rate of hydrolysis is constant 
    ! but different for the POC and PON. It is assumed as in Anderson and Williams that the PON is faster decomposed 
    ! We have to consider that the decomposition of POM is not so active in anoxic conditions (Devol et al, 2001, LO,! Van Mooy et al., 2002 Geochimica et Cosmochimica) 
-    hydroPOMLim=(DOX+1.0)/(DOX+ksatOxygenHydrolysis +1.0)
-    hydroPOC=hydroPOMLim*hydPOCmax
-    hydroPON=hydroPOMLim*hydPONmax
+    hydroPOMLim=(DOX+1.0)/(DOX+self%ksatOxygenHydrolysis +1.0)
+    hydroPOC=hydroPOMLim*self%hydPOCmax
+    hydroPON=hydroPOMLim*self%hydPONmax
     POCHYDR = tf*hydroPOC*POC
     PONHYDR = tf*hydroPON*PON
              !hydroPCS=hydroPOMLim*hydPCSmax ! REMOVE (POSSIBLY)
@@ -184,14 +184,14 @@
              !PNSHYDR = tf*hydroPNS*PNSI(i,j,k) ! REMOVE (POSSIBLY)
    ! The semi-labile DOM is decomposed into labile dom according to the model proposed in Anderson and Williams (1998) 
    ! and Anderson and Pondhaven (2003). 
-    DOCSLHYDR = tf*maxhydrDOCSL*DCS/(DCS + csatdocsl)*BAC
-    DONSLHYDR = tf*maxhydrDOCSL*DCS/(DCS + csatdocsl)*BAC*DNS/DCS
+    DOCSLHYDR = tf*self%maxhydrDOCSL*DCS/(DCS + self%csatdocsl)*BAC
+    DONSLHYDR = tf*self%maxhydrDOCSL*DCS/(DCS + self%csatdocsl)*BAC*DNS/DCS
    ! ADJUSTING THE RATE OF CHANGE 
    ! The hydrolysis of POM increases the pool of DOm and decreases the pool of POM 
-   _ADD_SOURCE_(self%id_dcl,1.0*( labilefraction*POCHYDR ! + labilefraction_fromS*PCSHYDR)) 
-   _ADD_SOURCE_(self%id_dnl,1.0*( labilefraction*PONHYDR ! + labilefraction_fromS*PNSHYDR)) 
-   _ADD_SOURCE_(self%id_dcs,1.0*( (1.0 - labilefraction)*POCHYDR !  +  (1.0 - labilefraction_fromS)*PCSHYDR)) 
-   _ADD_SOURCE_(self%id_dns,1.0*( (1.0 - labilefraction)*PONHYDR !  +  (1.0 - labilefraction_fromS)*PNSHYDR)) 
+   _ADD_SOURCE_(self%id_dcl,1.0*( self%labilefraction*POCHYDR ! + self%labilefraction_fromS*PCSHYDR)) 
+   _ADD_SOURCE_(self%id_dnl,1.0*( self%labilefraction*PONHYDR ! + self%labilefraction_fromS*PNSHYDR)) 
+   _ADD_SOURCE_(self%id_dcs,1.0*( (1.0 - self%labilefraction)*POCHYDR !  +  (1.0 - self%labilefraction_fromS)*PCSHYDR)) 
+   _ADD_SOURCE_(self%id_dns,1.0*( (1.0 - self%labilefraction)*PONHYDR !  +  (1.0 - self%labilefraction_fromS)*PNSHYDR)) 
    _ADD_SOURCE_(self%id_poc,-1.0*( POCHYDR)) 
    _ADD_SOURCE_(self%id_pon,-1.0*( PONHYDR)) 
             !dDPCS(i,j,k) = dDPCS(i,j,k) + PCSHYDR ! REMOVE (POSSIBLY)

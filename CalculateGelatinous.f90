@@ -221,7 +221,7 @@
    ! Attention do not forget to add OXYGEN 
    CALL GELATINOUS_MORTALITY_RATE(HalfSatMort_Gelatinous,NLin_Mort_Gelatinous,expmortGelatinous,DOXsatmort,Mortanoxic,tf,GEL,DOX,C_ZOOMort) ! REMOVE (POSSIBLY)
    ! Mortality in nitrogen units 
-    N_ZOOMort  = C_ZOOMort * NCrGelatinous
+    N_ZOOMort  = C_ZOOMort * self%NCrGelatinous
    !Computes the nitrogen/carbon fluxes necessary to conserve the NCrzoo (C_ZOOAdjust,N_ZOOAdjust) 
    !The adjustment is realised through an extra-respiration or an excretion term on the model of the zooplankton in ERSEM 
    ! in this case excretion can be zero. We have to compute the N:C ratio of zooplankton with the computed fluxes 
@@ -251,22 +251,22 @@
              END SELECT ! REMOVE (POSSIBLY)
    ! Ammonium is excreyed by zooplankton 
    _ADD_SOURCE_(self%id_nhs,1.0*( N_ZOOAdjust)) 
-   _ADD_SOURCE_(self%id_pho,1.0*( N_ZOOAdjust*PNRedfield)) 
+   _ADD_SOURCE_(self%id_pho,1.0*( N_ZOOAdjust*self%PNRedfield)) 
    ! Grazing on zoooplankton 
-   _ADD_SOURCE_(self%id_mic,-1.0*( grazing_carbonGelatinous/FluxPrey_carbon*Capt_eff_Gelatinous_Microzoo*MIC)) 
-   _ADD_SOURCE_(self%id_mes,-1.0*( grazing_carbonGelatinous/FluxPrey_carbon*Capt_eff_Gelatinous_Mesozoo*MES)) 
+   _ADD_SOURCE_(self%id_mic,-1.0*( grazing_carbonGelatinous/FluxPrey_carbon*self%Capt_eff_Gelatinous_Microzoo*MIC)) 
+   _ADD_SOURCE_(self%id_mes,-1.0*( grazing_carbonGelatinous/FluxPrey_carbon*self%Capt_eff_Gelatinous_Mesozoo*MES)) 
    ! Grazing on detritus 
-   _ADD_SOURCE_(self%id_poc,-1.0*( grazing_carbonGelatinous/FluxPrey_carbon*Capt_eff_Gelatinous_POM*POC)) 
-   _ADD_SOURCE_(self%id_pon,-1.0*( grazing_carbonGelatinous/FluxPrey_carbon*Capt_eff_Gelatinous_POM*PON)) 
+   _ADD_SOURCE_(self%id_poc,-1.0*( grazing_carbonGelatinous/FluxPrey_carbon*self%Capt_eff_Gelatinous_POM*POC)) 
+   _ADD_SOURCE_(self%id_pon,-1.0*( grazing_carbonGelatinous/FluxPrey_carbon*self%Capt_eff_Gelatinous_POM*PON)) 
    ! POMNOS decreases by the grazing 
    ! If diatoms can form aggregate 
              SELECT CASE (SinkingVelocityType) ! REMOVE (POSSIBLY)
              CASE ('aggregation') ! REMOVE (POSSIBLY)
                !dDAGG(i,j,k)=dDAGG(i,j,k) + grazing_carbonGelatinous/FluxPrey_carbon*Capt_eff_Gelatinous_POM*PON(i,j,k)*AGG(i,j,k)/(PON(i,j,k)+PNS(i,j,k)) ! REMOVE (POSSIBLY)
-   _ADD_SOURCE_(self%id_agg,-1.0*( grazing_carbonGelatinous/FluxPrey_carbon*Capt_eff_Gelatinous_POM*AGG)) 
+   _ADD_SOURCE_(self%id_agg,-1.0*( grazing_carbonGelatinous/FluxPrey_carbon*self%Capt_eff_Gelatinous_POM*AGG)) 
              END SELECT ! REMOVE (POSSIBLY)
    ! DOX decreases due to respiration of zooplankton 
-   _ADD_SOURCE_(self%id_dox,-1.0*( (C_ZOOResp + C_ZOOAdjust)*OCr)) 
+   _ADD_SOURCE_(self%id_dox,-1.0*( (C_ZOOResp + C_ZOOAdjust)*self%OCr)) 
    _ADD_SOURCE_(self%id_dic,1.0*( (C_ZOOResp + C_ZOOAdjust))) 
    ! diagnostics 
 #ifdef biodiag1 

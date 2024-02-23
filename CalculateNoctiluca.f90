@@ -241,7 +241,7 @@
    ! Attention do not forget to add OXYGEN 
    CALL GELATINOUS_MORTALITY_RATE(HalfSatMort_Noctiluca,NLin_Mort_Noctiluca,expmortNoctiluca,DOXsatmort,Mortanoxic,tf,NOC,DOX,C_ZOOMort) ! REMOVE (POSSIBLY)
    ! Mortality in nitrogen units 
-    N_ZOOMort  = C_ZOOMort* NCrNoctiluca
+    N_ZOOMort  = C_ZOOMort* self%NCrNoctiluca
    !Computes the nitrogen/carbon fluxes necessary to conserve the NCrzoo (C_ZOOAdjust,N_ZOOAdjust) 
    !The adjustment is realised through an extra-respiration or an excretion term on the model of the zooplankton in ERSEM 
    ! in this case excretion can be zero. We have to compute the N:C ratio of zooplankton with the computed fluxes 
@@ -271,31 +271,31 @@
              END SELECT ! REMOVE (POSSIBLY)
    ! Ammonium is excreyed by zooplankton 
    _ADD_SOURCE_(self%id_nhs,1.0*( N_ZOOAdjust)) 
-   _ADD_SOURCE_(self%id_pho,1.0*( N_ZOOAdjust*PNRedfield)) 
+   _ADD_SOURCE_(self%id_pho,1.0*( N_ZOOAdjust*self%PNRedfield)) 
    ! Grazing on zoooplankton 
-   _ADD_SOURCE_(self%id_mic,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*Capt_eff_Noctiluca_Microzoo*MIC)) 
-   _ADD_SOURCE_(self%id_mes,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*Capt_eff_Noctiluca_Mesozoo*MES)) 
+   _ADD_SOURCE_(self%id_mic,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Microzoo*MIC)) 
+   _ADD_SOURCE_(self%id_mes,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Mesozoo*MES)) 
    !  Grazing on detritus 
-   _ADD_SOURCE_(self%id_poc,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*Capt_eff_Noctiluca_POM*POC)) 
-   _ADD_SOURCE_(self%id_pon,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*Capt_eff_Noctiluca_POM*PON)) 
+   _ADD_SOURCE_(self%id_poc,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_POM*POC)) 
+   _ADD_SOURCE_(self%id_pon,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_POM*PON)) 
    ! Grazing on phytoplankton 
-   _ADD_SOURCE_(self%id_cfl,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*Capt_eff_Noctiluca_Flagellates*CFL)) 
-   _ADD_SOURCE_(self%id_cem,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*Capt_eff_Noctiluca_Emiliana*CEM)) 
-   _ADD_SOURCE_(self%id_cdi,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*Capt_eff_Noctiluca_Diatoms*CDI)) 
-   _ADD_SOURCE_(self%id_nfl,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*Capt_eff_Noctiluca_Flagellates*NFL)) 
-   _ADD_SOURCE_(self%id_nem,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*Capt_eff_Noctiluca_Emiliana*NEM)) 
-   _ADD_SOURCE_(self%id_ndi,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*Capt_eff_Noctiluca_Diatoms*NDI)) 
+   _ADD_SOURCE_(self%id_cfl,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Flagellates*CFL)) 
+   _ADD_SOURCE_(self%id_cem,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Emiliana*CEM)) 
+   _ADD_SOURCE_(self%id_cdi,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Diatoms*CDI)) 
+   _ADD_SOURCE_(self%id_nfl,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Flagellates*NFL)) 
+   _ADD_SOURCE_(self%id_nem,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Emiliana*NEM)) 
+   _ADD_SOURCE_(self%id_ndi,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Diatoms*NDI)) 
    !When eating diatoms, micro ejects silicate as silicious_Detritus 
-   _ADD_SOURCE_(self%id_sid,1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*Capt_eff_Noctiluca_Diatoms*NDI*SiNrDiatoms)) 
+   _ADD_SOURCE_(self%id_sid,1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Diatoms*NDI*self%SiNrDiatoms)) 
    ! POMNOS decreases by the grazing 
    ! If diatoms can form aggregate 
              SELECT CASE (SinkingVelocityType) ! REMOVE (POSSIBLY)
              CASE ('aggregation') ! REMOVE (POSSIBLY)
                !dDAGG(i,j,k) = dDAGG(i,j,k) + grazing_carbonNoctiluca/FluxPrey_carbon*Capt_eff_Noctiluca_POM*PON(i,j,k)*AGG(i,j,k)/(PON(i,j,k)+PNS(i,j,k)) ! REMOVE (POSSIBLY)
-   _ADD_SOURCE_(self%id_agg,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*Capt_eff_Noctiluca_POM*AGG)) 
+   _ADD_SOURCE_(self%id_agg,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_POM*AGG)) 
              END SELECT ! REMOVE (POSSIBLY)
    ! DOX decreases due to respiration of zooplankton 
-   _ADD_SOURCE_(self%id_dox,-1.0*( (C_ZOOResp + C_ZOOAdjust)*OCr)) 
+   _ADD_SOURCE_(self%id_dox,-1.0*( (C_ZOOResp + C_ZOOAdjust)*self%OCr)) 
    _ADD_SOURCE_(self%id_dic,1.0*( (C_ZOOResp + C_ZOOAdjust))) 
    ! diagnostics 
 #ifdef biodiag1 

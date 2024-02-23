@@ -250,9 +250,9 @@
    ! Growth rate of bacteria (BACGROWTH, in mmolC/m3/day) 
    CALL BAC_GROWTH_RATE(maxgrowthbac,tf,csatdocl,csatamm,bactgrowtheff,NCrBac,PHO,csatpo4,BAC,Uptake_DOCL_local,Uptake_DONL_local,Uptake_NHS_local,BACGrowth,BACResp,BACExcr,Halfsaturation_Iron,IronCsurf,Param1IronCurve,Param2IronCurve,Limitation_By_Iron,depth,DCL,DNL,NHS) ! REMOVE (POSSIBLY)
    ! Bacteria mortality rate (C_BACMort,N_BACMort, /day);  attention: do not forget to add OXYGEN 
-    C_BACMort = mortbac*tf*BAC
+    C_BACMort = self%mortbac*tf*BAC
    ! Mortality in nitrogen units 
-    N_BACMort  = mortbac*tf*BAC*NCrBac
+    N_BACMort  = self%mortbac*tf*BAC*self%NCrBac
    ! ADJUSTING THE RATE OF CHANGE 
    ! Bacteria C increases by intake of DOCl 
    ! it decreases by mortality,predation (see zooplankton.f) 
@@ -262,29 +262,29 @@
    _ADD_SOURCE_(self%id_nhs,1.0*( BACExcr)) 
    _ADD_SOURCE_(self%id_nhs,-1.0*( Uptake_NHS_local)) 
    ! phosphore 
-   _ADD_SOURCE_(self%id_pho,1.0*( BACExcr*PNRedfield)) 
-   _ADD_SOURCE_(self%id_pho,-1.0*( Uptake_NHS_local*PNRedfield)) 
+   _ADD_SOURCE_(self%id_pho,1.0*( BACExcr*self%PNRedfield)) 
+   _ADD_SOURCE_(self%id_pho,-1.0*( Uptake_NHS_local*self%PNRedfield)) 
    ! as a result of respiration. It increases as a result of mortality of bacteria which is fractionned beween the labile and semi labile pool 
    ! with a coefficient labilefractionDON 
-   _ADD_SOURCE_(self%id_dcl,1.0*( labilefraction*C_BACMort)) 
+   _ADD_SOURCE_(self%id_dcl,1.0*( self%labilefraction*C_BACMort)) 
    _ADD_SOURCE_(self%id_dcl,-1.0*( BACGrowth + BACResp)) 
-   _ADD_SOURCE_(self%id_dnl,1.0*( labilefraction*N_BACMort)) 
+   _ADD_SOURCE_(self%id_dnl,1.0*( self%labilefraction*N_BACMort)) 
    _ADD_SOURCE_(self%id_dnl,-1.0*( Uptake_DONL_local)) 
-   _ADD_SOURCE_(self%id_dcs,1.0*( (1.0 - labilefraction)*C_BACMort)) 
-   _ADD_SOURCE_(self%id_dns,1.0*( (1.0 - labilefraction)*N_BACMort)) 
-    denitrif = BACResp*NOS/(NOS+ksdeninos)*(kindenidox/(DOX+kindenidox))*NCr
+   _ADD_SOURCE_(self%id_dcs,1.0*( (1.0 - self%labilefraction)*C_BACMort)) 
+   _ADD_SOURCE_(self%id_dns,1.0*( (1.0 - self%labilefraction)*N_BACMort)) 
+    denitrif = BACResp*NOS/(NOS+self%ksdeninos)*(self%self%kindenidox/(DOX+self%self%kindenidox))*self%NCr
 #ifdef testcons 
     denitrif=0
 #endif 
-    bacteria_oxygenconsumption_local=BACResp*DOX/(DOX+ksremindox) * OCr
-    bacteria_anoxrem_local= BACResp*(kinanoxremnos/(NOS+kinanoxremnos))* (kinanoxremdox/(DOX+kinanoxremdox))*ODUCr
+    bacteria_oxygenconsumption_local=BACResp*DOX/(DOX+self%ksremindox) * self%OCr
+    bacteria_anoxrem_local= BACResp*(self%self%kinanoxremnos/(NOS+self%self%kinanoxremnos))* (self%self%kinanoxremdox/(DOX+self%self%kinanoxremdox))*self%ODUCr
    ! Oxygen decreases due to bacterial respiration 
    _ADD_SOURCE_(self%id_dox,-1.0*( bacteria_oxygenconsumption_local)) 
    !NOs decreases due to bacterial respiration 
    _ADD_SOURCE_(self%id_nos,-1.0*( denitrif)) 
    _ADD_SOURCE_(self%id_dic,1.0*( BACResp)) 
    !ODU increases due to bacterial anoxic remineralisation 
-   _ADD_SOURCE_(self%id_odu,1.0*( bacteria_anoxrem_local*(1. - Limitation_By_Iron*ODU_solid))) 
+   _ADD_SOURCE_(self%id_odu,1.0*( bacteria_anoxrem_local*(1. - Limitation_By_Iron*self%ODU_solid))) 
    ! CO2 production and consumption 
              ! dDIC=dDIC+BACResp ! REMOVE (POSSIBLY)
    ! CALL UpdateCO2(I, - GrowthPHY) 

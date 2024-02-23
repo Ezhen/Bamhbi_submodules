@@ -285,12 +285,12 @@
    ! Potential Nitrogen uptake 
     Nitrogen_UpPHY=Ammonium_UpPHY + Nitrate_UpPHY
    ! Nutrient uptake 
-    Nutrient_UpPHY=min(Nitrogen_UpPHY,Phosphate_upEmiliana/PNRedfield)
+    Nutrient_UpPHY=min(Nitrogen_UpPHY,Phosphate_upEmiliana/self%PNRedfield)
              !Nutrient_UpPHY=max(Nutrient_UpPHY,0) ! REMOVE (POSSIBLY)
    CALL GROWTH_RATE(ChlCrEmiliana,QuantumYieldEmiliana,alphaPIEmiliana,par(i,j,k),LightLimitationEmiliana,NutrientLimitationEmiliana,MaxNCrEmiliana,MinNCrEmiliana,NCrEmiliana,1.0_wp,0.0_wp,1.0_wp,MuMaxEmiliana,RespirationEmiliana,GrowthRespEmiliana,extradocphyexcr,tf,CEM,GrowthPHY,Carbon_UptakePHY,TotalRespirationPHY,DOC_extra_excr) ! REMOVE (POSSIBLY)
    !Compute the leakage    and extra DOC excretion, DOC_extra_excr 
-    DOC_leakage = leakagephy*Carbon_UptakePHY
-    DON_leakage  =leakagephy*abs(Nutrient_UpPHY)
+    DOC_leakage = self%leakagephy*Carbon_UptakePHY
+    DON_leakage  =self%leakagephy*abs(Nutrient_UpPHY)
    ! Phytoplankton mortality rate (PHYMort, /day) 
              CALL PHYMORT_RATE(MortalityEmiliana,tf, PHYmort) ! REMOVE (POSSIBLY)
    ! Phytoplankton mortality flux C_PHYMort,N_PHYMort (in mmol C/m3/day or mmol N/m3/day) 
@@ -309,23 +309,23 @@
    ! Nitrate is taken up by phytoplankton 
              IF (Nutrient_UpPHY.gt.0) THEN ! REMOVE (POSSIBLY)
    _ADD_SOURCE_(self%id_nos,-1.0*( Nutrient_UpPHY*Nitrate_UpPHY/Nitrogen_UpPHY)) 
-   _ADD_SOURCE_(self%id_dox,1.0*( Nutrient_UpPHY*Nitrate_UpPHY/Nitrogen_UpPHY*ONoxnhsr)) 
+   _ADD_SOURCE_(self%id_dox,1.0*( Nutrient_UpPHY*Nitrate_UpPHY/Nitrogen_UpPHY*self%ONoxnhsr)) 
    ! Ammonium is taken up by phytoplankton 
    _ADD_SOURCE_(self%id_nhs,-1.0*( Nutrient_UpPHY*Ammonium_UpPHY/Nitrogen_UpPHY)) 
-   _ADD_SOURCE_(self%id_pho,-1.0*( Nutrient_UpPHY*PNRedfield)) 
+   _ADD_SOURCE_(self%id_pho,-1.0*( Nutrient_UpPHY*self%PNRedfield)) 
              ELSE ! REMOVE (POSSIBLY)
    ! IF CN ratio of phytoplankton is lower than CNmin, than ammonium is excreted 
    _ADD_SOURCE_(self%id_nhs,1.0*( - Nutrient_UpPHY)) 
-   _ADD_SOURCE_(self%id_pho,1.0*( - Nutrient_UpPHY*PNRedfield)) 
+   _ADD_SOURCE_(self%id_pho,1.0*( - Nutrient_UpPHY*self%PNRedfield)) 
              END IF ! REMOVE (POSSIBLY)
    ! As in Anderson and Pondhaven (2003), the phytoplanton mortality increases the pool of POM and DOM with a coefficient of mortdom 
    ! for the DOM pool a part is considered as labile (labilefraction) and another part as semi labile (1-labilefraction) 
-   _ADD_SOURCE_(self%id_poc,1.0*( (1.0 - mortphydom)*C_PHYMort)) 
-   _ADD_SOURCE_(self%id_pon,1.0*( (1.0 - mortphydom)*N_PHYMort)) 
-   _ADD_SOURCE_(self%id_dcl,1.0*( mortphydom*C_PHYMort*labilefraction)) 
-   _ADD_SOURCE_(self%id_dnl,1.0*( mortphydom*N_PHYMort*labilefraction)) 
-   _ADD_SOURCE_(self%id_dcs,1.0*( mortphydom*C_PHYMort*(1.0 - labilefraction))) 
-   _ADD_SOURCE_(self%id_dns,1.0*( mortphydom*N_PHYMort*(1.0 - labilefraction))) 
+   _ADD_SOURCE_(self%id_poc,1.0*( (1.0 - self%mortphydom)*C_PHYMort)) 
+   _ADD_SOURCE_(self%id_pon,1.0*( (1.0 - self%mortphydom)*N_PHYMort)) 
+   _ADD_SOURCE_(self%id_dcl,1.0*( self%mortphydom*C_PHYMort*self%labilefraction)) 
+   _ADD_SOURCE_(self%id_dnl,1.0*( self%mortphydom*N_PHYMort*self%labilefraction)) 
+   _ADD_SOURCE_(self%id_dcs,1.0*( self%mortphydom*C_PHYMort*(1.0 - self%labilefraction))) 
+   _ADD_SOURCE_(self%id_dns,1.0*( self%mortphydom*N_PHYMort*(1.0 - self%labilefraction))) 
    ! As in Anderson and Pondhaven (2003), the DOCL and DONL concentration increases also due to phytoplankton leakage which is considered 
    ! to peoduced only labile DOC and DON 
    _ADD_SOURCE_(self%id_dcl,1.0*( DOC_leakage)) 
@@ -333,13 +333,13 @@
    ! As in Anderson and Pondhaven (2003), the phytoplankton extra DOC excretion, DOC_extra_excr, increases the pool of DOC (only DOC and not DON) 
    ! this extra-excretion is composed of a part (leakage) which is assimilated to leakage and is thus only labile 
    ! the remaining part (1-leakage) is composed of a labile (labileextradocexcr) and semi labile part (1-labileextradocexcr) 
-   _ADD_SOURCE_(self%id_dcl,1.0*( leakagephy*DOC_extra_excr + labileextradocphyexcr*(1.0 - leakagephy)*DOC_extra_excr)) 
-   _ADD_SOURCE_(self%id_dcs,1.0*( (1.0 - labileextradocphyexcr)*(1.0 - leakagephy)*DOC_extra_excr)) 
+   _ADD_SOURCE_(self%id_dcl,1.0*( self%self%leakagephy*DOC_extra_excr + self%labileextradocphyexcr*(1.0 - self%self%leakagephy)*DOC_extra_excr)) 
+   _ADD_SOURCE_(self%id_dcs,1.0*( (1.0 - self%labileextradocphyexcr)*(1.0 - self%leakagephy)*DOC_extra_excr)) 
              SELECT CASE (SinkingVelocityType) ! REMOVE (POSSIBLY)
              CASE ('aggregation') ! REMOVE (POSSIBLY)
    ! The number of aggregates, POMNOS including  PON increases and decreases with PON 
                !      dPAGGI(i,j,k) = dPAGGI(i,j,k) + (1.0 - mortphydom)*N_PHYMort*AGGI(i,j,k)/(PONI(i,j,k)+PNSI(i,j,k)) ! REMOVE (POSSIBLY)
-   _ADD_SOURCE_(self%id_agg,1.0*( (1.0 - mortphydom)*N_PHYMort*AGG/(PON))) 
+   _ADD_SOURCE_(self%id_agg,1.0*( (1.0 - self%mortphydom)*N_PHYMort*AGG/(PON))) 
 #ifdef nanquest 
                if (isnan(dPAGG(I,J,K))) then ! REMOVE (POSSIBLY)
                  write (*,*) '** NAN QUEST ** in CalcEMILIANNA' ! REMOVE (POSSIBLY)
@@ -351,7 +351,7 @@
 #endif 
              END SELECT ! REMOVE (POSSIBLY)
    ! The oxygen concentration increases due to photosynthesis 
-   _ADD_SOURCE_(self%id_dox,1.0*( (GrowthPHY + DOC_extra_excr)*OCr)) 
+   _ADD_SOURCE_(self%id_dox,1.0*( (GrowthPHY + DOC_extra_excr)*self%OCr)) 
    ! CO2 production and consumption 
    _ADD_SOURCE_(self%id_dic,-1.0*( GrowthPHY + DOC_extra_excr)) 
    !Diagnostics Store the fluxes 
@@ -364,7 +364,7 @@
           TotalRespirationEmiliana = TotalRespirationPHY
 #endif 
 #ifdef biodiag1 
-          PhytoNitrateReduction = PhytoNitrateReduction+Nutrient_UpPHY*ratio(Nitrate_UpPHY,Nitrogen_UpPHY)*ONoxnhsr
+          PhytoNitrateReduction = PhytoNitrateReduction+Nutrient_UpPHY*ratio(Nitrate_UpPHY,Nitrogen_UpPHY)*self%ONoxnhsr
 #endif 
            end if ! REMOVE (POSSIBLY)
          end do  ! REMOVE (POSSIBLY)

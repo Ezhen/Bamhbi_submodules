@@ -270,23 +270,23 @@
    ! Intake of N and C, N_ZOOIntake (mmolN/m3/day), C_ZOOIntake (mmolC/m3/day) are the sum 
    ! of grazing on phytoplanktonm zooplankton, detritus and bacteria, less messy feeding losses 
    ! altrhought in fact some of these losses occur after passage through the gut. 
-    C_ZOOIntake = grazing_carbonMicroZoo*(1. - Messy_feeding_MicroZoo)
-    N_ZOOIntake = grazing_nitrogenZoo*(1. - Messy_feeding_MicroZoo)
+    C_ZOOIntake = grazing_carbonMicroZoo*(1. - self%Messy_feeding_MicroZoo)
+    N_ZOOIntake = grazing_nitrogenZoo*(1. - self%Messy_feeding_MicroZoo)
    !Zooplankton messy feeding C_ZOOMessyfeeding,N_ZOOMessyfeeding 
-    C_ZOOMessyfeeding = grazing_carbonMicroZoo*Messy_feeding_MicroZoo
-    N_ZOOMessyfeeding = grazing_nitrogenZoo*Messy_feeding_MicroZoo
+    C_ZOOMessyfeeding = grazing_carbonMicroZoo*self%Messy_feeding_MicroZoo
+    N_ZOOMessyfeeding = grazing_nitrogenZoo*self%Messy_feeding_MicroZoo
    ! Growth rate of zooplankton computed according to Anderson and Hensen 
    CALL ZOO_GROWTH_RATE(Ass_Eff_OnNitrogen,Ass_Eff_OnCarbon,NCrMicroZoo,efficiency_growth_MicroZoo,NCrfoodMicroZoo,C_ZOOIntake,N_ZOOIntake,N_ZOOExcr,ZOOGrowth) ! REMOVE (POSSIBLY)
    ! Zooplankton respiration(C_ZOOResp, mmolC/m3/day) 
-    C_ZOOResp=Ass_Eff_OnCarbon*C_ZOOIntake-ZOOGrowth
+    C_ZOOResp=self%Ass_Eff_OnCarbon*C_ZOOIntake-ZOOGrowth
    ! Egestion rate of zooplankton(C_ZOOEgest,N_ZOOEgest,mmol/day) 
-    C_ZOOEgest= (1-Ass_Eff_OnCarbon)*C_ZOOIntake
-    N_ZOOEgest = (1-Ass_Eff_OnNitrogen)*N_ZOOIntake
+    C_ZOOEgest= (1-self%Ass_Eff_OnCarbon)*C_ZOOIntake
+    N_ZOOEgest = (1-self%Ass_Eff_OnNitrogen)*N_ZOOIntake
    ! Zooplankton mortality rate (C_ZOOMort,N_ZOOMort, /day) 
    ! Attention do not forget to add OXYGEN 
    CALL MORTALITY_RATE(HalfSatMort_MicroZoo,NLin_Mort_MicroZoo,expmortMicroZoo,DOXsatmort,Mortanoxic,tf,MIC,DOX,C_ZOOMort) ! REMOVE (POSSIBLY)
    ! Mortality in nitrogen units 
-    N_ZOOMort  = C_ZOOMort * NCrMicroZoo
+    N_ZOOMort  = C_ZOOMort * self%NCrMicroZoo
    ! ADJUSTING THE RATE OF CHANGE 
    ! zoooplankton C increases by intake of preys, 
              ! it decreases by egestion,respiration,mortality,predation (computed below) with  ZOOGrowth =Intake -respiration - egestion ! REMOVE (POSSIBLY)
@@ -314,32 +314,32 @@
              END SELECT ! REMOVE (POSSIBLY)
    ! Dissolved orgaqnic matter is formed by messy feeding, a part (labilefraction) increases the labile pool 
    ! while the remaining (1 -labilefrac) increases the semi-labile fraction. 
-   _ADD_SOURCE_(self%id_dcl,1.0*( labilefraction*C_ZOOMessyfeeding)) 
-   _ADD_SOURCE_(self%id_dnl,1.0*( labilefraction*N_ZOOMessyfeeding)) 
-   _ADD_SOURCE_(self%id_dcs,1.0*( (1.0 - labilefraction)*C_ZOOMessyfeeding)) 
-   _ADD_SOURCE_(self%id_dns,1.0*( (1.0 - labilefraction)*N_ZOOMessyfeeding)) 
+   _ADD_SOURCE_(self%id_dcl,1.0*( self%labilefraction*C_ZOOMessyfeeding)) 
+   _ADD_SOURCE_(self%id_dnl,1.0*( self%labilefraction*N_ZOOMessyfeeding)) 
+   _ADD_SOURCE_(self%id_dcs,1.0*( (1.0 - self%labilefraction)*C_ZOOMessyfeeding)) 
+   _ADD_SOURCE_(self%id_dns,1.0*( (1.0 - self%labilefraction)*N_ZOOMessyfeeding)) 
    ! Ammonium is excreyed by zooplankton 
    _ADD_SOURCE_(self%id_nhs,1.0*( N_ZOOExcr)) 
-   _ADD_SOURCE_(self%id_pho,1.0*( N_ZOOExcr*PNRedfield)) 
+   _ADD_SOURCE_(self%id_pho,1.0*( N_ZOOExcr*self%PNRedfield)) 
    ! Grazing on phytoplankton 
-   _ADD_SOURCE_(self%id_cfl,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_Flagellates*CFL)) 
-   _ADD_SOURCE_(self%id_cem,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_Emiliana*CEM)) 
-   _ADD_SOURCE_(self%id_cdi,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_Diatoms*CDI)) 
-   _ADD_SOURCE_(self%id_nfl,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_Flagellates*NFL)) 
-   _ADD_SOURCE_(self%id_nem,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_Emiliana*NEM)) 
-   _ADD_SOURCE_(self%id_ndi,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_Diatoms*NDI)) 
+   _ADD_SOURCE_(self%id_cfl,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Flagellates*CFL)) 
+   _ADD_SOURCE_(self%id_cem,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Emiliana*CEM)) 
+   _ADD_SOURCE_(self%id_cdi,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Diatoms*CDI)) 
+   _ADD_SOURCE_(self%id_nfl,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Flagellates*NFL)) 
+   _ADD_SOURCE_(self%id_nem,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Emiliana*NEM)) 
+   _ADD_SOURCE_(self%id_ndi,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Diatoms*NDI)) 
    !When eating diatoms, micro ejects silicate as silicious_Detritus 
-   _ADD_SOURCE_(self%id_sid,1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_Diatoms*NDI*SiNrDiatoms)) 
+   _ADD_SOURCE_(self%id_sid,1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Diatoms*NDI*self%SiNrDiatoms)) 
    !  Grazing on detritus 
-   _ADD_SOURCE_(self%id_poc,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_POM*POC)) 
-   _ADD_SOURCE_(self%id_pon,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_POM*PON)) 
+   _ADD_SOURCE_(self%id_poc,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_POM*POC)) 
+   _ADD_SOURCE_(self%id_pon,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_POM*PON)) 
    ! Grazing on Bacteria 
-   _ADD_SOURCE_(self%id_bac,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_BAC*BAC)) 
+   _ADD_SOURCE_(self%id_bac,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_BAC*BAC)) 
    ! POMNOS decreases by the grazing 
              SELECT CASE (SinkingVelocityType) ! REMOVE (POSSIBLY)
              CASE ('aggregation') ! REMOVE (POSSIBLY)
                !dDAGG(i,j,k) = dDAGG(i,j,k) + grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_POM*PON(i,j,k)*AGG(i,j,k)/(PON(i,j,k)+PNS(i,j,k)) ! REMOVE (POSSIBLY)
-   _ADD_SOURCE_(self%id_agg,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_POM*AGG)) 
+   _ADD_SOURCE_(self%id_agg,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_POM*AGG)) 
 #ifdef nanquest 
                if (isnan(dDAGG(I,J,K))) then ! REMOVE (POSSIBLY)
                  write (*,*) '** NAN QUEST ** in CalcMIC' ! REMOVE (POSSIBLY)
@@ -350,7 +350,7 @@
 #endif 
              END SELECT ! REMOVE (POSSIBLY)
    ! DOX decreases due to respiration of zooplankton 
-   _ADD_SOURCE_(self%id_dox,-1.0*( C_ZOOResp*OCr)) 
+   _ADD_SOURCE_(self%id_dox,-1.0*( C_ZOOResp*self%OCr)) 
    _ADD_SOURCE_(self%id_dic,1.0*( C_ZOOResp)) 
    ! diagnostics 
 #ifdef biodiag1 
@@ -359,9 +359,9 @@
 #endif 
 #ifdef biodiagtrophic 
    !  Diagnostics Store the fluxes 
-phy_to_Zoo = grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_Flagellates*CFL+ grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_Emiliana *CEM+ grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_Diatoms *CDI
-          bac_to_ZOO = grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_BAC * BAC
-          POC_to_ZOO = grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_POM * POC
+phy_to_Zoo = grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Flagellates*CFL+ grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Emiliana *CEM+ grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Diatoms *CDI
+          bac_to_ZOO = grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_BAC * BAC
+          POC_to_ZOO = grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_POM * POC
 #endif 
            end if ! REMOVE (POSSIBLY)
          END DO ! REMOVE (POSSIBLY)
