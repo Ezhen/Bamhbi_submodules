@@ -66,6 +66,7 @@
       real(rk) :: Mortanoxic
       real(rk) :: NCrMicroZoo
       real(rk) :: NLin_Mort_MicroZoo
+      real(rk) :: NCrBac
       real(rk) :: OCr
       real(rk) :: PNRedfield
       real(rk) :: Q10Zoo
@@ -111,6 +112,7 @@
    real(rk)     :: Mortanoxic=0.25/daytosecond
    real(rk)     :: NCrMicroZoo=1./5.5
    real(rk)     :: NLin_Mort_MicroZoo=0.3/daytosecond
+   real(rk)     :: NCrBac=1./5.1
    real(rk)     :: OCr=1.0
    real(rk)     :: PNRedfield=1.0/16.0
    real(rk)     :: Q10Zoo=2.0
@@ -131,8 +133,8 @@
                       HalfSatMort_MicroZoo, labilefraction, 	 & 
                       MaxgrazingrateMicroZoo, 	 & 
                       Messy_feeding_MicroZoo, Mortanoxic, 	 & 
-                      NCrMicroZoo, NLin_Mort_MicroZoo, OCr, 	 & 
-                      PNRedfield, Q10Zoo, SiNrDiatoms
+                      NCrMicroZoo, NLin_Mort_MicroZoo, NCrBac, 	 & 
+                      OCr, PNRedfield, Q10Zoo, SiNrDiatoms
 
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
@@ -157,6 +159,7 @@
    call self%get_parameter(self%Mortanoxic, 'Mortanoxic', default=Mortanoxic) 
    call self%get_parameter(self%NCrMicroZoo, 'NCrMicroZoo', default=NCrMicroZoo) 
    call self%get_parameter(self%NLin_Mort_MicroZoo, 'NLin_Mort_MicroZoo', default=NLin_Mort_MicroZoo) 
+   call self%get_parameter(self%NCrBac, 'NCrBac', default=NCrBac) 
    call self%get_parameter(self%OCr, 'OCr', default=OCr) 
    call self%get_parameter(self%PNRedfield, 'PNRedfield', default=PNRedfield) 
    call self%get_parameter(self%Q10Zoo, 'Q10Zoo', default=Q10Zoo) 
@@ -223,8 +226,10 @@
       real(rk) ::   C_ZOOMort	 + ! mmol C m-3, Zooplankton mortality flux in carbon
       real(rk) ::   C_ZOOResp	 + ! flux, Zooplankton respiration
       real(rk) ::   FluxPrey_carbon	 + ! mmol C m-3, Flux of ingested preys in carbon 
+      real(rk) ::   FluxPrey_nitrogen	 + ! mmol N m-3, Flux of consummed preys in nitrogen
       real(rk) ::   grazing_carbonMicroZoo	 + ! mmol C m-3, Grazing in carbon by microzooplankaton
       real(rk) ::   grazing_nitrogenZoo	 + ! mmol N m-3, Grazing in nitrogen all zooplankaton
+      real(rk) ::   NCrfoodZooref	 + ! mol N mol C-1, Food threshold elemental ratio
       real(rk) ::   N_ZOOEgest	 + ! mmol N m-3, Zooplankton POM egestion in nitrogen
       real(rk) ::   N_ZOOExcr	 + ! mmol N m-3, Zooplankton excretion of ammonium
       real(rk) ::   N_ZOOIntake	 + ! mmol N m-3, Zooplnkton nitrogen intake
@@ -263,7 +268,16 @@
     tf = Q10Factor(temp,Q10Zoo)
    ! ZOOPLANKTON 
    ! Grazing rate of zooplankton (grazing_carbonZoo(I),NCrfoodZoo(I),mmolC/day) 
-   CALL GRAZING_RATE(tf,MaxgrazingrateMicroZoo,Half_Saturation_MicroZoo,Capt_eff_MicroZoo_Flagellates, Capt_eff_MicroZoo_Emiliana,Capt_eff_MicroZoo_Diatoms,Capt_eff_MicroZoo_MicroZoo,Capt_eff_MicroZoo_MesoZoo,Capt_eff_MicroZoo_POM,Capt_eff_MicroZoo_BAC,MIC,grazing_carbonMicroZoo,NCrfoodMicroZoo,FluxPrey_carbon,i,j,k) ! REMOVE (POSSIBLY)
+   ! ################################# FORMER SUBROUTINE ZOO GRAZING RATE ########################################################  
+   ! Flux of consummed preys in carbon 
+    FluxPrey_carbon=self%Capt_eff_MicroZoo_Flagellates*CFL+self%Capt_eff_MicroZoo_Emiliana*CEM+self%Capt_eff_MicroZoo_Diatoms*CDI+self%self%Capt_eff_MicroZoo_MicroZoo*MIC+self%self%Capt_eff_MicroZoo_MicroZoo*MES+ self%Capt_eff_MicroZoo_POM*POC+self%Capt_eff_MicroZoo_BAC*BAC
+   ! Flux of consummed preys in nitrogen 
+    FluxPrey_nitrogen=self%Capt_eff_MicroZoo_Flagellates*NFL+self%Capt_eff_MicroZoo_Emiliana*NEM+self%Capt_eff_MicroZoo_Diatoms*NDI+self%Capt_eff_MicroZoo_MicroZoo*MIC*self%NCrMicroZoo + self%Capt_eff_MicroZoo_MesoZoo*MES*self%NCrMesoZoo+self%Capt_eff_MicroZoo_POM*PON+self%Capt_eff_MicroZoo_BAC*BAC*self%NCrBac
+   ! Grazing rate in carbon 
+    grazing_carbonMicroZoo = tf*self%MaxgrazingrateMicroZoo*(FluxPrey_carbon/(FluxPrey_carbon+self%Half_Saturation_MicroZoo))*MIC
+   ! N:C molar ratio of the consumed food 
+    NCrfoodMicroZoo=FluxPrey_nitrogen/FluxPrey_carbon
+   ! ################################# END OF FORMER SUBROUTINE ZOO GRAZING RATE ########################################################  
    ! Grazing rate of zooplankton on nitrogen(grazing_nitrogenZoo,NCrfoodZoo(I),mmolN/day) 
     grazing_nitrogenZoo = grazing_carbonMicroZoo*NCrfoodMicroZoo
    ! Ingestion rate of zooplankton C_ZOOIntake (mmolC/m3/day),N_ZOOIntake mmolN/m3/day) 
@@ -276,7 +290,19 @@
     C_ZOOMessyfeeding = grazing_carbonMicroZoo*self%Messy_feeding_MicroZoo
     N_ZOOMessyfeeding = grazing_nitrogenZoo*self%Messy_feeding_MicroZoo
    ! Growth rate of zooplankton computed according to Anderson and Hensen 
-   CALL ZOO_GROWTH_RATE(Ass_Eff_OnNitrogen,Ass_Eff_OnCarbon,NCrMicroZoo,efficiency_growth_MicroZoo,NCrfoodMicroZoo,C_ZOOIntake,N_ZOOIntake,N_ZOOExcr,ZOOGrowth) ! REMOVE (POSSIBLY)
+   ! ################################# FORMER SUBROUTINE ZOO GROWTH RATE ########################################################  
+   ! Compute the food threshold elemental ratio NCrfoodZooref (molN/molC) 
+    NCrfoodZooref = self%Ass_Eff_OnCarbon*self%efficiency_growth_MicroZoo/self%Ass_Eff_OnNitrogen*self%NCrMicroZoo
+   ! if the N:C ratio of ingested food NCrfoodMicroZoo is less than NCrfoodZooref then N limits production, excretion of N 
+   ! N_ZOOExcr is zero and Zoogrowth equals : 
+             if (NCrfoodMicroZoo < NCrfoodZooref) then ! REMOVE (POSSIBLY)
+    ZOOGrowth=self%Ass_Eff_OnNitrogen*N_ZOOIntake/self%NCrMicroZoo
+    N_ZOOExcr=0
+             else ! REMOVE (POSSIBLY)
+    ZOOGrowth = self%Ass_Eff_OnCarbon*self%efficiency_growth_MicroZoo*C_ZOOIntake
+    N_ZOOExcr=C_ZOOIntake*(self%Ass_Eff_OnNitrogen*NCrfoodMicroZoo-self%Ass_Eff_OnCarbon*self%efficiency_growth_MicroZoo*self%NCrMicroZoo)
+          endif 
+   ! ################################# END OF FORMER SUBROUTINE ZOO GROWTH RATE ########################################################  
    ! Zooplankton respiration(C_ZOOResp, mmolC/m3/day) 
     C_ZOOResp=self%Ass_Eff_OnCarbon*C_ZOOIntake-ZOOGrowth
    ! Egestion rate of zooplankton(C_ZOOEgest,N_ZOOEgest,mmol/day) 

@@ -237,7 +237,10 @@
       real(rk) ::   DON_leakage	 + ! mmol N d-1, Phytoplankton passive leakage rate for nitrogen
       real(rk) ::   GrowthPHY	 + ! mmol C m-3 d-1, Phytoplankton growth
       real(rk) ::   LightLimitationEmiliana	 + ! ?, Light limitation for small flagellates
+      real(rk) ::   Mu_Nitrogen	 + ! ?, ?
+      real(rk) ::   Mu_Silicate	 + ! ?, ?
       real(rk) ::   N_PHYMort	 + ! mmol N m-3, Phytoplankton mortality flux
+      real(rk) ::   NCrat	 + ! ?, ?
       real(rk) ::   NCrEmiliana	 + ! mol N mol C-1, N/C ratio in small flagellates
       real(rk) ::   Nitrate_UpPHY	 + ! mmol N m-3, Nitrate uptake of phytoplankton
       real(rk) ::   Nitrogen_UpPHY	 + ! mmol N m-3, Nitrogen uptake of phytoplankton
@@ -245,6 +248,7 @@
       real(rk) ::   NutrientLimitationEmiliana	 + ! ?, Nutrient limitation for small flagellates
       real(rk) ::   Phosphate_upEmiliana	 + ! mmol P m-3 , Small flagellates phosphate uptake
       real(rk) ::   PHYMort	 + ! mmol m-3, Phytoplankton mortality rate
+      real(rk) ::   SiCrat	 + ! ?, ?
       real(rk) ::   tf	 + ! -, Temperature factor
       real(rk) ::   TotalRespirationPHY	 + ! mmol C m-3, Total phytoplankton respiration (basal & activity)
    _LOOP_BEGIN_
@@ -287,7 +291,34 @@
    ! Nutrient uptake 
     Nutrient_UpPHY=min(Nitrogen_UpPHY,Phosphate_upEmiliana/self%PNRedfield)
              !Nutrient_UpPHY=max(Nutrient_UpPHY,0) ! REMOVE (POSSIBLY)
-   CALL GROWTH_RATE(ChlCrEmiliana,QuantumYieldEmiliana,alphaPIEmiliana,par(i,j,k),LightLimitationEmiliana,NutrientLimitationEmiliana,MaxNCrEmiliana,MinNCrEmiliana,NCrEmiliana,1.0_wp,0.0_wp,1.0_wp,MuMaxEmiliana,RespirationEmiliana,GrowthRespEmiliana,extradocphyexcr,tf,CEM,GrowthPHY,Carbon_UptakePHY,TotalRespirationPHY,DOC_extra_excr) ! REMOVE (POSSIBLY)
+   ! ################################# FORMER SUBROUTINE PHYT GROWTH RATE ########################################### 
+   ! Potential nutrient controlled growth rate; due to droop kinetics, the actual NC ratio can slightly surpass the maximal or minimal ratio 
+             IF(NCrEmiliana > MaxNCrEmiliana) THEN ! REMOVE (POSSIBLY)
+    NCrat = self%MaxNCrEmiliana
+             ELSEIF (NCrEmiliana < MinNCrEmiliana) THEN ! REMOVE (POSSIBLY)
+    NCrat = self%MinNCrEmiliana
+             ELSE ! REMOVE (POSSIBLY)
+    NCrat = NCrEmiliana
+             ENDIF ! REMOVE (POSSIBLY)
+   ! the actual SiC ratio can slightly surpass the maximal or minimal ratio 
+             IF(SiCrEmiliana > MaxSiCrEmiliana) THEN ! REMOVE (POSSIBLY)
+    SiCrat = MaxSiCrEmiliana
+             ELSEIF (SiCrEmiliana < MinSiCrEmiliana) THEN ! REMOVE (POSSIBLY)
+    SiCrat = MinSiCrEmiliana
+             ELSE ! REMOVE (POSSIBLY)
+    SiCrat = SiCrEmiliana
+             ENDIF ! REMOVE (POSSIBLY)
+   ! Tett model 
+    Mu_Nitrogen = 1. - self%MinNCrEmiliana  / NCrat
+    Mu_Silicate = 1. - MinSiCrEmiliana / SiCrat
+    NutrientLimitationEmiliana = min(Mu_Nitrogen,Mu_Silicate)
+          LightLimitationEmiliana = 1.-exp(-self%alphaPIEmiliana*PAR/self%MuMaxEmiliana)
+    Carbon_UptakePHY=self%MuMaxEmiliana*LightLimitationEmiliana*NutrientLimitationEmiliana*CEM*tf
+    TotalRespirationPHY=Carbon_UptakePHY*self%GrowthRespEmiliana + self%RespirationEmiliana*CEM*tf
+    GrowthPHY=Carbon_UptakePHY-TotalRespirationPHY
+   ! Compute the extra DOC excretion as a fraction (extradocphyexcr) of the difference of growth in nutrient limited (actual NC ratio) and nutrient saturated (max NC ratio) as in VDM et al 2004 L&O 
+    DOC_extra_excr=abs(extradocphyexcr*self%MuMaxEmiliana*CEM*tf*(min(LightLimitationEmiliana,(1. - self%self%MinNCrEmiliana  / self%MaxNCrEmiliana))- min(LightLimitationEmiliana,(1. - self%self%MinNCrEmiliana  / NCrat))))
+   ! ################################# END OF FORMER SUBROUTINE PHYT GROWTH RATE ########################################### 
    !Compute the leakage    and extra DOC excretion, DOC_extra_excr 
     DOC_leakage = self%leakagephy*Carbon_UptakePHY
     DON_leakage  =self%leakagephy*abs(Nutrient_UpPHY)

@@ -235,7 +235,10 @@
       real(rk) ::   DON_leakage	 + ! mmol N d-1, Phytoplankton passive leakage rate for nitrogen
       real(rk) ::   GrowthPHY	 + ! mmol C m-3 d-1, Phytoplankton growth
       real(rk) ::   LightLimitationFlagellates	 + ! ?, Light limitation for flagellates
+      real(rk) ::   Mu_Nitrogen	 + ! ?, ?
+      real(rk) ::   Mu_Silicate	 + ! ?, ?
       real(rk) ::   N_PHYMort	 + ! mmol N m-3, Phytoplankton mortality flux
+      real(rk) ::   NCrat	 + ! ?, ?
       real(rk) ::   NCrFlagellates	 + ! mol N mol C-1, N/C ratio in large flagellates
       real(rk) ::   Nitrate_UpPHY	 + ! mmol N m-3, Nitrate uptake of phytoplankton
       real(rk) ::   Nitrogen_UpPHY	 + ! mmol N m-3, Nitrogen uptake of phytoplankton
@@ -243,6 +246,7 @@
       real(rk) ::   NutrientLimitationFlagellates	 + ! ?, Nutrient limitation for flagellates
       real(rk) ::   Phosphate_upFlagellates	 + ! mmol P m-3, Phosphate uptake by large flagellates
       real(rk) ::   PHYMort	 + ! mmol m-3, Phytoplankton mortality rate
+      real(rk) ::   SiCrat	 + ! ?, ?
       real(rk) ::   tf	 + ! -, Temperature factor
       real(rk) ::   TotalRespirationPHY	 + ! mmol C m-3, Total phytoplankton respiration (basal & activity)
    _LOOP_BEGIN_
@@ -285,7 +289,34 @@
    ! Nutrient uptake 
     Nutrient_UpPHY=min(Nitrogen_UpPHY,Phosphate_upFlagellates/self%PNRedfield)
              ! Nutrient_UpPHY=max(Nutrient_UpPHY,0)                                                                                                                                                                                                                         ! REMOVE (POSSIBLY)
-   CALL GROWTH_RATE(ChlCrFlagellates,QuantumYieldFlagellates,alphaPIFlagellates,PAR(i,j,k),LightLimitationFlagellates,NutrientLimitationFlagellates,MaxNCrFlagellates,MinNCrFlagellates,NCrFlagellates,1.0_wp,0.0_wp,1.0_wp,MuMaxFlagellates,RespirationFlagellates,GrowthRespFlagellates,extradocphyexcr,tf, CFL,GrowthPHY,Carbon_UptakePHY,TotalRespirationPHY,DOC_extra_excr) ! REMOVE (POSSIBLY)
+   ! ################################# FORMER SUBROUTINE PHYT GROWTH RATE ########################################### 
+   ! Potential nutrient controlled growth rate; due to droop kinetics, the actual NC ratio can slightly surpass the maximal or minimal ratio 
+             IF(NCrFlagellates > MaxNCrFlagellates) THEN ! REMOVE (POSSIBLY)
+    NCrat = self%MaxNCrFlagellates
+             ELSEIF (NCrFlagellates < MinNCrFlagellates) THEN ! REMOVE (POSSIBLY)
+    NCrat = self%MinNCrFlagellates
+             ELSE ! REMOVE (POSSIBLY)
+    NCrat = NCrFlagellates
+             ENDIF ! REMOVE (POSSIBLY)
+   ! the actual SiC ratio can slightly surpass the maximal or minimal ratio 
+             IF(SiCrFlagellates > MaxSiCrFlagellates) THEN ! REMOVE (POSSIBLY)
+    SiCrat = MaxSiCrFlagellates
+             ELSEIF (SiCrFlagellates < MinSiCrFlagellates) THEN ! REMOVE (POSSIBLY)
+    SiCrat = MinSiCrFlagellates
+             ELSE ! REMOVE (POSSIBLY)
+    SiCrat = SiCrFlagellates
+             ENDIF ! REMOVE (POSSIBLY)
+   ! Tett model 
+    Mu_Nitrogen = 1. - self%MinNCrFlagellates  / NCrat
+    Mu_Silicate = 1. - MinSiCrFlagellates / SiCrat
+    NutrientLimitationFlagellates = min(Mu_Nitrogen,Mu_Silicate)
+          LightLimitationFlagellates = 1.-exp(-self%alphaPIFlagellates*PAR/self%MuMaxFlagellates)
+    Carbon_UptakePHY=self%MuMaxFlagellates*LightLimitationFlagellates*NutrientLimitationFlagellates*CFL*tf
+    TotalRespirationPHY=Carbon_UptakePHY*self%GrowthRespFlagellates + self%RespirationFlagellates*CFL*tf
+    GrowthPHY=Carbon_UptakePHY-TotalRespirationPHY
+   ! Compute the extra DOC excretion as a fraction (extradocphyexcr) of the difference of growth in nutrient limited (actual NC ratio) and nutrient saturated (max NC ratio) as in VDM et al 2004 L&O 
+    DOC_extra_excr=abs(extradocphyexcr*self%MuMaxFlagellates*CFL*tf*(min(LightLimitationFlagellates,(1. - self%self%MinNCrFlagellates  / self%MaxNCrFlagellates))- min(LightLimitationFlagellates,(1. - self%self%MinNCrFlagellates  / NCrat))))
+   ! ################################# END OF FORMER SUBROUTINE PHYT GROWTH RATE ########################################### 
    !Compute the leakage    and extra DOC excretion, DOC_extra_excr 
     DOC_leakage = self%leakagephy*Carbon_UptakePHY
     DON_leakage  =self%leakagephy*abs(Nutrient_upPHY)

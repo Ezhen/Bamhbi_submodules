@@ -20,7 +20,7 @@
 ! Translation into FABM : Evgeny Ivanov                                                                 
 ! Contains the pelagic submodel, for bacteria described in Anderson (1992),JPR and also
 ! in Anderson and Ponhaven (2003), DSR I. This model is a nitrogen-carbon balanced model.
-!It is assumed that the organic matter is composed of nitrogenous (proteins, amino acids)
+! It is assumed that the organic matter is composed of nitrogenous (proteins, amino acids)
 ! and non nitrogenous compounds (carbohydrate, lipids). Fixed C/N ratio is aasigned to bacteria
 ! The cycling of C and N by bacteria is described by elemental stoichiometry (Anderson,1992, Anderson and Williams (1998).
 ! Bacteria act as either remineralizers or consumers of ammonium, depending on the relative imbalance
@@ -221,12 +221,16 @@
       real(rk) ::   bacteria_oxygenconsumption_local	 + ! mmol O2 m-3, Bacterial respiration
       real(rk) ::   C_BACMort	 + ! mmol C m-3, Bacteria mortality flux in carbon
       real(rk) ::   denitrif	 + ! mmol N m-3, Denitrification flux
+      real(rk) ::   Iron	 + ! ?, ?
       real(rk) ::   Limitation_By_Iron	 + ! ?, ?
+      real(rk) ::   NutLim	 + ! ?, ?
       real(rk) ::   N_BACMort	 + ! mmol N m-3, Bacteria mortality flux in nitrogen
       real(rk) ::   tf	 + ! -, Temperature factor
+      real(rk) ::   testratio	 + ! ?, ?
       real(rk) ::   Uptake_DOCL_local	 + ! mmol C m-3, Bacteria uptake of DOC
       real(rk) ::   Uptake_DONL_local	 + ! mmol N m-3, Bacteria uptake of DON
       real(rk) ::   Uptake_NHS_local	 + ! mmol N m-3, Bacteria uptake of ammonium
+      real(rk) ::   Uptake_Potential_NHS	 + ! ?, ?
    _LOOP_BEGIN_
 
    ! Retrieve current (local) state variable values.
@@ -246,16 +250,46 @@
     _GET_(self%id_temp,temp)            ! local temperature
    !TEMPERATURE EFFECT on rates (all rates are defined at 20 dg C) 
     tf = Q10Factor(temp,Q10bac)
-   ! BACTERIA 
+   ! FORMER SUBROUTINE BAC GROWTH RATE  
+   !Compute Iron Limitation 
+    Iron=self%IronCsurf+self%Param1IronCurve/(self%self%Param2IronCurve*sqrt(2.*3.14159265359))*exp(-(depth-275.)**2/(2.*self%self%Param2IronCurve**2))
+    Limitation_By_Iron = Iron/(Iron+Halfsaturation_Iron)															
+    Uptake_DOCL_local = tf*self%maxgrowthbac*DCL/(DCL+self%csatdocl)*BAC
+    Uptake_DONL_local = Uptake_DOCL_local*(DNL/DCL)
+    NutLim = min(NHS/(self%csatamm+NHS)),PHO/(self%csatpo4+PHO)) 	
+    Uptake_Potential_NHS = self%maxgrowthbac*NutLim*BAC*NCrBac					
+   ! Test if bacterial growth is limited by carbon (DOClabile) or nitrogen (ammonium + DONLabile) 
+   ! Define a threshold value and compare the Uptake_Potential_NHS, to this value 
+    testratio = Uptake_DOCL_local*(Uptake_DONL_local/Uptake_DOCL_local - self%bactgrowtheff*NCrBac)		
    ! Growth rate of bacteria (BACGROWTH, in mmolC/m3/day) 
-   CALL BAC_GROWTH_RATE(maxgrowthbac,tf,csatdocl,csatamm,bactgrowtheff,NCrBac,PHO,csatpo4,BAC,Uptake_DOCL_local,Uptake_DONL_local,Uptake_NHS_local,BACGrowth,BACResp,BACExcr,Halfsaturation_Iron,IronCsurf,Param1IronCurve,Param2IronCurve,Limitation_By_Iron,depth,DCL,DNL,NHS) ! REMOVE (POSSIBLY)
-   ! Bacteria mortality rate (C_BACMort,N_BACMort, /day);  attention: do not forget to add OXYGEN 
+             if (Uptake_Potential_NHS > (-testratio)) then ! REMOVE (POSSIBLY)
+   ! In this case we are in a situation of carbon limitation 
+    BACGrowth = self%bactgrowtheff*Uptake_DOCL_local
+   ! Growth rate computed taking into account the iron limitation 
+    BACResp = Uptake_DOCL_local*(1.0 - self%bactgrowtheff)
+   ! We have to test now, if NHS uptake is necessary to use all the DOCl 
+               if (testratio > 0) then ! REMOVE (POSSIBLY)
+   ! We are in case of remineralisation of ammonium through bacteria excretion and no net uptake of ammonium is necessary to use all the DOC 
+    Uptake_NHS_local = 0
+    BACExcr = testratio
+               else ! REMOVE (POSSIBLY)
+    Uptake_NHS_local = -testratio
+    BACExcr = 0
+            endif 
+             else ! REMOVE (POSSIBLY)
+   ! if we are in case of nitrogen limitation,it means that all the DON and the potential uptake of NHS is not sufficient to consume all the DOC 
+    Uptake_NHS_local = Uptake_Potential_NHS
+    BACGrowth = (Uptake_Potential_NHS + Uptake_DONL_local)/self%NCrBac
+   ! Growth rate computed taking into account the iron limitation 
+    BACExcr = 0
+    BACResp = BACGrowth*(1.0/bactgrowthefficiency  - 1.0)
+          endif 
+   ! END OF FORMER SUBROUTINE BAC GROWTH RATE  
+   ! Bacteria mortality rate (C_BACMort,N_BACMort, /day) 
     C_BACMort = self%mortbac*tf*BAC
    ! Mortality in nitrogen units 
     N_BACMort  = self%mortbac*tf*BAC*self%NCrBac
-   ! ADJUSTING THE RATE OF CHANGE 
-   ! Bacteria C increases by intake of DOCl 
-   ! it decreases by mortality,predation (see zooplankton.f) 
+   ! Adjusting the rate of change: Bacteria C increases by intake of DOCl and decreases by mortality & predation 
    _ADD_SOURCE_(self%id_bac,1.0*( BACGrowth)) 
    _ADD_SOURCE_(self%id_bac,-1.0*( C_BACMort)) 
    ! Ammonium is excreyed by bacteria and can be taken up by bacteria 
@@ -264,8 +298,7 @@
    ! phosphore 
    _ADD_SOURCE_(self%id_pho,1.0*( BACExcr*self%PNRedfield)) 
    _ADD_SOURCE_(self%id_pho,-1.0*( Uptake_NHS_local*self%PNRedfield)) 
-   ! as a result of respiration. It increases as a result of mortality of bacteria which is fractionned beween the labile and semi labile pool 
-   ! with a coefficient labilefractionDON 
+   ! As a result of respiration. Increases as a result of bactreial mortality which is fractionned bewteen the labile and semi-labile 
    _ADD_SOURCE_(self%id_dcl,1.0*( self%labilefraction*C_BACMort)) 
    _ADD_SOURCE_(self%id_dcl,-1.0*( BACGrowth + BACResp)) 
    _ADD_SOURCE_(self%id_dnl,1.0*( self%labilefraction*N_BACMort)) 
@@ -280,15 +313,11 @@
     bacteria_anoxrem_local= BACResp*(self%self%kinanoxremnos/(NOS+self%self%kinanoxremnos))* (self%self%kinanoxremdox/(DOX+self%self%kinanoxremdox))*self%ODUCr
    ! Oxygen decreases due to bacterial respiration 
    _ADD_SOURCE_(self%id_dox,-1.0*( bacteria_oxygenconsumption_local)) 
-   !NOs decreases due to bacterial respiration 
+   ! NOs decreases due to bacterial respiration 
    _ADD_SOURCE_(self%id_nos,-1.0*( denitrif)) 
    _ADD_SOURCE_(self%id_dic,1.0*( BACResp)) 
-   !ODU increases due to bacterial anoxic remineralisation 
+   ! ODU increases due to bacterial anoxic remineralisation 
    _ADD_SOURCE_(self%id_odu,1.0*( bacteria_anoxrem_local*(1. - Limitation_By_Iron*self%ODU_solid))) 
-   ! CO2 production and consumption 
-             ! dDIC=dDIC+BACResp ! REMOVE (POSSIBLY)
-   ! CALL UpdateCO2(I, - GrowthPHY) 
-   !Diagnostics 
 #ifdef biodiag1 
           Uptake_DOCL=Uptake_DOCL_local
           Bacteria_Respiration=BACResp
@@ -302,16 +331,6 @@
          end do ! REMOVE (POSSIBLY)
        end do ! REMOVE (POSSIBLY)
      end do ! REMOVE (POSSIBLY)
-   ! OUTPUT VARIABLES 
-  !      ! #ifdef biodiag 
-   ! Averaged over entire water column 
-     !          IntegratedBAC = IntegrateVertical(BAC,vertical_layer) ! REMOVE (POSSIBLY)
-     !          IntegratedPOC = IntegrateVertical(POC,vertical_layer) ! REMOVE (POSSIBLY)
-     !          IntegratedPON = IntegrateVertical(PON,vertical_layer) ! REMOVE (POSSIBLY)
-     !          IntegratedDOCL = IntegrateVertical(DOCL,vertical_layer) ! REMOVE (POSSIBLY)
-     !          IntegratedDOCSL =IntegrateVertical(DOCSL,vertical_layer) ! REMOVE (POSSIBLY)
-     !          IntegratedDONL =IntegrateVertical(DONL,vertical_layer) ! REMOVE (POSSIBLY)
-     !          IntegratedDONSL      =IntegrateVertical(DONSL,vertical_layer) ! REMOVE (POSSIBLY)
 #ifdef biodiag1 
    _SET_DIAGNOSTIC_(self%id_Uptake_DOCL, Uptake_DOCL)
    _SET_DIAGNOSTIC_(self%id_Bacteria_Respiration, Bacteria_Respiration)

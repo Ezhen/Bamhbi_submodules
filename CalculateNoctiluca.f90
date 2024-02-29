@@ -195,6 +195,7 @@
       real(rk) ::   C_ZOOMort	 + ! mmol C m-3, Zooplankton mortality flux in carbon
       real(rk) ::   C_ZOOResp	 + ! flux, Zooplankton respiration
       real(rk) ::   FluxPrey_carbon	 + ! mmol C m-3, Flux of ingested preys in carbon 
+      real(rk) ::   FluxPrey_nitrogen	 + ! mmol N m-3, Flux of consummed preys in nitrogen
       real(rk) ::   grazing_carbonNoctiluca	 + ! mmol C m-3, Grazing in carbon by Noctiluca
       real(rk) ::   grazing_nitrogen	 + ! mmol N m-3 d-1, Grazing in nitrogen by gelatinous
       real(rk) ::   N_ZOOAdjust	 + ! mmol C m-3, Potential additional respiration flux to keep the N/C ratio of Gelationous constant
@@ -230,7 +231,20 @@
     tf = Q10Factor (temp,Q10Zoo)
    ! ZOOPLANKTON 
    ! Grazing rate of zooplankton (grazing_carbonZoo(I),NCrfoodZoo(I),mmolC/day) 
-   CALL GELATINOUS_GRAZING_RATE(tf,MaxgrazingrateNoctiluca,threshold_feeding_Noctiluca,Capt_eff_Noctiluca_Flagellates,Capt_eff_Noctiluca_Emiliana,Capt_eff_Noctiluca_Diatoms,Capt_eff_Noctiluca_Microzoo,Capt_eff_Noctiluca_Mesozoo,Capt_eff_Noctiluca_POM,NOC,grazing_carbonNoctiluca,NCrfoodNoctiluca,FluxPrey_carbon,i,j,k) ! REMOVE (POSSIBLY)
+   ! Flux of consummed preys in carbon 
+   ! #################################### FORMER SUBROUTINE GRAZING RATE GELATINOUS ###################################### 
+    FluxPrey_carbon=self%Capt_eff_Noctiluca_Flagellates*CFL+self%Capt_eff_Noctiluca_Emiliana*CEM+self%Capt_eff_Noctiluca_Diatoms*CDI+self%Capt_eff_Noctiluca_Microzoo*MIC+self%Capt_eff_Noctiluca_Mesozoo*MES+self%Capt_eff_Noctiluca_POM*POC
+   ! Flux of consummed preys in nitrogen 
+    FluxPrey_nitrogen=self%Capt_eff_Noctiluca_Flagellates*NFL+self%Capt_eff_Noctiluca_Emiliana*NEM+self%Capt_eff_Noctiluca_Diatoms*NDI+self%Capt_eff_Noctiluca_Microzoo*MIC*self%NCrMicroZoo + self%Capt_eff_Noctiluca_Mesozoo*MES*self%NCrMesoZoo+self%Capt_eff_Noctiluca_POM*PON
+   ! Grazing rate in carbon 
+             if (FluxPrey_carbon>threshold_feeding_Noctiluca) then ! REMOVE (POSSIBLY)
+    grazing_carbonNoctiluca = tf*self%MaxgrazingrateNoctiluca*(FluxPrey_carbon-self%threshold_feeding_Noctiluca)*NOC
+             else ! REMOVE (POSSIBLY)
+    grazing_carbonNoctiluca = 0
+          endif 
+   ! N:C molar ratio of the consumed food 
+    NCrfoodNoctiluca=FluxPrey_nitrogen/FluxPrey_carbon
+   ! #################################### FORMER SUBROUTINE GRAZING RATE NOCTILUCA ###################################### 
     grazing_nitrogen=grazing_carbonNoctiluca*NCrfoodNoctiluca
    ! Egestion rate of zooplankton(C_ZOOEgest,N_ZOOEgest,mmol/day) 
              CALL GELATINOUS_EGESTION_RATE(Ass_Eff_Noctiluca,grazing_carbonNoctiluca,C_ZOOEgest) ! REMOVE (POSSIBLY)

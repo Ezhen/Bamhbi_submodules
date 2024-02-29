@@ -66,6 +66,7 @@
       real(rk) :: MaxgrazingrateMesoZoo
       real(rk) :: Messy_feeding_MesoZoo
       real(rk) :: Mortanoxic
+      real(rk) :: NCrBac
       real(rk) :: NCrMesoZoo
       real(rk) :: NLin_Mort_MesoZoo
       real(rk) :: OCr
@@ -111,6 +112,7 @@
    real(rk)     :: MaxgrazingrateMesoZoo=1.2/daytosecond
    real(rk)     :: Messy_feeding_MesoZoo=0.23
    real(rk)     :: Mortanoxic=0.25/daytosecond
+   real(rk)     :: NCrBac=1./5.1
    real(rk)     :: NCrMesoZoo=1./4.67
    real(rk)     :: NLin_Mort_MesoZoo=0.3/daytosecond
    real(rk)     :: OCr=1.0
@@ -132,8 +134,8 @@
                       HalfSatMort_MesoZoo, labilefraction, 	 & 
                       MaxgrazingrateMesoZoo, 	 & 
                       Messy_feeding_MesoZoo, Mortanoxic, 	 & 
-                      NCrMesoZoo, NLin_Mort_MesoZoo, OCr, 	 & 
-                      PNRedfield, Q10Zoo, SiNrDiatoms
+                      NCrBac, NCrMesoZoo, NLin_Mort_MesoZoo, 	 & 
+                      OCr, PNRedfield, Q10Zoo, SiNrDiatoms
 
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
@@ -156,6 +158,7 @@
    call self%get_parameter(self%MaxgrazingrateMesoZoo, 'MaxgrazingrateMesoZoo', default=MaxgrazingrateMesoZoo) 
    call self%get_parameter(self%Messy_feeding_MesoZoo, 'Messy_feeding_MesoZoo', default=Messy_feeding_MesoZoo) 
    call self%get_parameter(self%Mortanoxic, 'Mortanoxic', default=Mortanoxic) 
+   call self%get_parameter(self%NCrBac, 'NCrBac', default=NCrBac) 
    call self%get_parameter(self%NCrMesoZoo, 'NCrMesoZoo', default=NCrMesoZoo) 
    call self%get_parameter(self%NLin_Mort_MesoZoo, 'NLin_Mort_MesoZoo', default=NLin_Mort_MesoZoo) 
    call self%get_parameter(self%OCr, 'OCr', default=OCr) 
@@ -235,8 +238,10 @@
       real(rk) ::   C_ZOOMort	 + ! mmol C m-3, Zooplankton mortality flux in carbon
       real(rk) ::   C_ZOOResp	 + ! flux, Zooplankton respiration
       real(rk) ::   FluxPrey_carbon	 + ! mmol C m-3, Flux of ingested preys in carbon 
+      real(rk) ::   FluxPrey_nitrogen	 + ! mmol N m-3, Flux of consummed preys in nitrogen
       real(rk) ::   grazing_carbonMesoZoo	 + ! mmol C m-3, Grazing in carbon by mesozooplankaton
       real(rk) ::   grazing_nitrogenZoo	 + ! mmol N m-3, Grazing in nitrogen all zooplankaton
+      real(rk) ::   NCrfoodZooref	 + ! mol N mol C-1, Food threshold elemental ratio
       real(rk) ::   N_ZOOEgest	 + ! mmol N m-3, Zooplankton POM egestion in nitrogen
       real(rk) ::   N_ZOOExcr	 + ! mmol N m-3, Zooplankton excretion of ammonium
       real(rk) ::   N_ZOOIntake	 + ! mmol N m-3, Zooplnkton nitrogen intake
@@ -276,7 +281,16 @@
     tf = Q10Factor(temp,Q10Zoo)
    ! ZOOPLANKTON 
    ! Grazing rate of zooplankton (grazing_carbonZoo(I),NCrfoodZoo(I),mmolC/day) 
-   CALL GRAZING_RATE(tf,MaxgrazingrateMesoZoo,Half_Saturation_MesoZoo,Capt_eff_MesoZoo_Flagellates, Capt_eff_MesoZoo_Emiliana,Capt_eff_MesoZoo_Diatoms,Capt_eff_MesoZoo_MicroZoo,Capt_eff_MesoZoo_MesoZoo,Capt_eff_MesoZoo_POM,Capt_eff_MesoZoo_BAC,MES,grazing_carbonMesoZoo,NCrfoodMesoZoo,FluxPrey_carbon,i,j,k) ! REMOVE (POSSIBLY)
+   ! ################################# FORMER SUBROUTINE ZOO GRAZING RATE ########################################################  
+   ! Flux of consummed preys in carbon 
+    FluxPrey_carbon=self%Capt_eff_MesoZoo_Flagellates*CFL+self%Capt_eff_MesoZoo_Emiliana*CEM+self%Capt_eff_MesoZoo_Diatoms*CDI+self%Capt_eff_MesoZoo_MicroZoo*MIC+self%Capt_eff_MesoZoo_MesoZoo*MES+ self%Capt_eff_MesoZoo_POM*POC+self%Capt_eff_MesoZoo_BAC*BAC
+   ! Flux of consummed preys in nitrogen 
+    FluxPrey_nitrogen=self%Capt_eff_MesoZoo_Flagellates*NFL+self%Capt_eff_MesoZoo_Emiliana*NEM+self%Capt_eff_MesoZoo_Diatoms*NDI+self%Capt_eff_MesoZoo_MicroZoo*MIC*self%NCrMicroZoo + self%Capt_eff_MesoZoo_MesoZoo*MES*self%NCrMesoZoo+self%Capt_eff_MesoZoo_POM*PON+self%Capt_eff_MesoZoo_BAC*BAC*self%NCrBac
+   ! Grazing rate in carbon 
+    grazing_carbonMesoZoo = tf*self%MaxgrazingrateMesoZoo*(FluxPrey_carbon/(FluxPrey_carbon+self%Half_Saturation_MesoZoo))*MES
+   ! N:C molar ratio of the consumed food 
+    NCrfoodMesoZoo=FluxPrey_nitrogen/FluxPrey_carbon
+   ! ################################# END OF FORMER SUBROUTINE ZOO GRAZING RATE ######################################################## 
    ! Grazing rate of zooplankton on nitrogen(grazing_nitrogenZoo,NCrfoodZoo(I),mmolN/day) 
     grazing_nitrogenZoo = grazing_carbonMesoZoo*NCrfoodMesoZoo
    ! Ingestion rate of zooplankton C_ZOOIntake (mmolC/m3/day),N_ZOOIntake mmolN/m3/day) 
@@ -289,7 +303,19 @@
     C_ZOOMessyfeeding = grazing_carbonMesoZoo*self%Messy_feeding_MesoZoo
     N_ZOOMessyfeeding = grazing_nitrogenZoo*self%Messy_feeding_MesoZoo
    ! Growth rate of zooplankton computed according to Anderson and Hensen 
-   CALL ZOO_GROWTH_RATE(Ass_Eff_OnNitrogen,Ass_Eff_OnCarbon,NCrMesoZoo,efficiency_growth_MesoZoo,NCrfoodMesoZoo,C_ZOOIntake,N_ZOOIntake,N_ZOOExcr,ZOOGrowth) ! REMOVE (POSSIBLY)
+   ! ################################# FORMER SUBROUTINE ZOO GROWTH RATE ########################################################  
+   ! Compute the food threshold elemental ratio NCrfoodZooref (molN/molC) 
+    NCrfoodZooref = self%Ass_Eff_OnCarbon*self%efficiency_growth_MesoZoo/self%Ass_Eff_OnNitrogen*self%NCrMesoZoo
+   ! if the N:C ratio of ingested food NCrfoodMicroZoo is less than NCrfoodZooref then N limits production, excretion of N 
+   ! N_ZOOExcr is zero and Zoogrowth equals : 
+             if (NCrfoodMesoZoo < NCrfoodZooref) then ! REMOVE (POSSIBLY)
+    ZOOGrowth=self%Ass_Eff_OnNitrogen*N_ZOOIntake/self%NCrMesoZoo
+    N_ZOOExcr=0
+             else ! REMOVE (POSSIBLY)
+    ZOOGrowth = self%Ass_Eff_OnCarbon*self%efficiency_growth_MesoZoo*C_ZOOIntake
+    N_ZOOExcr=C_ZOOIntake*(self%Ass_Eff_OnNitrogen*NCrfoodMesoZoo-self%Ass_Eff_OnCarbon*self%efficiency_growth_MesoZoo*self%NCrMesoZoo)
+          endif    
+   ! ################################# END OF FORMER SUBROUTINE ZOO GROWTH RATE ########################################################  
    ! Zooplankton respiration(C_ZOOResp, mmolC/m3/day) 
     C_ZOOResp=self%Ass_Eff_OnCarbon*C_ZOOIntake-ZOOGrowth
    ! Egestion rate of zooplankton(C_ZOOEgest,N_ZOOEgest,mmol/day) 

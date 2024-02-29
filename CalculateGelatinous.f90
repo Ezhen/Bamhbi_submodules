@@ -182,6 +182,7 @@
       real(rk) ::   C_ZOOMort	 + ! mmol C m-3, Zooplankton mortality flux in carbon
       real(rk) ::   C_ZOOResp	 + ! flux, Zooplankton respiration
       real(rk) ::   FluxPrey_carbon	 + ! mmol C m-3, Flux of ingested preys in carbon 
+      real(rk) ::   FluxPrey_nitrogen	 + ! mmol N m-3, Flux of consummed preys in nitrogen
       real(rk) ::   grazing_carbonGelatinous	 + ! mmol C m-3, Grazing in carbon by Gelatinous
       real(rk) ::   grazing_nitrogen	 + ! mmol N m-3 d-1, Grazing in nitrogen by gelatinous
       real(rk) ::   N_ZOOAdjust	 + ! mmol C m-3, Potential additional respiration flux to keep the N/C ratio of Gelationous constant
@@ -208,9 +209,21 @@
     _GET_(self%id_temp,temp)            ! local temperature
    ! TEMPERATURE EFFECT on rates (all rates are defined at 20 dg C) 
     tf = Q10Factor(temp,Q10Gelatinous)
-   ! ZOOPLANKTON 
    ! Grazing rate of zooplankton (grazing_carbonZoo(I),NCrfoodZoo(I),mmolC/day) 
-   CALL GELATINOUS_GRAZING_RATE(tf,MaxgrazingrateGelatinous,threshold_feeding_Gelatinous,Capt_eff_Gelatinous_Flagellates,Capt_eff_Gelatinous_Emiliana,Capt_eff_Gelatinous_Diatoms,Capt_eff_Gelatinous_Microzoo,Capt_eff_Gelatinous_Mesozoo,Capt_eff_Gelatinous_POM,GEL,grazing_carbonGelatinous,NCrfoodGelatinous,FluxPrey_carbon,i,j,k) ! REMOVE (POSSIBLY)
+   ! #################################### FORMER SUBROUTINE GRAZING RATE GELATINOUS ###################################### 
+   ! Flux of consummed preys in carbon 
+    FluxPrey_carbon=self%Capt_eff_Gelatinous_Flagellates*CFL+self%Capt_eff_Gelatinous_Emiliana*CEM+self%Capt_eff_Gelatinous_Diatoms*CDI+self%Capt_eff_Gelatinous_Microzoo*MIC+self%Capt_eff_Gelatinous_Mesozoo*MES+self%Capt_eff_Gelatinous_POM*POC
+   ! Flux of consummed preys in nitrogen 
+    FluxPrey_nitrogen=self%Capt_eff_Gelatinous_Flagellates*NFL+self%Capt_eff_Gelatinous_Emiliana*NEM+self%Capt_eff_Gelatinous_Diatoms*NDI+self%Capt_eff_Gelatinous_Microzoo*MIC*self%NCrMicroZoo + self%Capt_eff_Gelatinous_Mesozoo*MES*self%NCrMesoZoo+self%Capt_eff_Gelatinous_POM*PON
+   ! Grazing rate in carbon 
+             if (FluxPrey_carbon>threshold_feeding_Gelatinous) then ! REMOVE (POSSIBLY)
+    grazing_carbonGelatinous = tf*self%MaxgrazingrateGelatinous*(FluxPrey_carbon-self%threshold_feeding_Gelatinous)*GEL
+             else ! REMOVE (POSSIBLY)
+    grazing_carbonGelatinous = 0
+          endif 
+   ! N:C molar ratio of the consumed food 
+    NCrfoodGelatinous=FluxPrey_nitrogen/FluxPrey_carbon
+   ! #################################### FORMER SUBROUTINE GRAZING RATE GELATINOUS ###################################### 
     grazing_nitrogen=grazing_carbonGelatinous*NCrfoodGelatinous
    ! Egestion rate of zooplankton(C_ZOOEgest,N_ZOOEgest,mmol/day) 
              CALL GELATINOUS_EGESTION_RATE(Ass_Eff_Gelatinous,grazing_carbonGelatinous,C_ZOOEgest) ! REMOVE (POSSIBLY)

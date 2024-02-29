@@ -253,6 +253,9 @@
       real(rk) ::   LightLimitationDiatoms	 + ! ?, Light limitation diatoms
       real(rk) ::   MaxSiCrDiatoms	 + ! mol Si mol C-1, Maximum Si/C ratio in diatoms
       real(rk) ::   MinSiCrDiatoms	 + ! mol Si mol C-1, Minimum Si/C ratio in diatoms
+      real(rk) ::   Mu_Nitrogen	 + ! ?, ?
+      real(rk) ::   Mu_Silicate	 + ! ?, ?
+      real(rk) ::   NCrat	 + ! ?, ?
       real(rk) ::   N_PHYMort	 + ! mmol N m-3, Phytoplankton mortality flux
       real(rk) ::   NCrDiatoms	 + ! mol N mol C-1, N/C ratio in diatoms
       real(rk) ::   Nitrate_UpPHY	 + ! mmol N m-3, Nitrate uptake of phytoplankton
@@ -261,6 +264,7 @@
       real(rk) ::   NutrientLimitationDiatoms	 + ! ?, Nutrient limitation diatoms
       real(rk) ::   Phosphate_upDiatoms	 + ! mmol P m-3, Diatoms phosphate uptake
       real(rk) ::   PHYMort	 + ! mmol m-3, Phytoplankton mortality rate
+      real(rk) ::   SiCrat	 + ! ?, ?
       real(rk) ::   SiCrDiatoms	 + ! mol Si mol C-1, Si/C ratio in diatoms
       real(rk) ::   Silicate_upDia	 + ! mmol Si m-3, Diatoms silicate uptake
       real(rk) ::   tf	 + ! -, Temperature factor
@@ -315,7 +319,34 @@
     Nitrogen_UpPHY=Ammonium_UpPHY + Nitrate_UpPHY
     Nutrient_UpPHY=min(Nitrogen_UpPHY,Silicate_upDia/SiNrDiatoms,Phosphate_upDiatoms/self%PNRedfield)
    ! Compute the diatoms growth taking into account the potential limitimg effect of silicate 
-   CALL GROWTH_RATE(ChlCrDiatoms,QuantumYieldDiatoms,alphaPIDiatoms, par(i,j,k), LightLimitationDiatoms,NutrientLimitationDiatoms,MaxNCrDiatoms,MinNCrDiatoms,NCrDiatoms,MaxSiCrDiatoms,MinSiCrDiatoms,SiCrDiatoms,MuMaxDiatoms,RespirationDiatoms,GrowthRespDiatoms,extradocphyexcr,tf, CDI,GrowthPHY,Carbon_UptakePHY,TotalRespirationPHY,DOC_extra_excr) ! REMOVE (POSSIBLY)
+   ! ################################# FORMER SUBROUTINE PHYT GROWTH RATE ########################################### 
+   ! Potential nutrient controlled growth rate; due to droop kinetics, the actual NC ratio can slightly surpass the maximal or minimal ratio 
+             IF(NCrDiatoms > MaxNCrDiatoms) THEN ! REMOVE (POSSIBLY)
+    NCrat = self%MaxNCrDiatoms
+             ELSEIF (NCrDiatoms < MinNCrDiatoms) THEN ! REMOVE (POSSIBLY)
+    NCrat = self%MinNCrDiatoms
+             ELSE ! REMOVE (POSSIBLY)
+    NCrat = NCrDiatoms
+             ENDIF ! REMOVE (POSSIBLY)
+   ! the actual SiC ratio can slightly surpass the maximal or minimal ratio 
+             IF(SiCrDiatoms > MaxSiCrDiatoms) THEN ! REMOVE (POSSIBLY)
+    SiCrat = MaxSiCrDiatoms
+             ELSEIF (SiCrDiatoms < MinSiCrDiatoms) THEN ! REMOVE (POSSIBLY)
+    SiCrat = MinSiCrDiatoms
+             ELSE ! REMOVE (POSSIBLY)
+    SiCrat = SiCrDiatoms
+             ENDIF ! REMOVE (POSSIBLY)
+   ! Tett model 
+    Mu_Nitrogen = 1. - self%MinNCrDiatoms  / NCrat
+    Mu_Silicate = 1. - MinSiCrDiatoms / SiCrat
+    NutrientLimitationDiatoms = min(Mu_Nitrogen,Mu_Silicate)
+          LightLimitationDiatoms = 1.-exp(-self%alphaPIDiatoms*PAR/self%MuMaxDiatoms)
+    Carbon_UptakePHY=self%MuMaxDiatoms*LightLimitationDiatoms*NutrientLimitationDiatoms*CDI*tf
+    TotalRespirationPHY=Carbon_UptakePHY*self%GrowthRespDiatoms + self%RespirationDiatoms*CDI*tf
+    GrowthPHY=Carbon_UptakePHY-TotalRespirationPHY
+   ! Compute the extra DOC excretion as a fraction (extradocphyexcr) of the difference of growth in nutrient limited (actual NC ratio) and nutrient saturated (max NC ratio) as in VDM et al 2004 L&O 
+    DOC_extra_excr=abs(extradocphyexcr*self%MuMaxDiatoms*CDI*tf*(min(LightLimitationDiatoms,(1. - self%self%MinNCrDiatoms  / self%MaxNCrDiatoms))- min(LightLimitationDiatoms,(1. - self%self%MinNCrDiatoms  / NCrat))))
+   ! ################################# END OF FORMER SUBROUTINE PHYT GROWTH RATE ########################################### 
    !Compute the leakage and extra DOC excretion, DOC_extra_excr 
     DOC_leakage = self%leakagephy*Carbon_UptakePHY
     DON_leakage  =self%leakagephy*abs(Nutrient_UpPHY)
