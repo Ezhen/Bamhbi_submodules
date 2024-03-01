@@ -31,7 +31,6 @@
       type (type_state_variable_id)         :: id_dic,id_dox,id_mes,id_mic,id_nhs,id_pho,id_poc,id_pon
       type (type_dependency_id)             :: id_par,id_temp 
       type (type_diagnostic_variable_id)    :: id_TotalRespiration_Gel
-      type (type_diagnostic_variable_id)    :: 
 
 !     Model parameters 
       real(rk)     :: Ass_Eff_Gelatinous, basal_Resp_Gelatinous
@@ -144,7 +143,6 @@
       real(rk) ::  par,temp
       real(rk) ::  GEL
       real(rk) ::   TotalRespiration_Gel
-      real(rk) ::   
       real(rk) ::   C_ZOOAdjust	  ! mmol N m-3, Potential excretion rate necessary to keep the N/C ratio of Gelationous constant
       real(rk) ::   C_ZOOEgest	  ! mmol C m-3, Zooplankton POM egestion in carbon
       real(rk) ::   C_ZOOMort	  ! mmol C m-3, Zooplankton mortality flux in carbon
@@ -185,11 +183,11 @@
     FluxPrey_nitrogen = self%Capt_eff_Gelatinous_Flagellates*NFL+self%Capt_eff_Gelatinous_Emiliana*NEM+self%Capt_eff_Gelatinous_Diatoms*NDI+self%Capt_eff_Gelatinous_Microzoo*MIC*self%NCrMicroZoo + self%Capt_eff_Gelatinous_Mesozoo*MES*self%NCrMesoZoo+self%Capt_eff_Gelatinous_POM*PON
     
    ! Grazing rate in carbon 
-             if (FluxPrey_carbon>threshold_feeding_Gelatinous) then 
-    grazing_carbonGelatinous = tf*self%MaxgrazingrateGelatinous*(FluxPrey_carbon-self%threshold_feeding_Gelatinous)*GEL
-             else 
-    grazing_carbonGelatinous = 0.0
-          endif 
+    if (FluxPrey_carbon>threshold_feeding_Gelatinous) then 
+      grazing_carbonGelatinous = tf*self%MaxgrazingrateGelatinous*(FluxPrey_carbon-self%threshold_feeding_Gelatinous)*GEL
+    else 
+      grazing_carbonGelatinous = 0.0
+    endif 
     
    ! Grazing rate of nitrogen 
     NCrfoodGelatinous = FluxPrey_nitrogen/FluxPrey_carbon
@@ -208,40 +206,26 @@
     
    ! Computes the N/C fluxes necessary to conserve the N/C ratio 
     NCrzootest = (grazing_carbonGelatinous*NCrfoodGelatinous-N_ZOOEgest)/(grazing_carbonGelatinous-C_ZOOEgest-C_ZOOResp)
-             if (NCrzootest> NCrGelatinous) then 
-    C_ZOOAdjust = 0.0
-    N_ZOOAdjust = (grazing_carbonGelatinous*NCrfoodGelatinous-N_ZOOEgest)-(grazing_carbonGelatinous-C_ZOOEgest-C_ZOOResp)*self%NCrGelatinous
-             else 
-    N_ZOOAdjust = 0.0
-          endif 
+    if (NCrzootest > NCrGelatinous) then 
+      C_ZOOAdjust = 0.0
+      N_ZOOAdjust = (grazing_carbonGelatinous*NCrfoodGelatinous-N_ZOOEgest)-(grazing_carbonGelatinous-C_ZOOEgest-C_ZOOResp)*self%NCrGelatinous
+    else 
+      N_ZOOAdjust = 0.0
+    endif 
     
    ! Carbon content increases by intake of preys and decreases by egestion, respiration, mortality, adjustement 
-   _ADD_SOURCE_(self%id_gel,1.0*( grazing_carbonGelatinous)) 
-   _ADD_SOURCE_(self%id_gel,-1.0*( C_ZOOEgest + C_ZOOResp + C_ZOOMort + C_ZOOAdjust)) 
-    
-   ! Particulate detritus pool if formed from non-assimilated grazed food and dead zooplatkton 
-   _ADD_SOURCE_(self%id_poc,1.0*( C_ZOOEgest + C_ZOOMort)) 
-   _ADD_SOURCE_(self%id_pon,1.0*( N_ZOOEgest + N_ZOOMort)) 
-    
-   ! Ammonium is excreted by zooplankton 
-   _ADD_SOURCE_(self%id_nhs,1.0*( N_ZOOAdjust)) 
-   _ADD_SOURCE_(self%id_pho,1.0*( N_ZOOAdjust*self%PNRedfield)) 
-    
-   ! Grazing on zoooplankton 
-   _ADD_SOURCE_(self%id_mic,-1.0*( grazing_carbonGelatinous/FluxPrey_carbon*self%Capt_eff_Gelatinous_Microzoo*MIC)) 
-   _ADD_SOURCE_(self%id_mes,-1.0*( grazing_carbonGelatinous/FluxPrey_carbon*self%Capt_eff_Gelatinous_Mesozoo*MES)) 
-    
-   ! Grazing on detritus 
-   _ADD_SOURCE_(self%id_poc,-1.0*( grazing_carbonGelatinous/FluxPrey_carbon*self%Capt_eff_Gelatinous_POM*POC)) 
-   _ADD_SOURCE_(self%id_pon,-1.0*( grazing_carbonGelatinous/FluxPrey_carbon*self%Capt_eff_Gelatinous_POM*PON)) 
-    
-   ! DOX decreases due to respiration of zooplankton 
-   _ADD_SOURCE_(self%id_dox,-1.0*( (C_ZOOResp + C_ZOOAdjust)*self%OCr)) 
-   _ADD_SOURCE_(self%id_dic,1.0*( C_ZOOResp + C_ZOOAdjust)) 
-    
-#ifdef biodiag1 
-          TotalRespiration_Gel=C_ZOOResp + C_ZOOAdjust
-#endif 
+   ! Particulate detritus pool if formed from non-assimilated grazed food and dead zooplatkton
+   _ADD_SOURCE_(self%id_gel, grazing_carbonGelatinous - C_ZOOEgest - C_ZOOResp - C_ZOOMort - C_ZOOAdjust) 
+   _ADD_SOURCE_(self%id_poc, C_ZOOEgest + C_ZOOMort - grazing_carbonGelatinous/FluxPrey_carbon*self%Capt_eff_Gelatinous_POM*POC) 
+   _ADD_SOURCE_(self%id_pon, N_ZOOEgest + N_ZOOMort - grazing_carbonGelatinous/FluxPrey_carbon*self%Capt_eff_Gelatinous_POM*PON) 
+   _ADD_SOURCE_(self%id_nhs, N_ZOOAdjust) 
+   _ADD_SOURCE_(self%id_pho, N_ZOOAdjust*self%PNRedfield)
+   _ADD_SOURCE_(self%id_mic, -grazing_carbonGelatinous/FluxPrey_carbon*self%Capt_eff_Gelatinous_Microzoo*MIC) 
+   _ADD_SOURCE_(self%id_mes, -grazing_carbonGelatinous/FluxPrey_carbon*self%Capt_eff_Gelatinous_Mesozoo*MES)
+   _ADD_SOURCE_(self%id_dox, -self%OCr*(C_ZOOResp + C_ZOOAdjust)) 
+   _ADD_SOURCE_(self%id_dic, C_ZOOResp + C_ZOOAdjust)
+
+   _SET_DIAGNOSTIC_(self%id_TotalRespiration_Gel, C_ZOOResp + C_ZOOAdjust)
 
    _LOOP_END_
 
