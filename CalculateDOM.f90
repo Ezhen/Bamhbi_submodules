@@ -168,19 +168,15 @@
     DOCSLHYDR = tf*self%maxhydrDOCSL*BAC*Michaelis((DCS,csatdocsl)
     DONSLHYDR = tf*self%maxhydrDOCSL*BAC*DNS/DCS*Michaelis(DCS,csatdocsl)
     
-   ! The hydrolysis of POM increases the pool of DOM 
-   _ADD_SOURCE_(self%id_dcl,1.0*( self%labilefraction*POCHYDR )) 
-   _ADD_SOURCE_(self%id_dnl,1.0*( self%labilefraction*PONHYDR)) 
-   _ADD_SOURCE_(self%id_dcs,1.0*( (1.0 - self%labilefraction)*POCHYDR )) 
-   _ADD_SOURCE_(self%id_dns,1.0*( (1.0 - self%labilefraction)*PONHYDR )) 
-   _ADD_SOURCE_(self%id_poc,-1.0*( POCHYDR)) 
-   _ADD_SOURCE_(self%id_pon,-1.0*( PONHYDR)) 
-    
-   ! The hydrolysis of the semi-labile DOM increases the pool of labile DOM 
-   _ADD_SOURCE_(self%id_dcl,1.0*( DOCSLHYDR)) 
-   _ADD_SOURCE_(self%id_dnl,1.0*( DONSLHYDR)) 
-   _ADD_SOURCE_(self%id_dcs,-1.0*( DOCSLHYDR)) 
-   _ADD_SOURCE_(self%id_dns,-1.0*( DONSLHYDR)) 
+   ! Assign hydrolysis fluxes
+   _ADD_SOURCE_(self%id_dcl, self%labilefraction*POCHYDR + DOCSLHYDR) 
+   _ADD_SOURCE_(self%id_dnl, self%labilefraction*PONHYDR + DONSLHYDR) 
+   _ADD_SOURCE_(self%id_dcs, (1.0 - self%labilefraction)*POCHYDR - DOCSLHYDR) 
+   _ADD_SOURCE_(self%id_dns, (1.0 - self%labilefraction)*PONHYDR - DONSLHYDR) 
+   _ADD_SOURCE_(self%id_poc,-POCHYDR) 
+   _ADD_SOURCE_(self%id_pon,-PONHYDR) 
+   
+   _ADD_SOURCE_(self%id_dns,-1.0*( )) 
 
    _LOOP_END_
 
