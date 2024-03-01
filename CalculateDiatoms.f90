@@ -278,7 +278,7 @@
     
    ! Compute nutrient and light limitation 
     NutrientLimitationDiatoms = Nutr_LIM(MinNCrDiatoms,MinSiCrDiatoms,NCrat,SiCrat)
-          LightLimitationDiatoms = 1.-exp(-self%alphaPIDiatoms*PAR/self%MuMaxDiatoms)
+    LightLimitationDiatoms = 1.-exp(-self%alphaPIDiatoms*PAR/self%MuMaxDiatoms)
     
    ! Compute carbon uptake 
     Carbon_UptakePHY = self%MuMaxDiatoms*LightLimitationDiatoms*NutrientLimitationDiatoms*CDI*tf
