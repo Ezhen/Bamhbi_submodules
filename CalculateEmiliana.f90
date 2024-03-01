@@ -229,7 +229,7 @@
     NCrEmiliana  = NEM/CEM
     ChlCrEmiliana = ChlCrPHY(NCratio,MaxNCr,MinNCr,MinChlNr,MaxChlNr)
     
-             ! Chlorophyll(i,j,k,3) = ChlCrEmiliana * CEM	! REMOVE (POSSIBLY) 
+   ! Chlorophyll(i,j,k,3) = ChlCrEmiliana * CEM	! REMOVE (POSSIBLY) 
     
    ! Nitrate uptake rate 
     Nitrate_UpPHY = NOuptake(NCrEmiliana,tf,MaxNCrEmiliana,NosMaxUptakeEmiliana) * Michaelis(NOS,ksNOsEmiliana) * Inhibition(NHS,kinNHsPhy) * CEM
@@ -254,7 +254,7 @@
     
    ! Compute nutrient and light limitation 
     NutrientLimitationEmiliana = Nutr_LIM(MinNCrEmiliana,MinSiCrEmiliana,NCrat,SiCrat)
-          LightLimitationEmiliana = 1.0-exp(-self%alphaPIEmiliana*PAR/self%MuMaxEmiliana)
+    LightLimitationEmiliana = 1.0-exp(-self%alphaPIEmiliana*PAR/self%MuMaxEmiliana)
     
    ! Compute carbon uptake 
     Carbon_UptakePHY=self%MuMaxEmiliana*LightLimitationEmiliana*NutrientLimitationEmiliana*CEM*tf
@@ -277,64 +277,36 @@
     N_PHYMort  = PHYMORT(MortalityEmiliana,tf) * NEM
     
    ! Carbon in Emiliana increases by growth and decreases by leakage and mortality 
-   _ADD_SOURCE_(self%id_cem,1.0*( GrowthPHY)) 
-   _ADD_SOURCE_(self%id_cem,-1.0*( C_PHYMort + DOC_leakage)) 
-   _ADD_SOURCE_(self%id_nem,1.0*( Nutrient_UpPHY)) 
-   _ADD_SOURCE_(self%id_nem,-1.0*( N_PHYMort + DON_leakage)) 
+   _ADD_SOURCE_(self%id_cem, GrowthPHY - C_PHYMort - DOC_leakage) 
+   _ADD_SOURCE_(self%id_nem, Nutrient_UpPHY - N_PHYMort - DON_leakage)) 
     
    ! IF CN ratio of phytoplankton higher than CNmin, than nitrogen is taken up, unless it gets excreted 
-             IF (Nutrient_UpPHY.gt.0) THEN 
-   _ADD_SOURCE_(self%id_nos,-1.0*( Nutrient_UpPHY*Nitrate_UpPHY/Nitrogen_UpPHY)) 
-   _ADD_SOURCE_(self%id_dox,1.0*( Nutrient_UpPHY*Nitrate_UpPHY/Nitrogen_UpPHY*self%ONoxnhsr)) 
-   _ADD_SOURCE_(self%id_nhs,-1.0*( Nutrient_UpPHY*Ammonium_UpPHY/Nitrogen_UpPHY)) 
-   _ADD_SOURCE_(self%id_pho,-1.0*( Nutrient_UpPHY*self%PNRedfield)) 
-             ELSE 
-   _ADD_SOURCE_(self%id_nhs,1.0*( - Nutrient_UpPHY)) 
-   _ADD_SOURCE_(self%id_pho,1.0*( - Nutrient_UpPHY*self%PNRedfield)) 
-             END IF 
+   IF (Nutrient_UpPHY.gt.0) THEN 
+     _ADD_SOURCE_(self%id_nos, -Nutrient_UpPHY*Nitrate_UpPHY/Nitrogen_UpPHY)
+     _ADD_SOURCE_(self%id_dox, Nutrient_UpPHY*Nitrate_UpPHY/Nitrogen_UpPHY*self%ONoxnhsr) 
+     _ADD_SOURCE_(self%id_nhs, -Nutrient_UpPHY*Ammonium_UpPHY/Nitrogen_UpPHY)
+     _ADD_SOURCE_(self%id_pho, -Nutrient_UpPHY*self%PNRedfield)
+   ELSE 
+     _ADD_SOURCE_(self%id_nhs, -Nutrient_UpPHY)
+     _ADD_SOURCE_(self%id_pho, -Nutrient_UpPHY*self%PNRedfield)
+   END IF 
     
-   ! Mortality increases the pool of POM and DOM with proper partitioning and leakage adds to the labile pool 
-   _ADD_SOURCE_(self%id_poc,1.0*( (1.0 - self%mortphydom)*C_PHYMort)) 
-   _ADD_SOURCE_(self%id_pon,1.0*( (1.0 - self%mortphydom)*N_PHYMort)) 
-   _ADD_SOURCE_(self%id_dcl,1.0*( self%mortphydom*C_PHYMort*self%labilefraction + DOC_leakage)) 
-   _ADD_SOURCE_(self%id_dnl,1.0*( self%mortphydom*N_PHYMort*self%labilefraction + DON_leakage)) 
-   _ADD_SOURCE_(self%id_dcs,1.0*( self%mortphydom*C_PHYMort*(1.0 - self%labilefraction))) 
-   _ADD_SOURCE_(self%id_dns,1.0*( self%mortphydom*N_PHYMort*(1.0 - self%labilefraction))) 
+   ! Mortality increases the pool of POM and DOM with proper partitioning and leakage adds to the labile pool, extra-excretion and leakage add to the labile and semi-labile detritus 
+   _ADD_SOURCE_(self%id_poc, (1.0 - self%mortphydom)*C_PHYMort)
+   _ADD_SOURCE_(self%id_pon, (1.0 - self%mortphydom)*N_PHYMort)
+   _ADD_SOURCE_(self%id_dcl, self%mortphydom*C_PHYMort*self%labilefraction + DOC_leakage + self%self%leakagephy*DOC_extra_excr + self%labileextradocphyexcr*(1.0 - self%self%leakagephy)*DOC_extra_excr))
+   _ADD_SOURCE_(self%id_dnl, self%mortphydom*N_PHYMort*self%labilefraction + DON_leakage) 
+   _ADD_SOURCE_(self%id_dcs, self%mortphydom*C_PHYMort*(1.0 - self%labilefraction) + (1.0 - self%labileextradocphyexcr)*(1.0 - self%leakagephy)*DOC_extra_excr)) 
+   _ADD_SOURCE_(self%id_dns, self%mortphydom*N_PHYMort*(1.0 - self%labilefraction))
+   _ADD_SOURCE_(self%id_dox, (GrowthPHY + DOC_extra_excr)*self%OCr)
+   _ADD_SOURCE_(self%id_dic, -GrowthPHY - DOC_extra_excr)) 
     
-   ! Extra-excretion and leakage add to the labile and semi-labile detritus 
-   _ADD_SOURCE_(self%id_dcl,1.0*( self%self%leakagephy*DOC_extra_excr + self%labileextradocphyexcr*(1.0 - self%self%leakagephy)*DOC_extra_excr)) 
-   _ADD_SOURCE_(self%id_dcs,1.0*( (1.0 - self%labileextradocphyexcr)*(1.0 - self%leakagephy)*DOC_extra_excr)) 
-    
-   ! The oxygen increases due to photosynthesis 
-   _ADD_SOURCE_(self%id_dox,1.0*( (GrowthPHY + DOC_extra_excr)*self%OCr)) 
-    
-   ! CO2 production and consumption 
-   _ADD_SOURCE_(self%id_dic,-1.0*( GrowthPHY + DOC_extra_excr)) 
-    
-#ifdef primaryprod 
-          NPP = NPP + Carbon_UptakePHY-TotalRespirationPHY
-#endif 
-#ifdef biodiag2 
-          Nitrogen_Uptake_Emiliana = Ammonium_UpPHY + Nitrate_UpPHY
-          Carbon_UptakeEmiliana    = Carbon_UptakePHY
-          TotalRespirationEmiliana = TotalRespirationPHY
-#endif 
-#ifdef biodiag1 
-          PhytoNitrateReduction = PhytoNitrateReduction+Nutrient_UpPHY*ratio(Nitrate_UpPHY,Nitrogen_UpPHY)*self%ONoxnhsr
-#endif 
+   _SET_DIAGNOSTIC_(self%id_Nitrogen_Uptake_Emiliana, Ammonium_UpPHY + Nitrate_UpPHY)
+   _SET_DIAGNOSTIC_(self%id_Carbon_UptakeEmiliana, Carbon_UptakePHY)
+   _SET_DIAGNOSTIC_(self%id_TotalRespirationEmiliana, TotalRespirationPHY)
+   _SET_DIAGNOSTIC_(self%id_PhytoNitrateReduction, Nutrient_UpPHY*ratio(Nitrate_UpPHY,Nitrogen_UpPHY)*self%ONoxnhsr)
+   _SET_DIAGNOSTIC_(self%id_NPP, Carbon_UptakePHY-TotalRespirationPHY)
 
-   ! Averaged over entire water column Diagnostics 
-#ifdef biodiag2 
-   _SET_DIAGNOSTIC_(self%id_Nitrogen_Uptake_Emiliana, Nitrogen_Uptake_Emiliana)
-   _SET_DIAGNOSTIC_(self%id_Carbon_UptakeEmiliana, Carbon_UptakeEmiliana)
-   _SET_DIAGNOSTIC_(self%id_TotalRespirationEmiliana, TotalRespirationEmiliana)
-#endif 
-#ifdef biodiag1 
-   _SET_DIAGNOSTIC_(self%id_PhytoNitrateReduction, PhytoNitrateReduction)
-#endif 
-#ifdef primaryprod 
-   _SET_DIAGNOSTIC_(self%id_NPP, NPP)
-#endif 
    _LOOP_END_
 
    end subroutine do
