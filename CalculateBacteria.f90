@@ -252,30 +252,23 @@
     C_BACMort = self%mortbac*tf*BAC
     N_BACMort = self%mortbac*tf*BAC*self%NCrBac
     
-   ! Carbon content increases by intake of nutrients and decreases by mortality (and predation) 
-   _ADD_SOURCE_(self%id_bac, BACGrowth - C_BACMort)
-    
-   ! Ammonium is excreted or can be taken up 
-   _ADD_SOURCE_(self%id_nhs, BACExcr - Uptake_NHS_local) 
-   _ADD_SOURCE_(self%id_pho, (BACExcr - Uptake_NHS_local)*self%PNRedfield) 
-    
-   ! Mortality increases the pool of various detrituses 
-   _ADD_SOURCE_(self%id_dcl, self%labilefraction*C_BACMort - BACGrowth - BACResp) 
-   _ADD_SOURCE_(self%id_dnl, self%labilefraction*N_BACMort - Uptake_DONL_local) 
-   _ADD_SOURCE_(self%id_dcs, (1.0 - self%labilefraction)*C_BACMort) 
-   _ADD_SOURCE_(self%id_dns, (1.0 - self%labilefraction)*N_BACMort) 
-    
     denitrif = BACResp*NOS/(NOS+self%ksdeninos)*(self%self%kindenidox/(DOX+self%self%kindenidox))*self%NCr
     bacteria_oxygenconsumption_local = BACResp*DOX/(DOX+self%ksremindox) * self%OCr
     bacteria_anoxrem_local = BACResp*(self%self%kinanoxremnos/(NOS+self%self%kinanoxremnos))* (self%self%kinanoxremdox/(DOX+self%self%kinanoxremdox))*self%ODUCr
     
-   ! Oxygen decreases due to bacterial respiration 
-   _ADD_SOURCE_(self%id_dox, -bacteria_oxygenconsumption_local) 
-    
+   ! Carbon content increases by intake of nutrients and decreases by mortality (and predation) 
+   _ADD_SOURCE_(self%id_bac, BACGrowth - C_BACMort)
+   ! Ammonium is excreted or can be taken up 
+   _ADD_SOURCE_(self%id_nhs, BACExcr - Uptake_NHS_local) 
+   _ADD_SOURCE_(self%id_pho, (BACExcr - Uptake_NHS_local)*self%PNRedfield) 
+   _ADD_SOURCE_(self%id_dcl, self%labilefraction*C_BACMort - BACGrowth - BACResp) 
+   _ADD_SOURCE_(self%id_dnl, self%labilefraction*N_BACMort - Uptake_DONL_local) 
+   _ADD_SOURCE_(self%id_dcs, (1.0 - self%labilefraction)*C_BACMort) 
+   _ADD_SOURCE_(self%id_dns, (1.0 - self%labilefraction)*N_BACMort) 
+   _ADD_SOURCE_(self%id_dox, - bacteria_oxygenconsumption_local) 
    ! NOS decreases due to bacterial respiration 
    _ADD_SOURCE_(self%id_nos, -denitrif) 
    _ADD_SOURCE_(self%id_dic, BACResp) 
-    
    ! ODU increases due to bacterial anoxic remineralisation 
    _ADD_SOURCE_(self%id_odu, (1.0 - Limitation_By_Iron*self%ODU_solid)*bacteria_anoxrem_local) 
 
