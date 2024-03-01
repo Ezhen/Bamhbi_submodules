@@ -203,11 +203,11 @@
     FluxPrey_nitrogen = self%Capt_eff_Noctiluca_Flagellates*NFL+self%Capt_eff_Noctiluca_Emiliana*NEM+self%Capt_eff_Noctiluca_Diatoms*NDI+self%Capt_eff_Noctiluca_Microzoo*MIC*self%NCrMicroZoo + self%Capt_eff_Noctiluca_Mesozoo*MES*self%NCrMesoZoo+self%Capt_eff_Noctiluca_POM*PON
     
    ! Grazing rate in carbon 
-             if (FluxPrey_carbon>threshold_feeding_Noctiluca) then 
-    grazing_carbonNoctiluca = tf*self%MaxgrazingrateNoctiluca*(FluxPrey_carbon-self%threshold_feeding_Noctiluca)*NOC
-             else 
-    grazing_carbonNoctiluca = 0.0
-          endif 
+    if (FluxPrey_carbon>threshold_feeding_Noctiluca) then 
+      grazing_carbonNoctiluca = tf*self%MaxgrazingrateNoctiluca*(FluxPrey_carbon-self%threshold_feeding_Noctiluca)*NOC
+    else 
+      grazing_carbonNoctiluca = 0.0
+    endif 
     
    ! Grazing rate of nitrogen 
     NCrfoodNoctiluca = FluxPrey_nitrogen/FluxPrey_carbon
@@ -226,57 +226,38 @@
     
    ! Computes the N/C fluxes necessary to conserve the N/C ratio 
     NCrzootest = (grazing_carbonNoctiluca*NCrfoodNoctiluca-N_ZOOEgest)/(grazing_carbonNoctiluca-C_ZOOEgest-C_ZOOResp)
-             if (NCrzootest> NCrNoctiluca) then 
-    C_ZOOAdjust = 0
-    N_ZOOAdjust = (grazing_carbonNoctiluca*NCrfoodNoctiluca-N_ZOOEgest)-(grazing_carbonNoctiluca-C_ZOOEgest-C_ZOOResp)*self%NCrNoctiluca
-             else 
-    N_ZOOAdjust = 0
-          endif 
+    if (NCrzootest > NCrNoctiluca) then 
+      C_ZOOAdjust = 0
+      N_ZOOAdjust = (grazing_carbonNoctiluca*NCrfoodNoctiluca-N_ZOOEgest)-(grazing_carbonNoctiluca-C_ZOOEgest-C_ZOOResp)*self%NCrNoctiluca
+    else 
+      N_ZOOAdjust = 0
+    endif 
     
-   ! Carbon content increases by intake of preys and decreases by egestion, respiration, mortality and adjustement 
-   _ADD_SOURCE_(self%id_noc,1.0*( grazing_carbonNoctiluca)) 
-   _ADD_SOURCE_(self%id_noc,-1.0*( C_ZOOEgest + C_ZOOResp + C_ZOOMort + C_ZOOAdjust)) 
-    
-   ! Particulate detritus pool if formed from non-assimilated grazed food and dead zooplatkton 
-   _ADD_SOURCE_(self%id_poc,1.0*( C_ZOOEgest+C_ZOOMort)) 
-   _ADD_SOURCE_(self%id_pon,1.0*( N_ZOOEgest+N_ZOOMort)) 
-    
-   ! Ammonium is excreted by zooplankton 
-   _ADD_SOURCE_(self%id_nhs,1.0*( N_ZOOAdjust)) 
-   _ADD_SOURCE_(self%id_pho,1.0*( N_ZOOAdjust*self%PNRedfield)) 
-    
-   ! Grazing on zoooplankton 
-   _ADD_SOURCE_(self%id_mic,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Microzoo*MIC)) 
-   _ADD_SOURCE_(self%id_mes,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Mesozoo*MES)) 
-    
-   !  Grazing on detritus 
-   _ADD_SOURCE_(self%id_poc,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_POM*POC)) 
-   _ADD_SOURCE_(self%id_pon,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_POM*PON)) 
-    
-   ! Grazing on phytoplankton 
-   _ADD_SOURCE_(self%id_cfl,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Flagellates*CFL)) 
-   _ADD_SOURCE_(self%id_cem,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Emiliana*CEM)) 
-   _ADD_SOURCE_(self%id_cdi,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Diatoms*CDI)) 
-   _ADD_SOURCE_(self%id_nfl,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Flagellates*NFL)) 
-   _ADD_SOURCE_(self%id_nem,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Emiliana*NEM)) 
-   _ADD_SOURCE_(self%id_ndi,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Diatoms*NDI)) 
-    
-   ! When eating diatoms, zooplankton, ejects silicate as silicious_detritus 
-   _ADD_SOURCE_(self%id_sid,1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Diatoms*NDI*self%SiNrDiatoms)) 
-    
-   ! DOX decreases due to respiration of zooplankton 
-   _ADD_SOURCE_(self%id_dox,-1.0*( (C_ZOOResp + C_ZOOAdjust)*self%OCr)) 
-   _ADD_SOURCE_(self%id_dic,1.0*( C_ZOOResp + C_ZOOAdjust)) 
-    
-#ifdef biodiag1 
-          TotalRespiration_Gel = TotalRespiration_Gel + C_ZOOResp + C_ZOOAdjust
-#endif 
+   ! Carbon content increases by intake of preys and decreases by egestion, respiration, mortality and adjustement
 
-   !******************************************************************** 
-   ! Averaged over entire water column 
-#ifdef biodiag1 
-   _SET_DIAGNOSTIC_(self%id_TotalRespiration_Gel, TotalRespiration_Gel)
-#endif 
+   _ADD_SOURCE_(self%id_noc, grazing_carbonNoctiluca - C_ZOOEgest - C_ZOOResp - C_ZOOMort - C_ZOOAdjust) 
+
+   ! Particulate detritus pool if formed from non-assimilated grazed food and dead zooplatkton; and grazing on zoooplankton and on phytoplankton
+   ! When eating diatoms, zooplankton, ejects silicate as silicious_detritus; DOX decreases due to respiration of zooplankton 
+
+   _ADD_SOURCE_(self%id_poc, C_ZOOEgest + C_ZOOMort - grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_POM*POC) 
+   _ADD_SOURCE_(self%id_pon, N_ZOOEgest + N_ZOOMort - grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_POM*PON) 
+   _ADD_SOURCE_(self%id_nhs, N_ZOOAdjust)
+   _ADD_SOURCE_(self%id_pho, N_ZOOAdjust*self%PNRedfield) 
+   _ADD_SOURCE_(self%id_mic, -grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Microzoo*MIC)
+   _ADD_SOURCE_(self%id_mes, -grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Mesozoo*MES) 
+   _ADD_SOURCE_(self%id_cfl, -grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Flagellates*CFL) 
+   _ADD_SOURCE_(self%id_cem, -grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Emiliana*CEM)
+   _ADD_SOURCE_(self%id_cdi, -grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Diatoms*CDI)
+   _ADD_SOURCE_(self%id_nfl, -grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Flagellates*NFL)
+   _ADD_SOURCE_(self%id_nem, -grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Emiliana*NEM)
+   _ADD_SOURCE_(self%id_ndi,- grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Diatoms*NDI) 
+   _ADD_SOURCE_(self%id_sid, grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Diatoms*NDI*self%SiNrDiatoms)
+   _ADD_SOURCE_(self%id_dox,-self%OCr*(C_ZOOResp + C_ZOOAdjust)) 
+   _ADD_SOURCE_(self%id_dic, C_ZOOResp + C_ZOOAdjust)
+
+   _SET_DIAGNOSTIC_(self%id_TotalRespiration_Gel, C_ZOOResp + C_ZOOAdjust)
+ 
    _LOOP_END_
 
    end subroutine do
