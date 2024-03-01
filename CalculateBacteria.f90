@@ -225,86 +225,66 @@
     testratio = Uptake_DOCL_local*(Uptake_DONL_local/Uptake_DOCL_local - self%bactgrowtheff*NCrBac)	
     
    ! Growth rate of bacteria depends on a threshold value compared with Uptake_Potential_NHS 
-             if (Uptake_Potential_NHS > (-testratio)) then 
-   ! In this case we are in a situation of carbon limitation 
-    BACGrowth = self%bactgrowtheff*Uptake_DOCL_local
-   ! Growth rate computed taking into account the iron limitation 
-    BACResp = Uptake_DOCL_local*(1.0 - self%bactgrowtheff)
-   ! Test if NHS uptake is necessary to use all the DOCl 
-               if (testratio > 0) then 
-   ! We are in case of remineralisation of ammonium through bacteria excretion and no net uptake of ammonium is necessary to use all the DOC 
-    Uptake_NHS_local = 0
-    BACExcr = testratio
-               else 
-    Uptake_NHS_local = -testratio
-    BACExcr = 0
-            endif 
-             else 
-   ! if we are in case of nitrogen limitation,it means that all the DON and the potential uptake of NHS is not sufficient to consume all the DOC 
-    Uptake_NHS_local = Uptake_Potential_NHS
-    BACGrowth = (Uptake_Potential_NHS + Uptake_DONL_local)/self%NCrBac
-   ! Growth rate computed taking into account the iron limitation 
-    BACExcr = 0
-    BACResp = BACGrowth*(1.0/bactgrowthefficiency  - 1.0)
-          endif 
+    if (Uptake_Potential_NHS > (-testratio)) then 
+      ! In this case we are in a situation of carbon limitation 
+      BACGrowth = self%bactgrowtheff*Uptake_DOCL_local
+      ! Growth rate computed taking into account the iron limitation 
+      BACResp = Uptake_DOCL_local*(1.0 - self%bactgrowtheff)
+      ! Test if NHS uptake is necessary to use all the DOCl 
+      if (testratio > 0) then 
+        ! We are in case of remineralisation of ammonium through bacteria excretion and no net uptake of ammonium is necessary to use all the DOC 
+        Uptake_NHS_local = 0
+        BACExcr = testratio
+      else 
+        Uptake_NHS_local = -testratio
+        BACExcr = 0
+      endif 
+    else 
+      ! if we are in case of nitrogen limitation,it means that all the DON and the potential uptake of NHS is not sufficient to consume all the DOC 
+      Uptake_NHS_local = Uptake_Potential_NHS
+      BACGrowth = (Uptake_Potential_NHS + Uptake_DONL_local)/self%NCrBac
+      ! Growth rate computed taking into account the iron limitation 
+      BACExcr = 0
+      BACResp = BACGrowth*(1.0/bactgrowthefficiency  - 1.0)
+    endif 
     
    ! Bacteria mortality rate (C_BACMort,N_BACMort, /day) 
     C_BACMort = self%mortbac*tf*BAC
     N_BACMort = self%mortbac*tf*BAC*self%NCrBac
     
    ! Carbon content increases by intake of nutrients and decreases by mortality (and predation) 
-   _ADD_SOURCE_(self%id_bac,1.0*( BACGrowth)) 
-   _ADD_SOURCE_(self%id_bac,-1.0*( C_BACMort)) 
+   _ADD_SOURCE_(self%id_bac, BACGrowth - C_BACMort)
     
    ! Ammonium is excreted or can be taken up 
-   _ADD_SOURCE_(self%id_nhs,1.0*( BACExcr)) 
-   _ADD_SOURCE_(self%id_nhs,-1.0*( Uptake_NHS_local)) 
-    
-   ! Phosphate update 
-   _ADD_SOURCE_(self%id_pho,1.0*( BACExcr * self%PNRedfield)) 
-   _ADD_SOURCE_(self%id_pho,-1.0*( Uptake_NHS_local * self%PNRedfield)) 
+   _ADD_SOURCE_(self%id_nhs, BACExcr - Uptake_NHS_local) 
+   _ADD_SOURCE_(self%id_pho, (BACExcr - Uptake_NHS_local)*self%PNRedfield) 
     
    ! Mortality increases the pool of various detrituses 
-   _ADD_SOURCE_(self%id_dcl,1.0*( self%labilefraction*C_BACMort)) 
-   _ADD_SOURCE_(self%id_dcl,-1.0*( BACGrowth + BACResp)) 
-   _ADD_SOURCE_(self%id_dnl,1.0*( self%labilefraction*N_BACMort)) 
-   _ADD_SOURCE_(self%id_dnl,-1.0*( Uptake_DONL_local)) 
-   _ADD_SOURCE_(self%id_dcs,1.0*( (1.0 - self%labilefraction)*C_BACMort)) 
-   _ADD_SOURCE_(self%id_dns,1.0*( (1.0 - self%labilefraction)*N_BACMort)) 
+   _ADD_SOURCE_(self%id_dcl, self%labilefraction*C_BACMort - BACGrowth - BACResp) 
+   _ADD_SOURCE_(self%id_dnl, self%labilefraction*N_BACMort - Uptake_DONL_local) 
+   _ADD_SOURCE_(self%id_dcs, (1.0 - self%labilefraction)*C_BACMort) 
+   _ADD_SOURCE_(self%id_dns, (1.0 - self%labilefraction)*N_BACMort) 
     
     denitrif = BACResp*NOS/(NOS+self%ksdeninos)*(self%self%kindenidox/(DOX+self%self%kindenidox))*self%NCr
     bacteria_oxygenconsumption_local = BACResp*DOX/(DOX+self%ksremindox) * self%OCr
     bacteria_anoxrem_local = BACResp*(self%self%kinanoxremnos/(NOS+self%self%kinanoxremnos))* (self%self%kinanoxremdox/(DOX+self%self%kinanoxremdox))*self%ODUCr
     
    ! Oxygen decreases due to bacterial respiration 
-   _ADD_SOURCE_(self%id_dox,-1.0*( bacteria_oxygenconsumption_local)) 
+   _ADD_SOURCE_(self%id_dox, -bacteria_oxygenconsumption_local) 
     
    ! NOS decreases due to bacterial respiration 
-   _ADD_SOURCE_(self%id_nos,-1.0*( denitrif)) 
-   _ADD_SOURCE_(self%id_dic,1.0*( BACResp)) 
+   _ADD_SOURCE_(self%id_nos, -denitrif) 
+   _ADD_SOURCE_(self%id_dic, BACResp) 
     
    ! ODU increases due to bacterial anoxic remineralisation 
-   _ADD_SOURCE_(self%id_odu,1.0*( bacteria_anoxrem_local*(1. - Limitation_By_Iron*self%ODU_solid))) 
-    
-#ifdef biodiag1 
-          Uptake_DOCL = Uptake_DOCL_local
-          Bacteria_Respiration = BACResp
-          denitrification = denitrif
-#endif 
-#ifdef biodiag2 
-          bacteria_anoxrem = bacteria_anoxrem_local
-          bacteria_oxygenconsumption = bacteria_oxygenconsumption_local
-#endif 
+   _ADD_SOURCE_(self%id_odu, (1.0 - Limitation_By_Iron*self%ODU_solid)*bacteria_anoxrem_local) 
 
-#ifdef biodiag1 
-   _SET_DIAGNOSTIC_(self%id_Uptake_DOCL, Uptake_DOCL)
-   _SET_DIAGNOSTIC_(self%id_Bacteria_Respiration, Bacteria_Respiration)
-   _SET_DIAGNOSTIC_(self%id_denitrification, denitrification)
-#endif 
-#ifdef biodiag2 
-   _SET_DIAGNOSTIC_(self%id_bacteria_oxygenconsumption, bacteria_oxygenconsumption)
-   _SET_DIAGNOSTIC_(self%id_bacteria_anoxrem, bacteria_anoxrem)
-#endif 
+   _SET_DIAGNOSTIC_(self%id_Uptake_DOCL, Uptake_DOCL_local)
+   _SET_DIAGNOSTIC_(self%id_Bacteria_Respiration, BACResp)
+   _SET_DIAGNOSTIC_(self%id_denitrification, denitrif)
+   _SET_DIAGNOSTIC_(self%id_bacteria_oxygenconsumption, bacteria_anoxrem_local)
+   _SET_DIAGNOSTIC_(self%id_bacteria_anoxrem, bacteria_oxygenconsumption_local)
+
    _LOOP_END_
 
    end subroutine do
