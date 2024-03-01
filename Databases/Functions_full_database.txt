@@ -1,0 +1,270 @@
+#######################################################################################################
+#                                      Common functions						      #
+#######################################################################################################
+tf			Temperature factor					-			limfac		Q10Factor
+
+#######################################################################################################
+#                                      All phytoplankton					      #
+#######################################################################################################
+ChlCrEmiliana		Chl/C ratio in small flagellates			g Chla mol C-1		ratio		CHL_C_RATIO
+ChlCrFlagellates	Chl/C ratio in large flagellates			g Chla mol C-1		ratio		CHL_C_RATIO
+ChlCrDiatoms		Chl/C ratio in large flagellates			g Chla mol C-1		ratio		CHL_C_RATIO
+SiCrDiatoms		Si/C ratio in diatoms					mol Si mol C-1		ratio		main
+LightLimitationEmiliana		Light limitation for small flagellates		-			limfac		GROWTH_RATE			
+NutrientLimitationEmiliana	Nutrient limitation for small flagellates	-			limfac		GROWTH_RATE
+LightLimitationFlagellates	Light limitation for flagellates		-			limfac		GROWTH_RATE
+NutrientLimitationFlagellates	Nutrient limitation for flagellates		-			limfac		GROWTH_RATE
+LightLimitationDiatoms		Light limitation diatoms			-			limfac		GROWTH_RATE
+NutrientLimitationDiatoms	Nutrient limitation diatoms			-			limfac		GROWTH_RATE
+NCrEmiliana		N/C ratio in small flagellates				mol N mol C-1		ratio		main
+NCrFlagellates		N/C ratio in large flagellates				mol N mol C-1		ratio		main
+NCrDiatoms		N/C ratio in diatoms					mol N mol C-1		ratio		main
+MaxSiCrDiatoms		Maximum Si/C ratio in diatoms				mol Si mol C-1		ratio		main
+MinSiCrDiatoms		Minimum Si/C ratio in diatoms				mol Si mol C-1		ratio		main	
+tfsilicate		Silicate dissolution adjusted for temperature		-			limfac		Q10Factor
+GrowthPHY		Phytoplankton growth					mmol C m-3 d-1		flux		GROWTH_RATE
+TotalRespirationPHY	Total phytoplankton respiration (basal & activity)	mmol C m-3		flux		GROWTH_RATE
+DOC_leakage		Phytoplankton passive leakage rate for carbon		mmol C d-1		flux		main
+DON_leakage		Phytoplankton passive leakage rate for nitrogen		mmol N d-1		flux		main
+DOC_extra_excr		Phytoplankton extra excretion				mmol C d-1		flux		GROWTH_RATE
+Nitrate_UpPHY		Nitrate uptake of phytoplankton				mmol N m-3		flux		NO_UPTAKE_RATE
+Ammonium_UpPHY		Ammonium uptake of phytoplankton			mmol N m-3		flux		NUT_UPTAKE_RATE
+Nitrogen_UpPHY		Nitrogen uptake of phytoplankton			mmol N m-3		flux		main	
+Silicate_upDia		Diatoms silicate uptake					mmol Si m-3		flux		NUT_UPTAKE_RATE
+Nutrient_UpPHY		Nutrient uptake of phytoplankton			mmol m-3		flux		main
+Carbon_UptakePHY	C assimilation of phytoplankton				mmol C m-3		flux		GROWTH_RATE
+Phosphate_upFlagellates	Phosphate uptake by large flagellates			mmol P m-3		flux		NUT_UPTAKE_RATE
+Phosphate_upDiatoms	Diatoms phosphate uptake				mmol P m-3		flux		NUT_UPTAKE_RATE
+Phosphate_upEmiliana	Small flagellates phosphate uptake			mmol P m-3 		flux		NUT_UPTAKE_RATE
+PHYMort			Phytoplankton mortality rate				mmol m-3		flux		PHYMORT_RATE
+C_PHYMort		Phytoplankton mortality flux				mmol C m-3		flux		main
+N_PHYMort		Phytoplankton mortality flux				mmol N m-3		flux		main
+
+#######################################################################################################
+#                                      All zooplankton						      #
+#######################################################################################################
+grazing_carbonMicroZoo	Grazing in carbon by microzooplankaton			mmol C m-3		flux		GRAZING_RATE
+grazing_carbonMesoZoo	Grazing in carbon by mesozooplankaton			mmol C m-3		flux		GRAZING_RATE
+grazing_nitrogenZoo	Grazing in nitrogen all zooplankaton			mmol N m-3		flux		main
+NCrfoodMesoZoo		N/C ratio in food of mesozooplankton			mmol N mmol C-1		ratio		GRAZING_RATE
+NCrfoodMicroZoo		N/C ratio in food of microzooplankton			mmol N mmol C-1		ratio		GRAZING_RATE
+FluxPrey_carbon		Flux of ingested preys in carbon 			mmol C m-3		flux		GRAZING_RATE
+C_ZOOMessyfeeding	Zooplankton messy feeding to the DOM in carbon		mmol C m-3		flux		main
+N_ZOOMessyfeeding	Zooplankton messy feeding to the DOM in nitrogen	mmol N m-3		flux		main
+C_ZOOIntake		Zooplankton carbon intake				mmol C m-3		flux		main
+N_ZOOIntake		Zooplnkton nitrogen intake				mmol N m-3		flux		main
+ZOOGrowth		Zooplankton growth flux					mmol C m-3		flux		ZOO_GROWTH_RATE
+N_ZOOExcr		Zooplankton excretion of ammonium			mmol N m-3		flux		ZOO_GROWTH_RATE
+C_ZOOResp		Zooplankton respiration	flux				mmol C m-3		flux		only GELATINOUS_RESPIRATION_RATE
+C_ZOOEgest		Zooplankton POM egestion in carbon			mmol C m-3		flux		only GELATINOUS_EGESTION_RATE
+N_ZOOEgest		Zooplankton POM egestion in nitrogen			mmol N m-3		flux		main
+C_ZOOMort		Zooplankton mortality flux in carbon			mmol C m-3		flux		MORTALITY_RATE
+N_ZOOMort		Zooplankton mortality flux in nitrogen			mmol N m-3		flux		main
+
+#######################################################################################################
+#                                      All gelatinous						      #
+#######################################################################################################
+grazing_carbonGelatinous	Grazing in carbon by Gelatinous			mmol C m-3		flux		GELATINOUS_GRAZING_RATE
+grazing_carbonNoctiluca		Grazing in carbon by Noctiluca			mmol C m-3		flux		GELATINOUS_GRAZING_RATE
+grazing_nitrogen	Grazing in nitrogen by gelatinous			mmol N m-3		flux		main
+NCrfoodGelatinous	N/C ratio in food of gelatinous				mmol N mmol C-1		ratio		GELATINOUS_GRAZING_RATE
+NCrfoodNoctiluca	N/C ratio in food of noctiluca				mmol N mmol C-1		ratio		GELATINOUS_GRAZING_RATE
+NCrzootest		N/C ratio of the zooplankton before adjustment		-			ratio		main
+C_ZOOAdjust		Potential excretion rate necessary to keep the N/C ratio of Gelationous constant		mmol N m-3		flux		main
+N_ZOOAdjust		Potential additional respiration flux to keep the N/C ratio of Gelationous constant		mmol C m-3		flux		main
+
+#######################################################################################################
+#                                      All bacteria						      #
+#######################################################################################################
+Uptake_DOCL_local	Bacteria uptake of DOC					mmol C m-3		flux		BAC_GROWTH_RATE
+Uptake_DONL_local	Bacteria uptake of DON					mmol N m-3		flux		BAC_GROWTH_RATE
+Uptake_NHS_local	Bacteria uptake of ammonium				mmol N m-3		flux		BAC_GROWTH_RATE
+bacteria_oxygenconsumption_local	Bacterial respiration			mmol O2 m-3		flux		main
+bacteria_anoxrem_local	Bacterial anoxic remineralisation			mmol ODU m-3		flux		main
+Limitation_By_Iron	Limitation by Iron					-			limfac		BAC_GROWTH_RATE
+denitrif		Denitrification flux					mmol N m-3		flux		main
+BACGrowth		Bacterial growth					mmol C m-3		flux		BAC_GROWTH_RATE
+BACResp			Bacteria respiration flux				mmol C m-3		flux		BAC_GROWTH_RATE
+BACExcr			Bacteria excretion flux of ammonium			mmol N m-3		flux		BAC_GROWTH_RATE
+C_BACMort		Bacteria mortality flux in carbon			mmol C m-3		flux		main
+N_BACMort		Bacteria mortality flux in nitrogen			mmol N m-3		flux		main
+Iron			Iron concentration					mmol Fe m-3		local		main
+NutLim			Nutrient limitation					-			limfac		main
+Uptake_Potential_NHS	Bacteria potential uptake of ammonium			mmol N m-3		flux		main
+testratio		Value showing if BAC growth limited by C or N		mmol N m-3		flux		main
+
+#######################################################################################################
+#                                      All detritus						      #
+#######################################################################################################
+DOCSLHYDR		Hydrolysis flux of DSL to DL in carbon			mmol C m-3		flux		main
+DONSLHYDR		Hydrolysis flux of DSL to DL in nitrogen		mmol N m-3		flux		main
+POCHYDR			Hydrolysis flux of POC into DSL and DL 			mmol C m-3		flux		main
+PONHYDR			Hydrolysis flux of PON into DSL and DL			mmol N m-3		flux		main
+hydroPOC		Hydrolysis rate of POC					mmol C m-3		flux		main
+hydroPON		Hydrolysis rate of PON					mmol N m-3		flux		main
+hydroPOMLim		Limiting function on POM hydrolysis			-			limfac		main
+
+#######################################################################################################
+#                                      All chemicals						      #
+#######################################################################################################
+Ammonium_Oxidation_rate_by_Nitrate	Ammonium oxidation rate by nitrate	mmol N m-3 d-1		flux		main	
+Nitrification_Rate			Ammonium oxidation rate by oxygen	mmol N m-3 d-1		flux		main
+ODU_Oxidation_Rate_by_nitrate		ODU oxidation rate by nitrate		ODU m-3 d-1		flux		main
+ODU_Oxidation_Rate_by_oxygen		ODU oxidation rate by oxygen		O2 m-3 d-1		flux		main
+lim			Limiting Michaelis-Menten function			-			limfac		michaelis	
+inhib			Inhibiting function					-			limfac		inhibition
+
+#######################################################################################################
+#                                      Little functions						      #
+#######################################################################################################
+tf			Temperature function					-			tf		tf
+#                   GRAZING_RATE,GELATINOUS_GRAZING_RATE					      #
+Maxgrazingrate		Maximum specific grazing rate				mmol C d-1		parameter	MaxgrazingrateMesoZoo,MaxgrazingrateMicroZoo,MaxgrazingrateGelatinous,MaxgrazingrateNoctiluca
+Csat			Half saturation constant for the grazing		mmol C m-3		parameter	Half_Saturation_MesoZoo,Half_Saturation_MicroZoo
+Zoo			Predator concentration in carbon			mmol C m-3		tracer		MES,MIC,GEL,NOC
+thresh			Feeding threshold for the grazing			mmol C m-3		parameter	threshold_feeding_Gelatinous,threshold_feeding_Noctiluca
+effprey1		Capture efficiency on flagellates			-			parameter	Capt_eff_MesoZoo_Flagellates,Capt_eff_MicroZoo_Flagellates,Capt_eff_Gelatinous_Flagellates,Capt_eff_Noctiluca_Flagellates
+effprey2		Capture efficiency on emiliana				-			parameter	Capt_eff_MesoZoo_Emiliana,Capt_eff_MicroZoo_Emiliana,Capt_eff_Gelatinous_Emiliana,Capt_eff_Noctiluca_Emiliana	
+effprey3		Capture efficiency on diatoms 				-			parameter	Capt_eff_MesoZoo_Diatoms,Capt_eff_MicroZoo_Diatoms,Capt_eff_Gelatinous_Diatoms,Capt_eff_Noctiluca_Diatoms	
+effprey4		Capture efficiency on microzoo				-			parameter	Capt_eff_MesoZoo_MicroZoo,Capt_eff_MicroZoo_MicroZoo,Capt_eff_Gelatinous_MicroZoo,Capt_eff_Noctiluca_MicroZoo
+effprey5		Capture efficiency on mesozoo				-			parameter	Capt_eff_MesoZoo_MesoZoo,Capt_eff_MicroZoo_MesoZoo,Capt_eff_Gelatinous_MesoZoo,Capt_eff_Noctiluca_MesoZoo
+effprey6		Capture efficiency on POM				-			parameter	Capt_eff_MesoZoo_pom,Capt_eff_MicroZoo_pom,Capt_eff_Gelatinous_pom,Capt_eff_Noctiluca_pom
+effprey7		Capture efficiency on bacteria				-			parameter	Capt_eff_MesoZoo_bac,Capt_eff_MicroZoo_bac
+FluxPrey_nitrogen	Flux of consummed preys in nitrogen			mmol N m-3		local		local
+FluxPrey_carbon		Flux of consummed preys in carbon			mmol C m-3		out		FluxPrey_carbon
+grazing_carbon		Grazing rate in carbon					mmol C m-3		out		Grazing_carbonMesoZoo,grazing_carbonMicroZoo,grazing_carbonGelatinous,grazing_carbonNoctiluca
+NCrfood			N/C molar ratio of the consumed food			-			out		NCrfoodMesoZoo,NCrfoodMicroZoo,NCrfoodGelatinous,NCrfoodNoctiluca
+#             GELATINOUS_RESPIRATION_RATE, GELATINOUS_EGESTION_RATE                       	      #
+Asszoo			Assimilation efficiency					-			parameter	Ass_Eff_Gelatinous,Ass_Eff_Noctiluca
+grazing_carbonZoo	Intake of carbon					mmol C m-3		in		grazing_carbonGelatinous,grazing_carbonNoctiluca (!)
+EffZOO			Part of the assimilated food of zooplankton for growth	-			parameter	efficiency_growth_Gelatinous,efficiency_growth_Noctiluca
+Zoo			Zooplankton carbon concentration			mmol C m-3		tracer		GEL,NOC
+bzoo			Basal respiration rate					d-1			parameter	basal_Resp_Gelatinous,basal_Resp_Noctiluca
+basalrespiration	Basal respiration					mmol C m-3		local		local
+activityrespiration	Activity respiration					mmol C m-3		local		local
+C_ZOORespiration	Respiration rate of zooplankton				mmol C m-3		out		C_ZOOResp
+C_ZOOEgest		Egestion rate of zooplankton				mmol C m-3		out		C_ZOOEgest
+#             			GELATINOUS_MORTALITY_RATE,MORTALITY_RATE                       	      #
+HalfSatMort_Zoo		Half-saturation constant of mortalirty			mmol C m-3		parameter	HalfSatMort_Gelatinous,HalfSatMort_Noctilucan,HalfSatMort_MesoZoo,HalfSatMort_MicroZoo
+mortnonlinzoo		Non-linear mortality rate				mmolC m-3 d-1		parameter	NLin_Mort_Gelatinous,NLin_Mort_Noctiluca
+expmortzoo		Order of the non-linearity of mortality rate		?			parameter	expmortMesoZoo,expmortMicroZoo,expmortGelatinous,expmortNoctiluca
+DOXsatmortality		? 							mmol O m-3		parameter	DOXsatmort
+mortalityanoxic		Anoxic mortality of zooplankton 			d-1 (?)			parameter	mortanoxic
+ZOO			Zooplankton biomass in carbon				mmol C m-3		tracer		MES,MIC,GEL,NOC
+DOX			Oxygen concentration					mmol O m-3		tracer		DOX
+Oxy			Oxygen concentration					mmol O m-3		tracer		DOX
+foxygen			?							?			local		local
+C_ZOOMortality		Zooplankton/Gelatinous mortality rate			mmol C m-3 d-1		out		C_ZOOMort
+#             				ZOO_GROWTH_RATE	                       	      #
+AssimNZoo		Zooplankton assimilation efficiencies on nitrogen	-			parameter	Ass_Eff_OnNitrogen
+AssimCZoo		Zooplankton assimilation efficiencies on carbon		-			parameter	Ass_Eff_OnCarbon
+NCrzooplankton		Zooplankton N/C molar ratio				mol N mol C-1		parameter	NCrMesozoo,NCrMicroZoo
+Zoogrowthefficiency	C net production efficiency				-			parameter	efficiency_growth_MesoZoo,efficiency_growth_MicroZoo
+NCrfood			N/C molar ratio of the grazed food			mol N mol C-1		in		NCrfoodMesoZoo,NCrfoodMicroZoo
+C_ZOOIntake		Intake of carbon					mmol C m-3		in		C_ZOOIntake
+N_ZOOIntake		Intake of nitrogen					mmol N m-3		in		N_ZOOIntake
+NCrfoodZooref		Food threshold elemental ratio				mol N mol C-1		local		local
+N_ZOOExcretion		Zooplankton excretion					mmol N m-3		out		N_ZOOExcr
+Zoogrowthrate		Zooplankton growth					mmol C m-3		out		Zoogrowth
+#             				CHL_C_RATIO			                       	      #
+NCratio			Actual N/C ratio					mol N mol C-1		parameter	NCrDiatoms,NCrEmiliana,NCrFlagellates
+MaxNCr			Maximum N/C ratio					mol N mol C-1		parameter	MaxNCrDiatoms,MaxNCrEmiliana,MaxNCrFlagellates
+MinNCr			Minimum N/C ratio					mol N mol C-1		parameter	MinNCrDiatoms,MinNCrEmiliana,MinNCrFlagellates
+MaxChlNr		Minimum Chl/C ratio					g Chla mol N-1		parameter	MaxChlNrDiatoms,MaxChlNrEmiliana,MaxChlNrFlagellates
+MinChlNr		Minimum Chl/C ratio					g Chla mol N-1		parameter	MinChlNrDiatoms,MinChlNrEmiliana,MinChlNrFlagellates
+RangeChl_N		?							?			local		local
+ChlCrPHY		Chlorophyll to carbon ratio				g Chla mol N-1		out		ChlCrDiatoms,ChlCrEmiliana,ChlCrFlagellates
+#             				GROWTH_RATE			                       	      #
+SiCratio		Actual Si/C ratio					-			in		SiCrDiatoms,1,1
+MaxSiCr			Maximum Si/C ratio					-			in		MaxSiCrDiatoms,1,1
+MinSiCr			Minimum Si/C ratio					-			in		MinSiCrDiatoms,0,0
+ChlCratio		Chl/C ratio						-			in		ChlCrDiatoms,ChlCrEmiliana,ChlCrFlagellates
+MuMax			Maximum specific growth rate				d-1			parameter	MuMaxDiatoms,MuMaxEmiliana,MuMaxFlagellates
+QuantumYield		Maximum quantun yield					mmolC(mgChldWm-2)-1	parameter	QuantumYieldDiatoms,QuantumYieldEmiliana,QuantumYieldFlagellates
+PhytoplanktonC		Phytoplankton carbon concentration			mmol C m-3		tracer		CDI,CEM,CFL
+alphaPI			Half-saturation light intensity				(W m-2)-1 d-1		parameter	alphaPIDiatoms,alphaPIEmiliana,alphaPIFlagellates
+Resp			Growth respiration					d-1			parameter	RespirationDiatoms,RespirationEmiliana,RespirationFlagellates
+ProdResp		Maintenance respiration					- (?)			parameter	GrowthRespDiatoms,GrowthRespEmiliana,GrowthRespFlagellates
+Light			Light							?			light		light
+extradocphyexc		Fraction of extra DOC excretion				-			parameter	extradocphyexcr
+NCrat			?							?			local		local
+SiCrat			?							?			local		local
+Mu_Nutrient		?							?			local		local
+Mu_Light		?							?			local		local
+Mu_Silicate		?							?			local		local
+Mu_Nitrogen		?							?			local		local
+LightLimitation		?							?			out		LightLimitationDiatoms,LightLimitationEmiliana,LightLimitationFlagellates
+NutrientLimitation	?							?			out		NutrientLimitationDiatoms,NutrientLimitationEmiliana,NutrientLimitationFlagellates
+Growth			Phytoplankton growth					?			out		GrowthPHY
+Carbon_Uptake		Carbon uptake by phytoplankton				?			out		Carbon_UptakePHY
+Respiration		Phytoplankton respiration				?			out		TotalRespirationPHY
+DOC_ex_excr		Extra DOC excretion					?			out		DOC_extra_excr
+#             				NO_UPTAKE_RATE			                       	      #
+nitrate			NO3 concentration					mmol N m-3		tracer		NOS
+ammonium		NHs concentration					mmol N m-3		tracer		NHS
+ks			Half-saturation constant for nitrate uptake 		?			parameter	ksNOsDiatoms,ksNOsEmiliana,ksNOsFlagellates
+half_inhib_amm		NHs inhibition coefficient				mmol N m-3		parameter	kinNHsPhy
+PhytoplanktonC		Phytoplankton concentration				mmol C m-3		tracer		CDI,CEM,CFL
+umax			Maximal NO3 uptake rate					mol N d-1 (?)		parameter	NosMaxUptakeDiatoms,NosMaxUptakeEmiliana,NosMaxUptakeFlagellates
+NOuptake		Nitrate uptake rate by phytoplankton			mmol N m-3 d-1		out		Nitrate_upPHY	
+#             				NUT_UPTAKE_RATE			                       	      #
+NutCratio		Actual Nut/C ratio					-			in		NCrDiatoms,SiCrDiatoms,NCrDiatoms,NCrEmiliana,NCrEmiliana,NCrFlagellates,NCrFlagellates
+MaxNutCr		Maximal Nut/C ratio					-			parameter	MaxNCrDiatoms,MaxSiCrDiatoms,MaxNCrDiatoms,MaxNCrEmiliana,MaxNCrEmiliana,MaxNCrFlagellates,MaxNCrFlagellates
+Nutrient		Nutrient concentration					mmol N m-3		tracer		NHS,SIO,PHO,NHS,PHO,NHS,PHO
+NUT0			Nutrient concentration below which no uptake		mmol N m-3		parameter	0,0,0,0,0,0,0
+ks			Nutrient half-saturation coefficient			?			parameter	ksNHsDiatoms,ksSiDiatoms,ksPO4Diatoms,ksNHsEmiliana,ksPO4Emiliana,ksNHsFlagellates,ksPO4Flagellates
+PhytoplanktonC		Phytoplankton concentration				mmol C m-3		tracer		CDI,CDI,CDI,CEM,CEM,CFL,CFL
+umax			Maximal nutrient uptake rate				mmol m-3 (?)		parameter	NHsMaxUptakeDiatoms,SiMaxUptakeDiatoms,PO4MaxUptakeDiatoms,NHsMaxUptakeEmiliana,PO4MaxUptakeEmiliana,NHsMaxUptakeFlagellates,PO4MaxUptakeFlagellates
+NUTuptake		Uptake rate of any nutrient by phytoplnkton		?			out		Ammonium_upPHY,Silicate_upDia,Phosphate_upDiatoms,Ammonium_upPHY,Phosphate_upEmiliana,Ammonium_upPHY,Phosphate_upFlagellates
+#             				PHYMORT_RATE			                       	      #
+Mortality		First-order mortality rate				d-1			parameter	MortalityDiatoms,MortalityEmiliana,MortalityFlagellates
+PHYMort			Mortality rate of phytoplankton				?			out		PHYmort
+#             				BAC_GROWTH_RATE			                       	      #
+maxgrowthratebac	Maximal labile DOC or ammonium uptake			d-1 (?)			parameter	maxgrowthbac
+BacteriaC		Bacteria carbon concentration				mmol C m-3		tracer		BAC
+ksatdocl		Half-saturation for labile DOC uptake			mmol C m-3		parameter	csatdocl
+ksatammonium		Half saturation for ammonium uptake			mmol N m-3		parameter	csatamm
+bactgrowthefficiency	Bacterial gross growth efficiency on carbon		-			parameter	bactgrowtheff	
+IronLim1		Half-saturation constant for iron limitation function	nmole l-1		parameter	Halfsaturation_Iron
+IronLim2		Concentration of iron in surface water			nmole l-1		parameter	IronCsurf
+IronLim3		Parameter of the curve of the iron concentration	-			parameter	Param1IronCurve
+IronLim4		Parameter of the curve of the iron concentration	-			parameter	Param2IronCurve
+Phosphate		Phosphate concentration					mmol P m-3		tracer		PHO
+ksatphosphate		Half-saturation for phosphate uptake by bacteria	mmol P m-3		parameter	csatpo4
+NCrBac			N/C ratio in bacteria (Goldman ratio)			mmol N mmol C-1		parameter	NCrBac
+DOCLabile		Labile detritus concentration in carbon			mmol C m-3		tracer		DCL
+DONLabile		Labile detritus concentration in nitrogen		mmol N m-3		tracer		DNL
+Ammonium		NHs concentration 					mmol N m-3		tracer		NHS
+zdepth			Depth							m			depth		gdept_b
+testratio		Ratio showing if we face nitrogen or carbon limitation	-			local		local	
+Iron			Iron concentration					mmol I m-3 (?)		local		local
+Nutlim			Parameters for phosphate uptake				?			local		local
+Uptake_Potential_NHS	Potential uptake of ammonium				mmol N m3 d-1		local		local
+Uptake_DOCLabile	Bacteria uptake of DOC					mmol C m-3		out		Uptake_DOCL_local
+Uptake_DONLabile	Bacteria uptake of DON					mmol N m-3		out		Uptake_DONL_local
+Uptake_AMM		Bacteria uptake of ammonium				mmol N m-3		out		Uptake_NHS_local
+BACGrowth		Bacterial growth					mmol C m-3		out		BACGrowth
+BACResp			Bacterial respiration					mmol C m-3		out		BACResp
+BACExcr			Bacterial excretion					mmol N m-3		out		BACExcr
+IronLimitation		Iron limitation for bacterial growth			?			out		Limitation_By_Iron
+#             				Q10Factor			                       	      #
+Temperature		Temperature (?)						C			temp		temp
+Q10			Temperature factor					-			parameter	Q10bac,Q10chem,Q10PhyDiatoms,Q10SilicateDiss,Q10Phy,Q10Zoo,Q10Gelatinous
+#             				Michaelis			                       	      #
+limitingelement		Limiting element					mmol m-3		tracer		DOX,NOS
+halfsaturationconstant	Half-saturation constant				mmol m-3		parameter	ksoxnhsdox,ksoxodudox,ksoxodunos,
+#             				Inhibition			                       	      #
+inhibitingelement	Limiting element					mmol m-3		tracer		DOX,NOS
+Inhibitionconstant	Inhibition constant					mmol m-3		parameter	kinoxnhsdox,kinoxnhsodu,kinoxodudox
+
+#######################################################################################################
+#                                     Obsolete						      	      #
+#######################################################################################################
+NCratio			Actual N:C ratio					-			ratio
+CNrDiatoms		N:C ratio in diatoms					-			ratio
+NetNGrowthDiatoms	?							?			?
+hydroPNS		?							?			?
+hydroPCS		?							?			?
+C_ZOOPred		Predation on ZOO					mmol C m-3 d-1		?
+N_ZOOPred		Predation on ZOO					mmol N m-3 d-1		?
+NetNGrowthDiatoms	?							?			?

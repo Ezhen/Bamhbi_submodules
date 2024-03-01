@@ -13,16 +13,10 @@
 ! Journal of marine research 52: 219-238
 !
 ! Implementation: Marilaure Gregoire,             NIOO-CEME
-! Translation into FABM: L. Ivanov, ULg / MAST
+! Translation into FABM: E. Ivanov, ULg / MAST
 !
 ! Contains the pelagic submodel, as used in Soetaert et al., 2001.
-! References to the microplankton model:
-! Tett, P., 1998. Parameterising a microplankton model.
-! Department of Biological Sciences, Napier University,
-! Report ISBN 0 902703 60 9, 60 pp.
 !
-! Sharples Tett (1994). Modeling the effect of physical! variability on the midwater chlorophyll maximum.
-! Journal of marine research 52: 219-238
 !--------------------------------------------------------------------*
 
    module fabm_ulg_Emiliana 
@@ -37,38 +31,21 @@
 ! PUBLIC DERIVED TYPES: 
    type,extends(type_base_model),public :: type_ulg_Emiliana 
       type (type_state_variable_id)         :: id_cem,id_nem
-      type (type_state_variable_id)         :: id_agg,id_cfl,id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_nfl,id_nhs,id_nos,id_pho,id_poc,id_pon
+      type (type_state_variable_id)         :: id_cfl,id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_nfl,id_nhs,id_nos,id_pho,id_poc,id_pon
       type (type_dependency_id)             :: id_par,id_temp 
       type (type_diagnostic_variable_id)    :: id_Carbon_UptakeEmiliana,id_Nitrogen_Uptake_Emiliana,id_NPP,id_PhytoNitrateReduction,id_TotalRespirationEmiliana
       type (type_diagnostic_variable_id)    :: id_Carbon_UptakeEmilianaIntegrated,id_Nitrogen_Uptake_EmilianaIntegrated,id_NPPIntegrated,id_PhytoNitrateReductionIntegrated,id_TotalRespirationEmilianaIntegrated
 
 !     Model parameters 
-      real(rk) :: alphaPIEmiliana
-      real(rk) :: extradocphyexcr
-      real(rk) :: GrowthRespEmiliana
-      real(rk) :: kinNHsPhy
-      real(rk) :: ksNHsEmiliana
-      real(rk) :: ksNOsEmiliana
-      real(rk) :: ksPO4Emiliana
-      real(rk) :: labileextradocphyexcr
-      real(rk) :: labilefraction
-      real(rk) :: leakagephy
-      real(rk) :: MaxChlNrEmiliana
-      real(rk) :: MaxNCrEmiliana
-      real(rk) :: MinChlNrEmiliana
-      real(rk) :: MinNCrEmiliana
-      real(rk) :: MortalityEmiliana
-      real(rk) :: mortphydom
-      real(rk) :: MuMaxEmiliana
-      real(rk) :: NHsMaxUptakeEmiliana
-      real(rk) :: NosMaxUptakeEmiliana
-      real(rk) :: OCr
-      real(rk) :: ONoxnhsr
-      real(rk) :: PNRedfield
-      real(rk) :: PO4MaxUptakeEmiliana
-      real(rk) :: Q10Phy
-      real(rk) :: QuantumYieldEmiliana
-      real(rk) :: RespirationEmiliana
+      real(rk)     :: alphaPIEmiliana, extradocphyexcr, GrowthRespEmiliana
+      real(rk)     :: kinNHsPhy, ksNHsEmiliana, ksNOsEmiliana
+      real(rk)     :: ksPO4Emiliana, labileextradocphyexcr, labilefraction
+      real(rk)     :: leakagephy, MaxChlNrEmiliana, MaxNCrEmiliana
+      real(rk)     :: MinChlNrEmiliana, MinNCrEmiliana, MortalityEmiliana
+      real(rk)     :: mortphydom, MuMaxEmiliana, NHsMaxUptakeEmiliana
+      real(rk)     :: NosMaxUptakeEmiliana, OCr, ONoxnhsr, PNRedfield
+      real(rk)     :: PO4MaxUptakeEmiliana, Q10Phy, QuantumYieldEmiliana
+      real(rk)     :: RespirationEmiliana
 
       contains 
 
@@ -90,32 +67,6 @@
    class (type_ulg_Emiliana), intent(inout), target :: self
    integer,                        intent(in)          :: configunit
 
-   real(rk)     :: alphaPIEmiliana=0.3/daytosecond
-   real(rk)     :: extradocphyexcr=0.05
-   real(rk)     :: GrowthRespEmiliana=0.1
-   real(rk)     :: kinNHsPhy=0.5
-   real(rk)     :: ksNHsEmiliana=0.05
-   real(rk)     :: ksNOsEmiliana=0.05
-   real(rk)     :: ksPO4Emiliana=0.02
-   real(rk)     :: labileextradocphyexcr=0.65
-   real(rk)     :: labilefraction=0.7
-   real(rk)     :: leakagephy=0.02
-   real(rk)     :: MaxChlNrEmiliana=2.0
-   real(rk)     :: MaxNCrEmiliana=0.2
-   real(rk)     :: MinChlNrEmiliana=1.0
-   real(rk)     :: MinNCrEmiliana=0.05
-   real(rk)     :: MortalityEmiliana=0.03/daytosecond
-   real(rk)     :: mortphydom=0.34
-   real(rk)     :: MuMaxEmiliana=2.5/daytosecond
-   real(rk)     :: NHsMaxUptakeEmiliana=1.5/daytosecond
-   real(rk)     :: NosMaxUptakeEmiliana=1.5/daytosecond
-   real(rk)     :: OCr=1.0
-   real(rk)     :: ONoxnhsr=2.0
-   real(rk)     :: PNRedfield=1.0/16.0
-   real(rk)     :: PO4MaxUptakeEmiliana=1.5/16.0/daytosecond
-   real(rk)     :: Q10Phy=2.0
-   real(rk)     :: QuantumYieldEmiliana=0.6
-   real(rk)     :: RespirationEmiliana=0.009/daytosecond
 
    namelist /ulg_Emiliana/ alphaPIEmiliana, 	 & 
                       extradocphyexcr, GrowthRespEmiliana, 	 & 
@@ -134,32 +85,32 @@
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
-   call self%get_parameter(self%alphaPIEmiliana, 'alphaPIEmiliana', default=alphaPIEmiliana) 
-   call self%get_parameter(self%extradocphyexcr, 'extradocphyexcr', default=extradocphyexcr) 
-   call self%get_parameter(self%GrowthRespEmiliana, 'GrowthRespEmiliana', default=GrowthRespEmiliana) 
-   call self%get_parameter(self%kinNHsPhy, 'kinNHsPhy', default=kinNHsPhy) 
-   call self%get_parameter(self%ksNHsEmiliana, 'ksNHsEmiliana', default=ksNHsEmiliana) 
-   call self%get_parameter(self%ksNOsEmiliana, 'ksNOsEmiliana', default=ksNOsEmiliana) 
-   call self%get_parameter(self%ksPO4Emiliana, 'ksPO4Emiliana', default=ksPO4Emiliana) 
-   call self%get_parameter(self%labileextradocphyexcr, 'labileextradocphyexcr', default=labileextradocphyexcr) 
-   call self%get_parameter(self%labilefraction, 'labilefraction', default=labilefraction) 
-   call self%get_parameter(self%leakagephy, 'leakagephy', default=leakagephy) 
-   call self%get_parameter(self%MaxChlNrEmiliana, 'MaxChlNrEmiliana', default=MaxChlNrEmiliana) 
-   call self%get_parameter(self%MaxNCrEmiliana, 'MaxNCrEmiliana', default=MaxNCrEmiliana) 
-   call self%get_parameter(self%MinChlNrEmiliana, 'MinChlNrEmiliana', default=MinChlNrEmiliana) 
-   call self%get_parameter(self%MinNCrEmiliana, 'MinNCrEmiliana', default=MinNCrEmiliana) 
-   call self%get_parameter(self%MortalityEmiliana, 'MortalityEmiliana', default=MortalityEmiliana) 
-   call self%get_parameter(self%mortphydom, 'mortphydom', default=mortphydom) 
-   call self%get_parameter(self%MuMaxEmiliana, 'MuMaxEmiliana', default=MuMaxEmiliana) 
-   call self%get_parameter(self%NHsMaxUptakeEmiliana, 'NHsMaxUptakeEmiliana', default=NHsMaxUptakeEmiliana) 
-   call self%get_parameter(self%NosMaxUptakeEmiliana, 'NosMaxUptakeEmiliana', default=NosMaxUptakeEmiliana) 
-   call self%get_parameter(self%OCr, 'OCr', default=OCr) 
-   call self%get_parameter(self%ONoxnhsr, 'ONoxnhsr', default=ONoxnhsr) 
-   call self%get_parameter(self%PNRedfield, 'PNRedfield', default=PNRedfield) 
-   call self%get_parameter(self%PO4MaxUptakeEmiliana, 'PO4MaxUptakeEmiliana', default=PO4MaxUptakeEmiliana) 
-   call self%get_parameter(self%Q10Phy, 'Q10Phy', default=Q10Phy) 
-   call self%get_parameter(self%QuantumYieldEmiliana, 'QuantumYieldEmiliana', default=QuantumYieldEmiliana) 
-   call self%get_parameter(self%RespirationEmiliana, 'RespirationEmiliana', default=RespirationEmiliana) 
+   call self%get_parameter(self%alphaPIEmiliana, 'alphaPIEmiliana', 'm2 W-1 d-1', 'Initial slope of photosynthesis-light curve for EM', default=0.3_rk) 
+   call self%get_parameter(self%extradocphyexcr, 'extradocphyexcr', '-', 'Extra-photosynthetic DOC excretion', default=0.05_rk) 
+   call self%get_parameter(self%GrowthRespEmiliana, 'GrowthRespEmiliana', '-', 'Part of primary production used for respiration by EM ', default=0.1_rk) 
+   call self%get_parameter(self%kinNHsPhy, 'kinNHsPhy', 'mmolN m-3', 'Inhib. constant of NHS for NOS uptake by PHY', default=0.5_rk) 
+   call self%get_parameter(self%ksNHsEmiliana, 'ksNHsEmiliana', 'mmolN m-3', 'Half-saturation constant for NHS uptake by EM', default=0.05_rk) 
+   call self%get_parameter(self%ksNOsEmiliana, 'ksNOsEmiliana', 'mmolN m-3', 'Half-saturation constant for NOS uptake by EM', default=0.05_rk) 
+   call self%get_parameter(self%ksPO4Emiliana, 'ksPO4Emiliana', 'mmolP m-3', 'Half-saturation constant for PO4 uptake by EM', default=0.02_rk) 
+   call self%get_parameter(self%labileextradocphyexcr, 'labileextradocphyexcr', '-', 'Labile fraction phytoxcreted DOC', default=0.65_rk) 
+   call self%get_parameter(self%labilefraction, 'labilefraction', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
+   call self%get_parameter(self%leakagephy, 'leakagephy', '-', 'Phytoplankton leakage fraction', default=0.02_rk) 
+   call self%get_parameter(self%MaxChlNrEmiliana, 'MaxChlNrEmiliana', 'g Chla molN-1', 'Maximum Chl:N ratio in EM', default=2.0_rk) 
+   call self%get_parameter(self%MaxNCrEmiliana, 'MaxNCrEmiliana', 'molN molC-1', 'Maximum N:C ratio in EM', default=0.2_rk) 
+   call self%get_parameter(self%MinChlNrEmiliana, 'MinChlNrEmiliana', 'g Chla molN-1', 'Minimum Chl:N ratio in EM', default=1.0_rk) 
+   call self%get_parameter(self%MinNCrEmiliana, 'MinNCrEmiliana', 'molN molC-1', 'Minimum N:C ratio in EM', default=0.05_rk) 
+   call self%get_parameter(self%MortalityEmiliana, 'MortalityEmiliana', 'd-1', 'Mortality rate of EM', default=0.03_rk) 
+   call self%get_parameter(self%mortphydom, 'mortphydom', '-', 'DOM fraction of phytoplankton mortality', default=0.34_rk) 
+   call self%get_parameter(self%MuMaxEmiliana, 'MuMaxEmiliana', 'd-1', 'Maximum specific growth rate of EM', default=2.5_rk) 
+   call self%get_parameter(self%NHsMaxUptakeEmiliana, 'NHsMaxUptakeEmiliana', 'molN molC-1 d-1', 'Maximal NHS uptake rate by EM', default=1.5_rk) 
+   call self%get_parameter(self%NosMaxUptakeEmiliana, 'NosMaxUptakeEmiliana', 'molN molC-1 d-1', 'Maximal NOS uptake rate by EM', default=1.5_rk) 
+   call self%get_parameter(self%OCr, 'OCr', 'molO2 molC-1', 'O2:C ratio of respiration process', default=1.0_rk) 
+   call self%get_parameter(self%ONoxnhsr, 'ONoxnhsr', 'molO2 molNS-1', 'O2:NHS ratio in NHS oxidation in nitrification', default=2.0_rk) 
+   call self%get_parameter(self%PNRedfield, 'PNRedfield', 'molP molN-1', 'N:P Redfield ratio in PHY', default=0.0625_rk) 
+   call self%get_parameter(self%PO4MaxUptakeEmiliana, 'PO4MaxUptakeEmiliana', 'molP molC-1 d-1', 'Maximal PO4 uptake rate by EM', default=0.09375_rk) 
+   call self%get_parameter(self%Q10Phy, 'Q10Phy', '-', 'Temperature factor', default=2.0_rk) 
+   call self%get_parameter(self%QuantumYieldEmiliana, 'QuantumYieldEmiliana', 'mmolC (mg Chl dW m-2)-1', 'Maximum quantum yield of EM', default=0.6_rk) 
+   call self%get_parameter(self%RespirationEmiliana, 'RespirationEmiliana', 'd-1', 'Basal respiration rate of EM', default=0.009_rk) 
 
    ! Register state variables 
 
@@ -169,7 +120,6 @@
    call self%register_state_variable(self%id_nem, 'NEM'  & 
          , 'mmol N m-3', 'Small flagellate biomass in nitrogen' & 
          minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
-   call self%register_state_dependency(self%id_agg, 'Aggregates', 'm-3') 
    call self%register_state_dependency(self%id_cfl, 'Small flagellate biomass in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_dcl, 'Labile detritus concentration in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_dcs, 'Semi-labile detritus concentration in carbon', 'mmol C m-3') 
@@ -220,41 +170,42 @@
 
    ! Right hand sides of Emiliana model
    subroutine do(self,_ARGUMENTS_DO_)
-   class (type_uhh_dinoflag), intent(in) :: self
+   class (type_ulg_Emiliana), intent(in) :: self
    _DECLARE_ARGUMENTS_DO_
 
-      real(rk) ::  AGG,CFL,DCL,DCS,DIC,DNL,DNS,DOX,NFL,NHS,NOS,PHO,POC,PON
+      real(rk) ::  CFL,DCL,DCS,DIC,DNL,DNS,DOX,NFL,NHS,NOS,PHO,POC,PON
       real(rk) ::  par,temp
       real(rk) ::  CEM,NEM
       real(rk) ::   Carbon_UptakeEmiliana,Nitrogen_Uptake_Emiliana,NPP,PhytoNitrateReduction,TotalRespirationEmiliana
       real(rk) ::   Carbon_UptakeEmilianaIntegrated,Nitrogen_Uptake_EmilianaIntegrated,NPPIntegrated,PhytoNitrateReductionIntegrated,TotalRespirationEmilianaIntegrated
-      real(rk) ::   Ammonium_UpPHY	 + ! mmol N m-3, Ammonium uptake of phytoplankton
-      real(rk) ::   C_PHYMort	 + ! mmol C m-3, Phytoplankton mortality flux
-      real(rk) ::   Carbon_UptakePHY	 + ! mmol C m-3, C assimilation of phytoplankton
-      real(rk) ::   ChlCrEmiliana	 + ! g Chla mol C-1, Chl/C ratio in small flagellates
-      real(rk) ::   DOC_extra_excr	 + ! mmol C d-1, Phytoplankton extra excretion
-      real(rk) ::   DOC_leakage	 + ! mmol C d-1, Phytoplankton passive leakage rate for carbon
-      real(rk) ::   DON_leakage	 + ! mmol N d-1, Phytoplankton passive leakage rate for nitrogen
-      real(rk) ::   GrowthPHY	 + ! mmol C m-3 d-1, Phytoplankton growth
-      real(rk) ::   LightLimitationEmiliana	 + ! ?, Light limitation for small flagellates
-      real(rk) ::   Mu_Nitrogen	 + ! ?, ?
-      real(rk) ::   Mu_Silicate	 + ! ?, ?
-      real(rk) ::   N_PHYMort	 + ! mmol N m-3, Phytoplankton mortality flux
-      real(rk) ::   NCrat	 + ! ?, ?
-      real(rk) ::   NCrEmiliana	 + ! mol N mol C-1, N/C ratio in small flagellates
-      real(rk) ::   Nitrate_UpPHY	 + ! mmol N m-3, Nitrate uptake of phytoplankton
-      real(rk) ::   Nitrogen_UpPHY	 + ! mmol N m-3, Nitrogen uptake of phytoplankton
-      real(rk) ::   Nutrient_UpPHY	 + ! mmol m-3, Nutrient uptake of phytoplankton
-      real(rk) ::   NutrientLimitationEmiliana	 + ! ?, Nutrient limitation for small flagellates
-      real(rk) ::   Phosphate_upEmiliana	 + ! mmol P m-3 , Small flagellates phosphate uptake
-      real(rk) ::   PHYMort	 + ! mmol m-3, Phytoplankton mortality rate
-      real(rk) ::   SiCrat	 + ! ?, ?
-      real(rk) ::   tf	 + ! -, Temperature factor
-      real(rk) ::   TotalRespirationPHY	 + ! mmol C m-3, Total phytoplankton respiration (basal & activity)
+      real(rk) ::   Ammonium_UpPHY	  ! mmol N m-3, Ammonium uptake of phytoplankton
+      real(rk) ::   C_PHYMort	  ! mmol C m-3, Phytoplankton mortality flux
+      real(rk) ::   Carbon_UptakePHY	  ! mmol C m-3, C assimilation of phytoplankton
+      real(rk) ::   ChlCrEmiliana	  ! g Chla mol C-1, Chl/C ratio in small flagellates
+      real(rk) ::   DOC_extra_excr	  ! mmol C d-1, Phytoplankton extra excretion
+      real(rk) ::   DOC_leakage	  ! mmol C d-1, Phytoplankton passive leakage rate for carbon
+      real(rk) ::   DON_leakage	  ! mmol N d-1, Phytoplankton passive leakage rate for nitrogen
+      real(rk) ::   GrowthPHY	  ! mmol C m-3 d-1, Phytoplankton growth
+      real(rk) ::   LightLimitationEmiliana	  ! -, Light limitation for small flagellates
+      real(rk) ::   Mu_Nitrogen	  ! ?, ?
+      real(rk) ::   Mu_Silicate	  ! ?, ?
+      real(rk) ::   N_PHYMort	  ! mmol N m-3, Phytoplankton mortality flux
+      real(rk) ::   NCrat	  ! ?, ?
+      real(rk) ::   NCrEmiliana	  ! mol N mol C-1, N/C ratio in small flagellates
+      real(rk) ::   Nitrate_UpPHY	  ! mmol N m-3, Nitrate uptake of phytoplankton
+      real(rk) ::   Nitrogen_UpPHY	  ! mmol N m-3, Nitrogen uptake of phytoplankton
+      real(rk) ::   Nutrient_UpPHY	  ! mmol m-3, Nutrient uptake of phytoplankton
+      real(rk) ::   NutrientLimitationEmiliana	  ! -, Nutrient limitation for small flagellates
+      real(rk) ::   Phosphate_upEmiliana	  ! mmol P m-3 , Small flagellates phosphate uptake
+      real(rk) ::   PHYMort	  ! mmol m-3, Phytoplankton mortality rate
+      real(rk) ::   SiCrat	  ! ?, ?
+      real(rk) ::   tf	  ! -, Temperature factor
+      real(rk) ::   TotalRespirationPHY	  ! mmol C m-3, Total phytoplankton respiration (basal & activity)
    _LOOP_BEGIN_
 
    ! Retrieve current (local) state variable values.
-   _GET_(self%id_agg,AGG)       ! Aggregates
+   _GET_(self%id_cem,CEM)       ! Small flagellate biomass in carbon
+   _GET_(self%id_nem,NEM)       ! Small flagellate biomass in nitrogen
    _GET_(self%id_cfl,CFL)       ! Small flagellate biomass in carbon
    _GET_(self%id_dcl,DCL)       ! Labile detritus concentration in carbon
    _GET_(self%id_dcs,DCS)       ! Semi-labile detritus concentration in carbon
@@ -272,120 +223,94 @@
    ! Retrieve current environmental conditions.
     _GET_(self%id_par,par)              ! local photosynthetically active radiation
     _GET_(self%id_temp,temp)            ! local temperature
-   ! TEMPERATURE EFFECT on rates (all rates are defined at 20 dg C) 
+    
     tf = Q10Factor(temp,Q10Phy)
-   ! PHYTOPLANKTON 
-   ! N/C ratio 
-    NCrEmiliana  = Ratio (NEM,CEM)
-   ! Chlorophyll to carbon ratio (ChlCrPHY, mg Chl/mol C) 
-   CALL CHL_C_RATIO(NCrEmiliana,MaxNCrEmiliana,MinNCrEmiliana,MinChlNrEmiliana,MaxChlNrEmiliana,ChlCrEmiliana) ! REMOVE (POSSIBLY)
-    Chlorophyll(i,j,k,3) = ChlCrEmiliana * CEM
-   ! Nitrate uptake rates of phytoplankton (NO3_upPHY, mmol N/m3/day) 
-   CALL NO_UPTAKE_RATE(NCrEmiliana,NOS,NHS,CEM,tf,MaxNCrEmiliana,NosMaxUptakeEmiliana,ksNOsEmiliana,kinNHsPhy, Nitrate_UpPHY) ! REMOVE (POSSIBLY)
-   ! Ammonium uptake rates of phytoplankton (NH3_upPHY, mmolN /m3/day) 
-   ! (and excretion if NC ratio too high) 
-   CALL NUT_UPTAKE_RATE(NCrEmiliana,NHS,CEM,tf,MaxNCrEmiliana,NHsMaxUptakeEmiliana,ksNHsEmiliana,0.0_wp, Ammonium_UpPHY) ! REMOVE (POSSIBLY)
-   CALL NUT_UPTAKE_RATE(NCrEmiliana,PHO,CEM,tf,MaxNCrEmiliana,PO4MaxUptakeEmiliana,ksPO4Emiliana,0.0_wp, Phosphate_upEmiliana) ! REMOVE (POSSIBLY)
-   ! Potential Nitrogen uptake 
-    Nitrogen_UpPHY=Ammonium_UpPHY + Nitrate_UpPHY
+   ! Calculate ratios in phytoplankton 
+    NCrEmiliana  = NEM/CEM
+    ChlCrEmiliana = ChlCrPHY(NCratio,MaxNCr,MinNCr,MinChlNr,MaxChlNr)
+    
+             ! Chlorophyll(i,j,k,3) = ChlCrEmiliana * CEM	! REMOVE (POSSIBLY) 
+    
+   ! Nitrate uptake rate 
+    Nitrate_UpPHY = NOuptake(NCrEmiliana,tf,MaxNCrEmiliana,NosMaxUptakeEmiliana) * Michaelis(NOS,ksNOsEmiliana) * Inhibition(NHS,kinNHsPhy) * CEM
+    
+   ! Ammonium uptake rate 
+    Ammonium_UpPHY = NUT_UPTAKE_RATE(NCrEmiliana,(NHS-0.0),tf,MaxNCrEmiliana,NHsMaxUptakeEmiliana,ksNHsEmiliana) * CEM
+    
+   ! Phosphate uptake rate 
+    Phosphate_upEmiliana = NUT_UPTAKE_RATE(NCrEmiliana,(PHO-0.0),tf,MaxNCrEmiliana,PO4MaxUptakeEmiliana,ksPO4Emiliana) * CEM
+    
+    
+   ! Potential nitrogen uptake 
+    Nitrogen_UpPHY = Ammonium_UpPHY + Nitrate_UpPHY
+    
    ! Nutrient uptake 
-    Nutrient_UpPHY=min(Nitrogen_UpPHY,Phosphate_upEmiliana/self%PNRedfield)
-             !Nutrient_UpPHY=max(Nutrient_UpPHY,0) ! REMOVE (POSSIBLY)
-   ! ################################# FORMER SUBROUTINE PHYT GROWTH RATE ########################################### 
-   ! Potential nutrient controlled growth rate; due to droop kinetics, the actual NC ratio can slightly surpass the maximal or minimal ratio 
-             IF(NCrEmiliana > MaxNCrEmiliana) THEN ! REMOVE (POSSIBLY)
-    NCrat = self%MaxNCrEmiliana
-             ELSEIF (NCrEmiliana < MinNCrEmiliana) THEN ! REMOVE (POSSIBLY)
-    NCrat = self%MinNCrEmiliana
-             ELSE ! REMOVE (POSSIBLY)
-    NCrat = NCrEmiliana
-             ENDIF ! REMOVE (POSSIBLY)
-   ! the actual SiC ratio can slightly surpass the maximal or minimal ratio 
-             IF(SiCrEmiliana > MaxSiCrEmiliana) THEN ! REMOVE (POSSIBLY)
-    SiCrat = MaxSiCrEmiliana
-             ELSEIF (SiCrEmiliana < MinSiCrEmiliana) THEN ! REMOVE (POSSIBLY)
-    SiCrat = MinSiCrEmiliana
-             ELSE ! REMOVE (POSSIBLY)
-    SiCrat = SiCrEmiliana
-             ENDIF ! REMOVE (POSSIBLY)
-   ! Tett model 
-    Mu_Nitrogen = 1. - self%MinNCrEmiliana  / NCrat
-    Mu_Silicate = 1. - MinSiCrEmiliana / SiCrat
-    NutrientLimitationEmiliana = min(Mu_Nitrogen,Mu_Silicate)
-          LightLimitationEmiliana = 1.-exp(-self%alphaPIEmiliana*PAR/self%MuMaxEmiliana)
+    Nutrient_UpPHY = min(Nitrogen_UpPHY,Phosphate_upEmiliana/self%PNRedfield)
+    
+   ! Compute actual N:C and Si:C ratios 
+    NCrat = Ratio_PHYT(NCrEmiliana,MaxNCrEmiliana,MinNCrEmiliana)
+    SiCrat = Ratio_PHYT(SiCrEmiliana,MaxSiCrEmiliana,MinSiCrEmiliana)
+    
+    
+   ! Compute nutrient and light limitation 
+    NutrientLimitationEmiliana = Nutr_LIM(MinNCrEmiliana,MinSiCrEmiliana,NCrat,SiCrat)
+          LightLimitationEmiliana = 1.0-exp(-self%alphaPIEmiliana*PAR/self%MuMaxEmiliana)
+    
+   ! Compute carbon uptake 
     Carbon_UptakePHY=self%MuMaxEmiliana*LightLimitationEmiliana*NutrientLimitationEmiliana*CEM*tf
+    
+   ! Compute respiration 
     TotalRespirationPHY=Carbon_UptakePHY*self%GrowthRespEmiliana + self%RespirationEmiliana*CEM*tf
+    
+   ! Compute growth 
     GrowthPHY=Carbon_UptakePHY-TotalRespirationPHY
-   ! Compute the extra DOC excretion as a fraction (extradocphyexcr) of the difference of growth in nutrient limited (actual NC ratio) and nutrient saturated (max NC ratio) as in VDM et al 2004 L&O 
-    DOC_extra_excr=abs(extradocphyexcr*self%MuMaxEmiliana*CEM*tf*(min(LightLimitationEmiliana,(1. - self%self%MinNCrEmiliana  / self%MaxNCrEmiliana))- min(LightLimitationEmiliana,(1. - self%self%MinNCrEmiliana  / NCrat))))
-   ! ################################# END OF FORMER SUBROUTINE PHYT GROWTH RATE ########################################### 
-   !Compute the leakage    and extra DOC excretion, DOC_extra_excr 
-    DOC_leakage = self%leakagephy*Carbon_UptakePHY
-    DON_leakage  =self%leakagephy*abs(Nutrient_UpPHY)
-   ! Phytoplankton mortality rate (PHYMort, /day) 
-             CALL PHYMORT_RATE(MortalityEmiliana,tf, PHYmort) ! REMOVE (POSSIBLY)
-   ! Phytoplankton mortality flux C_PHYMort,N_PHYMort (in mmol C/m3/day or mmol N/m3/day) 
-    C_PHYMort  = PHYMort * CEM
-    N_PHYMort  = PHYMort * NEM
-   ! ADJUSTING THE RATE OF CHANGE 
-   ! phytoplankton C increases by growth, 
-   ! it decreases by zooplankton grazing (see the zooplankton subroutine) and phytoplankton mortality 
+    
+   ! Compute the extra DOC excretion from the difference of growth in nutrient limited (actual NC ratio) and nutrient saturated (max NC ratio) 
+    DOC_extra_excr = CEM * tf * self%extradocphyexcr * self%MuMaxEmiliana * ExtraEXCR_term(LightLimitationEmiliana,MinNCrEmiliana,MaxNCrEmiliana,NCrat)        
+    
+   ! Compute the leakage 
+    DOC_leakage = self%leakagephy * Carbon_UptakePHY
+    DON_leakage = self%leakagephy * abs(Nutrient_UpPHY)
+    
+   ! Compute mortality 
+    C_PHYMort  = PHYMORT(MortalityEmiliana,tf) * CEM
+    N_PHYMort  = PHYMORT(MortalityEmiliana,tf) * NEM
+    
+   ! Carbon in Emiliana increases by growth and decreases by leakage and mortality 
    _ADD_SOURCE_(self%id_cem,1.0*( GrowthPHY)) 
-   _ADD_SOURCE_(self%id_cem,-1.0*( C_PHYMort+DOC_leakage)) 
-   ! phytoplankton N increases by N uptake, 
-   ! it decreases by zooplankton grazing and phytoplankton mortality 
+   _ADD_SOURCE_(self%id_cem,-1.0*( C_PHYMort + DOC_leakage)) 
    _ADD_SOURCE_(self%id_nem,1.0*( Nutrient_UpPHY)) 
-   _ADD_SOURCE_(self%id_nem,-1.0*( N_PHYMort+DON_leakage)) 
-   ! IF CN ratio of phytoplankton not lower than CNmin, than nitrogen is taken up 
-   ! Nitrate is taken up by phytoplankton 
-             IF (Nutrient_UpPHY.gt.0) THEN ! REMOVE (POSSIBLY)
+   _ADD_SOURCE_(self%id_nem,-1.0*( N_PHYMort + DON_leakage)) 
+    
+   ! IF CN ratio of phytoplankton higher than CNmin, than nitrogen is taken up, unless it gets excreted 
+             IF (Nutrient_UpPHY.gt.0) THEN 
    _ADD_SOURCE_(self%id_nos,-1.0*( Nutrient_UpPHY*Nitrate_UpPHY/Nitrogen_UpPHY)) 
    _ADD_SOURCE_(self%id_dox,1.0*( Nutrient_UpPHY*Nitrate_UpPHY/Nitrogen_UpPHY*self%ONoxnhsr)) 
-   ! Ammonium is taken up by phytoplankton 
    _ADD_SOURCE_(self%id_nhs,-1.0*( Nutrient_UpPHY*Ammonium_UpPHY/Nitrogen_UpPHY)) 
    _ADD_SOURCE_(self%id_pho,-1.0*( Nutrient_UpPHY*self%PNRedfield)) 
-             ELSE ! REMOVE (POSSIBLY)
-   ! IF CN ratio of phytoplankton is lower than CNmin, than ammonium is excreted 
+             ELSE 
    _ADD_SOURCE_(self%id_nhs,1.0*( - Nutrient_UpPHY)) 
    _ADD_SOURCE_(self%id_pho,1.0*( - Nutrient_UpPHY*self%PNRedfield)) 
-             END IF ! REMOVE (POSSIBLY)
-   ! As in Anderson and Pondhaven (2003), the phytoplanton mortality increases the pool of POM and DOM with a coefficient of mortdom 
-   ! for the DOM pool a part is considered as labile (labilefraction) and another part as semi labile (1-labilefraction) 
+             END IF 
+    
+   ! Mortality increases the pool of POM and DOM with proper partitioning and leakage adds to the labile pool 
    _ADD_SOURCE_(self%id_poc,1.0*( (1.0 - self%mortphydom)*C_PHYMort)) 
    _ADD_SOURCE_(self%id_pon,1.0*( (1.0 - self%mortphydom)*N_PHYMort)) 
-   _ADD_SOURCE_(self%id_dcl,1.0*( self%mortphydom*C_PHYMort*self%labilefraction)) 
-   _ADD_SOURCE_(self%id_dnl,1.0*( self%mortphydom*N_PHYMort*self%labilefraction)) 
+   _ADD_SOURCE_(self%id_dcl,1.0*( self%mortphydom*C_PHYMort*self%labilefraction + DOC_leakage)) 
+   _ADD_SOURCE_(self%id_dnl,1.0*( self%mortphydom*N_PHYMort*self%labilefraction + DON_leakage)) 
    _ADD_SOURCE_(self%id_dcs,1.0*( self%mortphydom*C_PHYMort*(1.0 - self%labilefraction))) 
    _ADD_SOURCE_(self%id_dns,1.0*( self%mortphydom*N_PHYMort*(1.0 - self%labilefraction))) 
-   ! As in Anderson and Pondhaven (2003), the DOCL and DONL concentration increases also due to phytoplankton leakage which is considered 
-   ! to peoduced only labile DOC and DON 
-   _ADD_SOURCE_(self%id_dcl,1.0*( DOC_leakage)) 
-   _ADD_SOURCE_(self%id_dnl,1.0*( DON_leakage)) 
-   ! As in Anderson and Pondhaven (2003), the phytoplankton extra DOC excretion, DOC_extra_excr, increases the pool of DOC (only DOC and not DON) 
-   ! this extra-excretion is composed of a part (leakage) which is assimilated to leakage and is thus only labile 
-   ! the remaining part (1-leakage) is composed of a labile (labileextradocexcr) and semi labile part (1-labileextradocexcr) 
+    
+   ! Extra-excretion and leakage add to the labile and semi-labile detritus 
    _ADD_SOURCE_(self%id_dcl,1.0*( self%self%leakagephy*DOC_extra_excr + self%labileextradocphyexcr*(1.0 - self%self%leakagephy)*DOC_extra_excr)) 
    _ADD_SOURCE_(self%id_dcs,1.0*( (1.0 - self%labileextradocphyexcr)*(1.0 - self%leakagephy)*DOC_extra_excr)) 
-             SELECT CASE (SinkingVelocityType) ! REMOVE (POSSIBLY)
-             CASE ('aggregation') ! REMOVE (POSSIBLY)
-   ! The number of aggregates, POMNOS including  PON increases and decreases with PON 
-               !      dPAGGI(i,j,k) = dPAGGI(i,j,k) + (1.0 - mortphydom)*N_PHYMort*AGGI(i,j,k)/(PONI(i,j,k)+PNSI(i,j,k)) ! REMOVE (POSSIBLY)
-   _ADD_SOURCE_(self%id_agg,1.0*( (1.0 - self%mortphydom)*N_PHYMort*AGG/(PON))) 
-#ifdef nanquest 
-               if (isnan(dPAGG(I,J,K))) then ! REMOVE (POSSIBLY)
-                 write (*,*) '** NAN QUEST ** in CalcEMILIANNA' ! REMOVE (POSSIBLY)
-                 write (*,*) 'i,j,k,PON(I,J,K),trb(I,J,K,AGG)' ! REMOVE (POSSIBLY)
-                 write (*,*) i,j,k,trb(I,J,K,PON),trb(I,J,K,AGG) ! REMOVE (POSSIBLY)
-                 call flush(6) ! REMOVE (POSSIBLY)
-                 stop ! REMOVE (POSSIBLY)
-            endif 
-#endif 
-             END SELECT ! REMOVE (POSSIBLY)
-   ! The oxygen concentration increases due to photosynthesis 
+    
+   ! The oxygen increases due to photosynthesis 
    _ADD_SOURCE_(self%id_dox,1.0*( (GrowthPHY + DOC_extra_excr)*self%OCr)) 
+    
    ! CO2 production and consumption 
    _ADD_SOURCE_(self%id_dic,-1.0*( GrowthPHY + DOC_extra_excr)) 
-   !Diagnostics Store the fluxes 
+    
 #ifdef primaryprod 
           NPP = NPP + Carbon_UptakePHY-TotalRespirationPHY
 #endif 
@@ -397,11 +322,7 @@
 #ifdef biodiag1 
           PhytoNitrateReduction = PhytoNitrateReduction+Nutrient_UpPHY*ratio(Nitrate_UpPHY,Nitrogen_UpPHY)*self%ONoxnhsr
 #endif 
-           end if ! REMOVE (POSSIBLY)
-         end do  ! REMOVE (POSSIBLY)
-       end do ! REMOVE (POSSIBLY)
-     end do ! REMOVE (POSSIBLY)
-   ! OUTPUT VARIABLES 
+
    ! Averaged over entire water column Diagnostics 
 #ifdef biodiag2 
    _SET_DIAGNOSTIC_(self%id_Nitrogen_Uptake_Emiliana, Nitrogen_Uptake_Emiliana)
@@ -418,3 +339,5 @@
 
    end subroutine do
 
+
+   end module fabm_ulg_Emiliana 

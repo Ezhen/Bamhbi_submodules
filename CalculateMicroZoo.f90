@@ -40,37 +40,21 @@
 ! PUBLIC DERIVED TYPES: 
    type,extends(type_base_model),public :: type_ulg_MicroZoo 
       type (type_state_variable_id)         :: id_mic
-      type (type_state_variable_id)         :: id_agg,id_bac,id_cdi,id_cem,id_cfl,id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_ndi,id_nem,id_nfl,id_nhs,id_pho,id_poc,id_pon,id_sid
+      type (type_state_variable_id)         :: id_bac,id_cdi,id_cem,id_cfl,id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_ndi,id_nem,id_nfl,id_nhs,id_pho,id_poc,id_pon,id_sid
       type (type_dependency_id)             :: id_par,id_temp 
       type (type_diagnostic_variable_id)    :: id_bac_to_ZOO,id_phy_to_ZOO,id_POC_to_ZOO
       type (type_diagnostic_variable_id)    :: 
 
 !     Model parameters 
-      real(rk) :: Ass_Eff_OnCarbon
-      real(rk) :: Ass_Eff_OnNitrogen
-      real(rk) :: Capt_eff_MicroZoo_BAC
-      real(rk) :: Capt_eff_MicroZoo_Diatoms
-      real(rk) :: Capt_eff_MicroZoo_Emiliana
-      real(rk) :: Capt_eff_MicroZoo_Flagellates
-      real(rk) :: Capt_eff_MicroZoo_MesoZoo
-      real(rk) :: Capt_eff_MicroZoo_MicroZoo
-      real(rk) :: Capt_eff_MicroZoo_POM
-      real(rk) :: DOXsatmort
-      real(rk) :: efficiency_growth_MicroZoo
-      real(rk) :: expmortMicroZoo
-      real(rk) :: Half_Saturation_MicroZoo
-      real(rk) :: HalfSatMort_MicroZoo
-      real(rk) :: labilefraction
-      real(rk) :: MaxgrazingrateMicroZoo
-      real(rk) :: Messy_feeding_MicroZoo
-      real(rk) :: Mortanoxic
-      real(rk) :: NCrMicroZoo
-      real(rk) :: NLin_Mort_MicroZoo
-      real(rk) :: NCrBac
-      real(rk) :: OCr
-      real(rk) :: PNRedfield
-      real(rk) :: Q10Zoo
-      real(rk) :: SiNrDiatoms
+      real(rk)     :: Ass_Eff_OnCarbon, Ass_Eff_OnNitrogen, Capt_eff_MicroZoo_BAC
+      real(rk)     :: Capt_eff_MicroZoo_Diatoms, Capt_eff_MicroZoo_Emiliana
+      real(rk)     :: Capt_eff_MicroZoo_Flagellates, Capt_eff_MicroZoo_MesoZoo
+      real(rk)     :: Capt_eff_MicroZoo_MicroZoo, Capt_eff_MicroZoo_POM
+      real(rk)     :: DOXsatmort, efficiency_growth_MicroZoo, expmortMicroZoo
+      real(rk)     :: Half_Saturation_MicroZoo, HalfSatMort_MicroZoo
+      real(rk)     :: labilefraction, MaxgrazingrateMicroZoo, Messy_feeding_MicroZoo
+      real(rk)     :: Mortanoxic, NCrMicroZoo, NLin_Mort_MicroZoo
+      real(rk)     :: NCrBac, OCr, PNRedfield, Q10Zoo, SiNrDiatoms
 
       contains 
 
@@ -92,31 +76,6 @@
    class (type_ulg_MicroZoo), intent(inout), target :: self
    integer,                        intent(in)          :: configunit
 
-   real(rk)     :: Ass_Eff_OnCarbon=0.64
-   real(rk)     :: Ass_Eff_OnNitrogen=0.77
-   real(rk)     :: Capt_eff_MicroZoo_BAC=0.7
-   real(rk)     :: Capt_eff_MicroZoo_Diatoms=0.0
-   real(rk)     :: Capt_eff_MicroZoo_Emiliana=1.0
-   real(rk)     :: Capt_eff_MicroZoo_Flagellates=0.0
-   real(rk)     :: Capt_eff_MicroZoo_MesoZoo=0.0
-   real(rk)     :: Capt_eff_MicroZoo_MicroZoo=0.0
-   real(rk)     :: Capt_eff_MicroZoo_POM=0.0
-   real(rk)     :: DOXsatmort=7.8125
-   real(rk)     :: efficiency_growth_MicroZoo=0.8
-   real(rk)     :: expmortMicroZoo=2.0
-   real(rk)     :: Half_Saturation_MicroZoo=5.0
-   real(rk)     :: HalfSatMort_MicroZoo=1.0
-   real(rk)     :: labilefraction=0.7
-   real(rk)     :: MaxgrazingrateMicroZoo=3.6/daytosecond
-   real(rk)     :: Messy_feeding_MicroZoo=0.23
-   real(rk)     :: Mortanoxic=0.25/daytosecond
-   real(rk)     :: NCrMicroZoo=1./5.5
-   real(rk)     :: NLin_Mort_MicroZoo=0.3/daytosecond
-   real(rk)     :: NCrBac=1./5.1
-   real(rk)     :: OCr=1.0
-   real(rk)     :: PNRedfield=1.0/16.0
-   real(rk)     :: Q10Zoo=2.0
-   real(rk)     :: SiNrDiatoms=5./6.
 
    namelist /ulg_MicroZoo/ Ass_Eff_OnCarbon, 	 & 
                       Ass_Eff_OnNitrogen, 	 & 
@@ -139,38 +98,37 @@
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
-   call self%get_parameter(self%Ass_Eff_OnCarbon, 'Ass_Eff_OnCarbon', default=Ass_Eff_OnCarbon) 
-   call self%get_parameter(self%Ass_Eff_OnNitrogen, 'Ass_Eff_OnNitrogen', default=Ass_Eff_OnNitrogen) 
-   call self%get_parameter(self%Capt_eff_MicroZoo_BAC, 'Capt_eff_MicroZoo_BAC', default=Capt_eff_MicroZoo_BAC) 
-   call self%get_parameter(self%Capt_eff_MicroZoo_Diatoms, 'Capt_eff_MicroZoo_Diatoms', default=Capt_eff_MicroZoo_Diatoms) 
-   call self%get_parameter(self%Capt_eff_MicroZoo_Emiliana, 'Capt_eff_MicroZoo_Emiliana', default=Capt_eff_MicroZoo_Emiliana) 
-   call self%get_parameter(self%Capt_eff_MicroZoo_Flagellates, 'Capt_eff_MicroZoo_Flagellates', default=Capt_eff_MicroZoo_Flagellates) 
-   call self%get_parameter(self%Capt_eff_MicroZoo_MesoZoo, 'Capt_eff_MicroZoo_MesoZoo', default=Capt_eff_MicroZoo_MesoZoo) 
-   call self%get_parameter(self%Capt_eff_MicroZoo_MicroZoo, 'Capt_eff_MicroZoo_MicroZoo', default=Capt_eff_MicroZoo_MicroZoo) 
-   call self%get_parameter(self%Capt_eff_MicroZoo_POM, 'Capt_eff_MicroZoo_POM', default=Capt_eff_MicroZoo_POM) 
-   call self%get_parameter(self%DOXsatmort, 'DOXsatmort', default=DOXsatmort) 
-   call self%get_parameter(self%efficiency_growth_MicroZoo, 'efficiency_growth_MicroZoo', default=efficiency_growth_MicroZoo) 
-   call self%get_parameter(self%expmortMicroZoo, 'expmortMicroZoo', default=expmortMicroZoo) 
-   call self%get_parameter(self%Half_Saturation_MicroZoo, 'Half_Saturation_MicroZoo', default=Half_Saturation_MicroZoo) 
-   call self%get_parameter(self%HalfSatMort_MicroZoo, 'HalfSatMort_MicroZoo', default=HalfSatMort_MicroZoo) 
-   call self%get_parameter(self%labilefraction, 'labilefraction', default=labilefraction) 
-   call self%get_parameter(self%MaxgrazingrateMicroZoo, 'MaxgrazingrateMicroZoo', default=MaxgrazingrateMicroZoo) 
-   call self%get_parameter(self%Messy_feeding_MicroZoo, 'Messy_feeding_MicroZoo', default=Messy_feeding_MicroZoo) 
-   call self%get_parameter(self%Mortanoxic, 'Mortanoxic', default=Mortanoxic) 
-   call self%get_parameter(self%NCrMicroZoo, 'NCrMicroZoo', default=NCrMicroZoo) 
-   call self%get_parameter(self%NLin_Mort_MicroZoo, 'NLin_Mort_MicroZoo', default=NLin_Mort_MicroZoo) 
-   call self%get_parameter(self%NCrBac, 'NCrBac', default=NCrBac) 
-   call self%get_parameter(self%OCr, 'OCr', default=OCr) 
-   call self%get_parameter(self%PNRedfield, 'PNRedfield', default=PNRedfield) 
-   call self%get_parameter(self%Q10Zoo, 'Q10Zoo', default=Q10Zoo) 
-   call self%get_parameter(self%SiNrDiatoms, 'SiNrDiatoms', default=SiNrDiatoms) 
+   call self%get_parameter(self%Ass_Eff_OnCarbon, 'Ass_Eff_OnCarbon', '-', 'ZOO assimilation efficiency on C', default=0.64_rk) 
+   call self%get_parameter(self%Ass_Eff_OnNitrogen, 'Ass_Eff_OnNitrogen', '-', 'ZOO assimilation efficiencies on N', default=0.77_rk) 
+   call self%get_parameter(self%Capt_eff_MicroZoo_BAC, 'Capt_eff_MicroZoo_BAC', '-', 'Capture efficiency of MIC on BAC', default=0.7_rk) 
+   call self%get_parameter(self%Capt_eff_MicroZoo_Diatoms, 'Capt_eff_MicroZoo_Diatoms', '-', 'Capture efficiency of MIC on DI', default=0.0_rk) 
+   call self%get_parameter(self%Capt_eff_MicroZoo_Emiliana, 'Capt_eff_MicroZoo_Emiliana', '-', 'Capture efficiency of MIC on EM', default=1.0_rk) 
+   call self%get_parameter(self%Capt_eff_MicroZoo_Flagellates, 'Capt_eff_MicroZoo_Flagellates', '-', 'Capture efficiency of MIC on FL', default=0.0_rk) 
+   call self%get_parameter(self%Capt_eff_MicroZoo_MesoZoo, 'Capt_eff_MicroZoo_MesoZoo', '-', 'Capture efficiency of MIC on MES', default=0.0_rk) 
+   call self%get_parameter(self%Capt_eff_MicroZoo_MicroZoo, 'Capt_eff_MicroZoo_MicroZoo', '-', 'Capture efficiency of MIC on MIC', default=0.0_rk) 
+   call self%get_parameter(self%Capt_eff_MicroZoo_POM, 'Capt_eff_MicroZoo_POM', '-', 'Capture efficiency of MIC on POM', default=0.0_rk) 
+   call self%get_parameter(self%DOXsatmort, 'DOXsatmort', 'mmolO2 m-3', 'Percentage of saturation where metabolic respiration is half the one under oxygen satyrated conditions', default=7.8125_rk) 
+   call self%get_parameter(self%efficiency_growth_MicroZoo, 'efficiency_growth_MicroZoo', '-', 'MIC net growth efficiency on C', default=0.8_rk) 
+   call self%get_parameter(self%expmortMicroZoo, 'expmortMicroZoo', '(?)', '? mortality rate of MIC', default=2.0_rk) 
+   call self%get_parameter(self%Half_Saturation_MicroZoo, 'Half_Saturation_MicroZoo', 'mmolC m-3', 'Half-saturation constant for MIC grazing', default=5.0_rk) 
+   call self%get_parameter(self%HalfSatMort_MicroZoo, 'HalfSatMort_MicroZoo', 'mmolC m-3', '', default=1.0_rk) 
+   call self%get_parameter(self%labilefraction, 'labilefraction', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
+   call self%get_parameter(self%MaxgrazingrateMicroZoo, 'MaxgrazingrateMicroZoo', 'd-1', 'Maximum grazing rate of MIC', default=3.6_rk) 
+   call self%get_parameter(self%Messy_feeding_MicroZoo, 'Messy_feeding_MicroZoo', '-', 'Messy feeding fraction of MIC grazing', default=0.23_rk) 
+   call self%get_parameter(self%Mortanoxic, 'Mortanoxic', 'd-1', 'Mortality rate in anoxia', default=0.25_rk) 
+   call self%get_parameter(self%NCrMicroZoo, 'NCrMicroZoo', 'molN molC-1', 'N:C molar ratio in MIC', default=0.18_rk) 
+   call self%get_parameter(self%NLin_Mort_MicroZoo, 'NLin_Mort_MicroZoo', 'd-1', 'Maximum mortality rate of MIC', default=0.3_rk) 
+   call self%get_parameter(self%NCrBac, 'NCrBac', 'molN molC-1', 'N:C', default=0.196_rk) 
+   call self%get_parameter(self%OCr, 'OCr', 'molO2 molC-1', 'O2:C ratio of respiration process', default=1.0_rk) 
+   call self%get_parameter(self%PNRedfield, 'PNRedfield', 'molP molN-1', 'N:P Redfield ratio in PHY', default=0.0625_rk) 
+   call self%get_parameter(self%Q10Zoo, 'Q10Zoo', '-', 'Temperature factor Soetart et al., 2001', default=2.0_rk) 
+   call self%get_parameter(self%SiNrDiatoms, 'SiNrDiatoms', 'molSi molN-1', 'Si:N ratio in DI', default=0.83_rk) 
 
    ! Register state variables 
 
    call self%register_state_variable(self%id_mic, 'MIC'  & 
          , 'mmol C m-3', 'Microzooplakton biomass' & 
          minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
-   call self%register_state_dependency(self%id_agg, 'Aggregates', 'm-3') 
    call self%register_state_dependency(self%id_bac, 'Bacterial biomass', 'mmol C m-3') 
    call self%register_state_dependency(self%id_cdi, 'Diatom biomass in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_cem, 'Small flagellate biomass in carbon', 'mmol C m-3') 
@@ -212,36 +170,36 @@
 
    ! Right hand sides of MicroZoo model
    subroutine do(self,_ARGUMENTS_DO_)
-   class (type_uhh_dinoflag), intent(in) :: self
+   class (type_ulg_MicroZoo), intent(in) :: self
    _DECLARE_ARGUMENTS_DO_
 
-      real(rk) ::  AGG,BAC,CDI,CEM,CFL,DCL,DCS,DIC,DNL,DNS,DOX,NDI,NEM,NFL,NHS,PHO,POC,PON,SID
+      real(rk) ::  BAC,CDI,CEM,CFL,DCL,DCS,DIC,DNL,DNS,DOX,NDI,NEM,NFL,NHS,PHO,POC,PON,SID
       real(rk) ::  par,temp
       real(rk) ::  MIC
       real(rk) ::   bac_to_ZOO,phy_to_ZOO,POC_to_ZOO
       real(rk) ::   
-      real(rk) ::   C_ZOOEgest	 + ! mmol C m-3, Zooplankton POM egestion in carbon
-      real(rk) ::   C_ZOOIntake	 + ! mmol C m-3, Zooplankton carbon intake
-      real(rk) ::   C_ZOOMessyfeeding	 + ! mmol C m-3, Zooplankton messy feeding to the DOM in carbon
-      real(rk) ::   C_ZOOMort	 + ! mmol C m-3, Zooplankton mortality flux in carbon
-      real(rk) ::   C_ZOOResp	 + ! flux, Zooplankton respiration
-      real(rk) ::   FluxPrey_carbon	 + ! mmol C m-3, Flux of ingested preys in carbon 
-      real(rk) ::   FluxPrey_nitrogen	 + ! mmol N m-3, Flux of consummed preys in nitrogen
-      real(rk) ::   grazing_carbonMicroZoo	 + ! mmol C m-3, Grazing in carbon by microzooplankaton
-      real(rk) ::   grazing_nitrogenZoo	 + ! mmol N m-3, Grazing in nitrogen all zooplankaton
-      real(rk) ::   NCrfoodZooref	 + ! mol N mol C-1, Food threshold elemental ratio
-      real(rk) ::   N_ZOOEgest	 + ! mmol N m-3, Zooplankton POM egestion in nitrogen
-      real(rk) ::   N_ZOOExcr	 + ! mmol N m-3, Zooplankton excretion of ammonium
-      real(rk) ::   N_ZOOIntake	 + ! mmol N m-3, Zooplnkton nitrogen intake
-      real(rk) ::   N_ZOOMessyfeeding	 + ! mmol N m-3, Zooplankton messy feeding to the DOM in nitrogen
-      real(rk) ::   N_ZOOMort	 + ! mmol N m-3, Zooplankton mortality flux in nitrogen
-      real(rk) ::   NCrfoodMicroZoo	 + ! mmol N mmol C-1, N/C ratio in food of microzooplankton
-      real(rk) ::   tf	 + ! -, Temperature factor
-      real(rk) ::   ZOOGrowth	 + ! mmol C m-3, Zooplankton growth flux
+      real(rk) ::   C_ZOOEgest	  ! mmol C m-3, Zooplankton POM egestion in carbon
+      real(rk) ::   C_ZOOIntake	  ! mmol C m-3, Zooplankton carbon intake
+      real(rk) ::   C_ZOOMessyfeeding	  ! mmol C m-3, Zooplankton messy feeding to the DOM in carbon
+      real(rk) ::   C_ZOOMort	  ! mmol C m-3, Zooplankton mortality flux in carbon
+      real(rk) ::   C_ZOOResp	  ! flux, Zooplankton respiration
+      real(rk) ::   FluxPrey_carbon	  ! mmol C m-3, Flux of ingested preys in carbon 
+      real(rk) ::   FluxPrey_nitrogen	  ! mmol N m-3, Flux of consummed preys in nitrogen
+      real(rk) ::   grazing_carbonMicroZoo	  ! mmol C m-3, Grazing in carbon by microzooplankaton
+      real(rk) ::   grazing_nitrogenZoo	  ! mmol N m-3, Grazing in nitrogen all zooplankaton
+      real(rk) ::   NCrfoodZooref	  ! mol N mol C-1, Food threshold elemental ratio
+      real(rk) ::   N_ZOOEgest	  ! mmol N m-3, Zooplankton POM egestion in nitrogen
+      real(rk) ::   N_ZOOExcr	  ! mmol N m-3, Zooplankton excretion of ammonium
+      real(rk) ::   N_ZOOIntake	  ! mmol N m-3, Zooplnkton nitrogen intake
+      real(rk) ::   N_ZOOMessyfeeding	  ! mmol N m-3, Zooplankton messy feeding to the DOM in nitrogen
+      real(rk) ::   N_ZOOMort	  ! mmol N m-3, Zooplankton mortality flux in nitrogen
+      real(rk) ::   NCrfoodMicroZoo	  ! mmol N mmol C-1, N/C ratio in food of microzooplankton
+      real(rk) ::   tf	  ! -, Temperature factor
+      real(rk) ::   ZOOGrowth	  ! mmol C m-3, Zooplankton growth flux
    _LOOP_BEGIN_
 
    ! Retrieve current (local) state variable values.
-   _GET_(self%id_agg,AGG)       ! Aggregates
+   _GET_(self%id_mic,MIC)       ! Microzooplakton biomass
    _GET_(self%id_bac,BAC)       ! Bacterial biomass
    _GET_(self%id_cdi,CDI)       ! Diatom biomass in carbon
    _GET_(self%id_cem,CEM)       ! Small flagellate biomass in carbon
@@ -264,89 +222,74 @@
    ! Retrieve current environmental conditions.
     _GET_(self%id_par,par)              ! local photosynthetically active radiation
     _GET_(self%id_temp,temp)            ! local temperature
-   ! TEMPERATURE EFFECT on rates (all rates are defined at 20 dg C) 
+    
     tf = Q10Factor(temp,Q10Zoo)
-   ! ZOOPLANKTON 
-   ! Grazing rate of zooplankton (grazing_carbonZoo(I),NCrfoodZoo(I),mmolC/day) 
-   ! ################################# FORMER SUBROUTINE ZOO GRAZING RATE ########################################################  
+    
    ! Flux of consummed preys in carbon 
     FluxPrey_carbon=self%Capt_eff_MicroZoo_Flagellates*CFL+self%Capt_eff_MicroZoo_Emiliana*CEM+self%Capt_eff_MicroZoo_Diatoms*CDI+self%self%Capt_eff_MicroZoo_MicroZoo*MIC+self%self%Capt_eff_MicroZoo_MicroZoo*MES+ self%Capt_eff_MicroZoo_POM*POC+self%Capt_eff_MicroZoo_BAC*BAC
-   ! Flux of consummed preys in nitrogen 
+    
+   ! Flux of consummed preys in nitrogené 
     FluxPrey_nitrogen=self%Capt_eff_MicroZoo_Flagellates*NFL+self%Capt_eff_MicroZoo_Emiliana*NEM+self%Capt_eff_MicroZoo_Diatoms*NDI+self%Capt_eff_MicroZoo_MicroZoo*MIC*self%NCrMicroZoo + self%Capt_eff_MicroZoo_MesoZoo*MES*self%NCrMesoZoo+self%Capt_eff_MicroZoo_POM*PON+self%Capt_eff_MicroZoo_BAC*BAC*self%NCrBac
+    
    ! Grazing rate in carbon 
-    grazing_carbonMicroZoo = tf*self%MaxgrazingrateMicroZoo*(FluxPrey_carbon/(FluxPrey_carbon+self%Half_Saturation_MicroZoo))*MIC
+    grazing_carbonMicroZoo = tf*self%MaxgrazingrateMicroZoo*Michaelis(FluxPrey_carbon,Half_Saturation_MicroZoo)*MIC 
+    
    ! N:C molar ratio of the consumed food 
     NCrfoodMicroZoo=FluxPrey_nitrogen/FluxPrey_carbon
-   ! ################################# END OF FORMER SUBROUTINE ZOO GRAZING RATE ########################################################  
-   ! Grazing rate of zooplankton on nitrogen(grazing_nitrogenZoo,NCrfoodZoo(I),mmolN/day) 
+    
+   ! Grazing rate of zooplankton on nitrogen 
     grazing_nitrogenZoo = grazing_carbonMicroZoo*NCrfoodMicroZoo
-   ! Ingestion rate of zooplankton C_ZOOIntake (mmolC/m3/day),N_ZOOIntake mmolN/m3/day) 
-   ! Intake of N and C, N_ZOOIntake (mmolN/m3/day), C_ZOOIntake (mmolC/m3/day) are the sum 
-   ! of grazing on phytoplanktonm zooplankton, detritus and bacteria, less messy feeding losses 
-   ! altrhought in fact some of these losses occur after passage through the gut. 
+    
+   ! Zooplankton egestion 
     C_ZOOIntake = grazing_carbonMicroZoo*(1. - self%Messy_feeding_MicroZoo)
     N_ZOOIntake = grazing_nitrogenZoo*(1. - self%Messy_feeding_MicroZoo)
-   !Zooplankton messy feeding C_ZOOMessyfeeding,N_ZOOMessyfeeding 
+    
+   ! Zooplankton messy feeding 
     C_ZOOMessyfeeding = grazing_carbonMicroZoo*self%Messy_feeding_MicroZoo
     N_ZOOMessyfeeding = grazing_nitrogenZoo*self%Messy_feeding_MicroZoo
-   ! Growth rate of zooplankton computed according to Anderson and Hensen 
-   ! ################################# FORMER SUBROUTINE ZOO GROWTH RATE ########################################################  
-   ! Compute the food threshold elemental ratio NCrfoodZooref (molN/molC) 
+    
+   ! Food threshold elemental ratio 
     NCrfoodZooref = self%Ass_Eff_OnCarbon*self%efficiency_growth_MicroZoo/self%Ass_Eff_OnNitrogen*self%NCrMicroZoo
-   ! if the N:C ratio of ingested food NCrfoodMicroZoo is less than NCrfoodZooref then N limits production, excretion of N 
-   ! N_ZOOExcr is zero and Zoogrowth equals : 
-             if (NCrfoodMicroZoo < NCrfoodZooref) then ! REMOVE (POSSIBLY)
-    ZOOGrowth=self%Ass_Eff_OnNitrogen*N_ZOOIntake/self%NCrMicroZoo
-    N_ZOOExcr=0
-             else ! REMOVE (POSSIBLY)
+    
+   ! Growth and extrection as a function of N:C ratio of food 
+             if (NCrfoodMicroZoo < NCrfoodZooref) then 
+    ZOOGrowth = self%Ass_Eff_OnNitrogen*N_ZOOIntake/self%NCrMicroZoo
+    N_ZOOExcr = 0
+             else 
     ZOOGrowth = self%Ass_Eff_OnCarbon*self%efficiency_growth_MicroZoo*C_ZOOIntake
-    N_ZOOExcr=C_ZOOIntake*(self%Ass_Eff_OnNitrogen*NCrfoodMicroZoo-self%Ass_Eff_OnCarbon*self%efficiency_growth_MicroZoo*self%NCrMicroZoo)
+    N_ZOOExcr = C_ZOOIntake*(self%Ass_Eff_OnNitrogen*NCrfoodMicroZoo-self%Ass_Eff_OnCarbon*self%efficiency_growth_MicroZoo*self%NCrMicroZoo)
           endif 
-   ! ################################# END OF FORMER SUBROUTINE ZOO GROWTH RATE ########################################################  
-   ! Zooplankton respiration(C_ZOOResp, mmolC/m3/day) 
-    C_ZOOResp=self%Ass_Eff_OnCarbon*C_ZOOIntake-ZOOGrowth
-   ! Egestion rate of zooplankton(C_ZOOEgest,N_ZOOEgest,mmol/day) 
-    C_ZOOEgest= (1-self%Ass_Eff_OnCarbon)*C_ZOOIntake
-    N_ZOOEgest = (1-self%Ass_Eff_OnNitrogen)*N_ZOOIntake
-   ! Zooplankton mortality rate (C_ZOOMort,N_ZOOMort, /day) 
-   ! Attention do not forget to add OXYGEN 
-   CALL MORTALITY_RATE(HalfSatMort_MicroZoo,NLin_Mort_MicroZoo,expmortMicroZoo,DOXsatmort,Mortanoxic,tf,MIC,DOX,C_ZOOMort) ! REMOVE (POSSIBLY)
-   ! Mortality in nitrogen units 
+    
+   ! Zooplankton respiration  
+    C_ZOOResp = self%Ass_Eff_OnCarbon*C_ZOOIntake-ZOOGrowth
+    
+   ! Zooplankton egestion  
+    C_ZOOEgest = ZOOEgestion(Ass_Eff_OnCarbon,C_ZOOIntake)
+    N_ZOOEgest = ZOOEgestion(Ass_Eff_OnNitrogen,N_ZOOIntake)
+    
+   ! Zooplankton mortality rate  
+    C_ZOOMort = Mortality_consument(HalfSatMort_MicroZoo,NLin_Mort_MicroZoo,expmortMicroZoo,DOXsatmort,Mortanoxic,tf,MIC,DOX)
     N_ZOOMort  = C_ZOOMort * self%NCrMicroZoo
-   ! ADJUSTING THE RATE OF CHANGE 
-   ! zoooplankton C increases by intake of preys, 
-             ! it decreases by egestion,respiration,mortality,predation (computed below) with  ZOOGrowth =Intake -respiration - egestion ! REMOVE (POSSIBLY)
-             !and intake = grazing - messyfeeding ! REMOVE (POSSIBLY)
+    
+    
+   ! Zoooplankton C increases by intake of preys (growth minus messy feeding) and decreases by egestion (where is it?), respiration, mortality 
    _ADD_SOURCE_(self%id_mic,1.0*( ZOOGrowth)) 
    _ADD_SOURCE_(self%id_mic,-1.0*( C_ZOOMort)) 
-   ! Detritus is formed by the non-assimilated zooplankton grazing, 
-   ! when phytoplankton dies (see the phytoplankton subroutine), when zooplankton dies 
-   _ADD_SOURCE_(self%id_poc,1.0*( C_ZOOEgest+C_ZOOMort)) 
-   _ADD_SOURCE_(self%id_pon,1.0*( N_ZOOEgest+N_ZOOMort)) 
-   ! The number of aggregates increases with PON 
-   ! if diatoms aggregate 
-             SELECT CASE (SinkingVelocityType) ! REMOVE (POSSIBLY)
-             CASE ('aggregation') ! REMOVE (POSSIBLY)
-               !dPAGG(i,j,k) = dPAGG(i,j,k) + (N_ZooEgest+N_ZOOMort)*AGG(i,j,k)/(PON(i,j,k)+PNS(i,j,k)) ! REMOVE (POSSIBLY)
-   _ADD_SOURCE_(self%id_agg,1.0*( (N_ZOOEgest+N_ZOOMort)*AGG/(PON))) 
-#ifdef nanquest 
-               if (isnan(dPAGG(I,J,K))) then ! REMOVE (POSSIBLY)
-                 write (*,*) '** NAN QUEST ** in Calcmicrozoo' ! REMOVE (POSSIBLY)
-                 write (*,*) 'i,j,k,PON(I,J,K),AGG(I,J,K)',i,j,k,TRB(I,J,K,PON),trb(I,J,K,AGG) ! REMOVE (POSSIBLY)
-                 call flush(6) ! REMOVE (POSSIBLY)
-                 stop ! REMOVE (POSSIBLY)
-            endif 
-#endif 
-             END SELECT ! REMOVE (POSSIBLY)
-   ! Dissolved orgaqnic matter is formed by messy feeding, a part (labilefraction) increases the labile pool 
-   ! while the remaining (1 -labilefrac) increases the semi-labile fraction. 
+    
+   ! Particulate detritus pool if formed from non-assimilated grazed food and dead zooplatkton 
+   _ADD_SOURCE_(self%id_poc,1.0*( C_ZOOEgest + C_ZOOMort)) 
+   _ADD_SOURCE_(self%id_pon,1.0*( N_ZOOEgest + N_ZOOMort)) 
+    
+   ! Dissolved orgaqnic matter is formed by messy feeding taking into account labile/semi-labile partitioning 
    _ADD_SOURCE_(self%id_dcl,1.0*( self%labilefraction*C_ZOOMessyfeeding)) 
    _ADD_SOURCE_(self%id_dnl,1.0*( self%labilefraction*N_ZOOMessyfeeding)) 
    _ADD_SOURCE_(self%id_dcs,1.0*( (1.0 - self%labilefraction)*C_ZOOMessyfeeding)) 
    _ADD_SOURCE_(self%id_dns,1.0*( (1.0 - self%labilefraction)*N_ZOOMessyfeeding)) 
+    
    ! Ammonium is excreyed by zooplankton 
    _ADD_SOURCE_(self%id_nhs,1.0*( N_ZOOExcr)) 
    _ADD_SOURCE_(self%id_pho,1.0*( N_ZOOExcr*self%PNRedfield)) 
+    
    ! Grazing on phytoplankton 
    _ADD_SOURCE_(self%id_cfl,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Flagellates*CFL)) 
    _ADD_SOURCE_(self%id_cem,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Emiliana*CEM)) 
@@ -354,31 +297,21 @@
    _ADD_SOURCE_(self%id_nfl,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Flagellates*NFL)) 
    _ADD_SOURCE_(self%id_nem,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Emiliana*NEM)) 
    _ADD_SOURCE_(self%id_ndi,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Diatoms*NDI)) 
-   !When eating diatoms, micro ejects silicate as silicious_Detritus 
+    
+   ! When eating diatoms, zooplankton, ejects silicate as silicious_detritus 
    _ADD_SOURCE_(self%id_sid,1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Diatoms*NDI*self%SiNrDiatoms)) 
+    
    !  Grazing on detritus 
    _ADD_SOURCE_(self%id_poc,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_POM*POC)) 
    _ADD_SOURCE_(self%id_pon,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_POM*PON)) 
+    
    ! Grazing on Bacteria 
    _ADD_SOURCE_(self%id_bac,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_BAC*BAC)) 
-   ! POMNOS decreases by the grazing 
-             SELECT CASE (SinkingVelocityType) ! REMOVE (POSSIBLY)
-             CASE ('aggregation') ! REMOVE (POSSIBLY)
-               !dDAGG(i,j,k) = dDAGG(i,j,k) + grazing_carbonMicroZoo/FluxPrey_carbon*Capt_eff_MicroZoo_POM*PON(i,j,k)*AGG(i,j,k)/(PON(i,j,k)+PNS(i,j,k)) ! REMOVE (POSSIBLY)
-   _ADD_SOURCE_(self%id_agg,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_POM*AGG)) 
-#ifdef nanquest 
-               if (isnan(dDAGG(I,J,K))) then ! REMOVE (POSSIBLY)
-                 write (*,*) '** NAN QUEST ** in CalcMIC' ! REMOVE (POSSIBLY)
-                 write (*,*) 'i,j,k,PONI(I,J,K),AGGI(I,J,K)',i,j,k,TRB(I,J,K,PON),trb(I,J,K,AGG) ! REMOVE (POSSIBLY)
-                 call flush(6) ! REMOVE (POSSIBLY)
-                 stop ! REMOVE (POSSIBLY)
-            endif 
-#endif 
-             END SELECT ! REMOVE (POSSIBLY)
+    
    ! DOX decreases due to respiration of zooplankton 
    _ADD_SOURCE_(self%id_dox,-1.0*( C_ZOOResp*self%OCr)) 
    _ADD_SOURCE_(self%id_dic,1.0*( C_ZOOResp)) 
-   ! diagnostics 
+    
 #ifdef biodiag1 
    !mic est appele d abord par updatebioflux,donc on initialise ici ce diagnostique cumulatif pour les zoo 
     Totalrespiration_ZOO(I,j,k) = C_ZOOResp
@@ -389,10 +322,7 @@ phy_to_Zoo = grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Flage
           bac_to_ZOO = grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_BAC * BAC
           POC_to_ZOO = grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_POM * POC
 #endif 
-           end if ! REMOVE (POSSIBLY)
-         END DO ! REMOVE (POSSIBLY)
-       END DO ! REMOVE (POSSIBLY)
-     END DO ! REMOVE (POSSIBLY)
+
    ! OUTPUT VARIABLES 
    ! diagnostics   Averaged over entire water column 
 #ifdef biodiag 
@@ -402,3 +332,5 @@ phy_to_Zoo = grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Flage
 
    end subroutine do
 
+
+   end module fabm_ulg_MicroZoo 

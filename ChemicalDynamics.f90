@@ -42,21 +42,10 @@
       type (type_diagnostic_variable_id)    :: id_ANAMMOXIntegrated,id_NitrificationIntegrated,id_Oxidation_by_nitrateIntegrated,id_Oxidation_by_oxygenIntegrated
 
 !     Model parameters 
-      real(rk) :: kinoxnhsdox
-      real(rk) :: kinoxnhsodu
-      real(rk) :: kinoxodudox
-      real(rk) :: ksoxnhsdox
-      real(rk) :: ksoxodudox
-      real(rk) :: ksoxodunos
-      real(rk) :: NODUr
-      real(rk) :: NOsNHsr
-      real(rk) :: ONoxnhsr
-      real(rk) :: OODUr
-      real(rk) :: Q10chem
-      real(rk) :: Roxnhs
-      real(rk) :: Roxnhsnos
-      real(rk) :: Roxodu
-      real(rk) :: Roxodunos
+      real(rk)     :: kinoxnhsdox, kinoxnhsodu, kinoxodudox, ksoxnhsdox
+      real(rk)     :: ksoxodudox, ksoxodunos, NODUr, NOsNHsr, ONoxnhsr
+      real(rk)     :: OODUr, Q10chem, Roxnhs, Roxnhsnos, Roxodu
+      real(rk)     :: Roxodunos
 
       contains 
 
@@ -78,21 +67,6 @@
    class (type_ulg_Chemical), intent(inout), target :: self
    integer,                        intent(in)          :: configunit
 
-   real(rk)     :: kinoxnhsdox=8.0
-   real(rk)     :: kinoxnhsodu=0.5
-   real(rk)     :: kinoxodudox=5.0
-   real(rk)     :: ksoxnhsdox=3.0
-   real(rk)     :: ksoxodudox=1.0
-   real(rk)     :: ksoxodunos=2.0
-   real(rk)     :: NODUr=0.8
-   real(rk)     :: NOsNHsr=0.6
-   real(rk)     :: ONoxnhsr=2.0
-   real(rk)     :: OODUr=1.0
-   real(rk)     :: Q10chem=2.0
-   real(rk)     :: Roxnhs=0.03/daytosecond
-   real(rk)     :: Roxnhsnos=0.05/daytosecond
-   real(rk)     :: Roxodu=0.1/daytosecond
-   real(rk)     :: Roxodunos=0.05/daytosecond
 
    namelist /ulg_Chemical/ kinoxnhsdox, 	 & 
                       kinoxnhsodu, kinoxodudox, ksoxnhsdox, 	 & 
@@ -103,21 +77,21 @@
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
-   call self%get_parameter(self%kinoxnhsdox, 'kinoxnhsdox', default=kinoxnhsdox) 
-   call self%get_parameter(self%kinoxnhsodu, 'kinoxnhsodu', default=kinoxnhsodu) 
-   call self%get_parameter(self%kinoxodudox, 'kinoxodudox', default=kinoxodudox) 
-   call self%get_parameter(self%ksoxnhsdox, 'ksoxnhsdox', default=ksoxnhsdox) 
-   call self%get_parameter(self%ksoxodudox, 'ksoxodudox', default=ksoxodudox) 
-   call self%get_parameter(self%ksoxodunos, 'ksoxodunos', default=ksoxodunos) 
-   call self%get_parameter(self%NODUr, 'NODUr', default=NODUr) 
-   call self%get_parameter(self%NOsNHsr, 'NOsNHsr', default=NOsNHsr) 
-   call self%get_parameter(self%ONoxnhsr, 'ONoxnhsr', default=ONoxnhsr) 
-   call self%get_parameter(self%OODUr, 'OODUr', default=OODUr) 
-   call self%get_parameter(self%Q10chem, 'Q10chem', default=Q10chem) 
-   call self%get_parameter(self%Roxnhs, 'Roxnhs', default=Roxnhs) 
-   call self%get_parameter(self%Roxnhsnos, 'Roxnhsnos', default=Roxnhsnos) 
-   call self%get_parameter(self%Roxodu, 'Roxodu', default=Roxodu) 
-   call self%get_parameter(self%Roxodunos, 'Roxodunos', default=Roxodunos) 
+   call self%get_parameter(self%kinoxnhsdox, 'kinoxnhsdox', 'mmolO2 m-3', 'Half-sat. constant for O2 inhibition in NHS oxidation by NOS', default=8.0_rk) 
+   call self%get_parameter(self%kinoxnhsodu, 'kinoxnhsodu', '(?)', '', default=0.5_rk) 
+   call self%get_parameter(self%kinoxodudox, 'kinoxodudox', 'mmolO2 m-3', 'Half-sat. constant for O2 inhibition in ODU oxidation by NOS', default=5.0_rk) 
+   call self%get_parameter(self%ksoxnhsdox, 'ksoxnhsdox', 'mmolO2 m-3', 'Half-sat. constant for O2 lim. in NHS oxidation by O2', default=3.0_rk) 
+   call self%get_parameter(self%ksoxodudox, 'ksoxodudox', 'mmolO2 m-3', 'Half-sat. constant for O2 lim. in ODU oxidation', default=1.0_rk) 
+   call self%get_parameter(self%ksoxodunos, 'ksoxodunos', 'mmolN m-3', 'Half-sat. constant for NOS lim. in ODU oxidation by NOS', default=2.0_rk) 
+   call self%get_parameter(self%NODUr, 'NODUr', 'molNOS molODU-1', 'NOS:ODU ratio in ODU oxidation', default=0.8_rk) 
+   call self%get_parameter(self%NOsNHsr, 'NOsNHsr', 'molNOS molNHS-1', 'NOS:NHS ratio in NHS oxidation', default=0.6_rk) 
+   call self%get_parameter(self%ONoxnhsr, 'ONoxnhsr', 'molO2 molNS-1', 'O2:NHS ratio in NHS oxidation in nitrification', default=2.0_rk) 
+   call self%get_parameter(self%OODUr, 'OODUr', 'molO2 molODU-1', 'O2:ODU ratio in ODU oxidation', default=1.0_rk) 
+   call self%get_parameter(self%Q10chem, 'Q10chem', '-', 'Temperature factor for chemical processes', default=2.0_rk) 
+   call self%get_parameter(self%Roxnhs, 'Roxnhs', 'd-1', 'Maximum NHS oxidation rate of NHS by O2', default=0.03_rk) 
+   call self%get_parameter(self%Roxnhsnos, 'Roxnhsnos', 'd-1', 'Maximum NHS oxidation rate by NOS', default=0.05_rk) 
+   call self%get_parameter(self%Roxodu, 'Roxodu', 'd-1', 'Maximum ODU oxidation rate by O2', default=0.1_rk) 
+   call self%get_parameter(self%Roxodunos, 'Roxodunos', 'd-1', 'Maximum ODU oxidation rate by NOS', default=0.05_rk) 
 
    ! Register state variables 
 
@@ -166,77 +140,72 @@
 
    ! Right hand sides of Chemical model
    subroutine do(self,_ARGUMENTS_DO_)
-   class (type_uhh_dinoflag), intent(in) :: self
+   class (type_ulg_Chemical), intent(in) :: self
    _DECLARE_ARGUMENTS_DO_
 
       real(rk) ::  par,temp
       real(rk) ::  DOX,NHS,NOS,ODU
       real(rk) ::   ANAMMOX,Nitrification,Oxidation_by_nitrate,Oxidation_by_oxygen
       real(rk) ::   ANAMMOXIntegrated,NitrificationIntegrated,Oxidation_by_nitrateIntegrated,Oxidation_by_oxygenIntegrated
-      real(rk) ::   Ammonium_Oxidation_rate_by_Nitrate	 + ! mmol N m-3 d-1, Ammonium oxidation rate by nitrate
-      real(rk) ::   inhib	 + ! ?, Inhibiting function
-      real(rk) ::   lim	 + ! mmol m-3 s-1, Limiting Michaelis-Menten function
-      real(rk) ::   Nitrification_Rate	 + ! mmol N m-3 d-1, Ammonium oxidation rate by oxygen
-      real(rk) ::   ODU_Oxidation_Rate_by_nitrate	 + ! ODU m-3 d-1, ODU oxidation rate by nitrate
-      real(rk) ::   ODU_Oxidation_Rate_by_oxygen	 + ! O2 m-3 d-1, ODU oxidation rate by oxygen
-      real(rk) ::   tf	 + ! -, Temperature factor
+      real(rk) ::   Ammonium_Oxidation_rate_by_Nitrate	  ! mmol N m-3 d-1, Ammonium oxidation rate by nitrate
+      real(rk) ::   inhib	  ! -, Inhibiting function
+      real(rk) ::   lim	  ! -, Limiting Michaelis-Menten function
+      real(rk) ::   Nitrification_Rate	  ! mmol N m-3 d-1, Ammonium oxidation rate by oxygen
+      real(rk) ::   ODU_Oxidation_Rate_by_nitrate	  ! ODU m-3 d-1, ODU oxidation rate by nitrate
+      real(rk) ::   ODU_Oxidation_Rate_by_oxygen	  ! O2 m-3 d-1, ODU oxidation rate by oxygen
+      real(rk) ::   tf	  ! -, Temperature factor
    _LOOP_BEGIN_
 
    ! Retrieve current (local) state variable values.
+   _GET_(self%id_dox,DOX)       ! Dissolved oxygen concentration
+   _GET_(self%id_nhs,NHS)       ! Ammonium concentration
+   _GET_(self%id_nos,NOS)       ! Nitrate concentration
+   _GET_(self%id_odu,ODU)       ! Oxygen demand unit concentration
 
    ! Retrieve current environmental conditions.
     _GET_(self%id_par,par)              ! local photosynthetically active radiation
     _GET_(self%id_temp,temp)            ! local temperature
-   ! TEMPERATURE EFFECT on rates (all rates are defined at 20 dg C) 
+    
     tf = Q10Factor (temp,Q10chem)
+    
    ! Compute ammonium oxidation by oxygen 
-    lim = michaelis(DOX,ksoxnhsdox)
-    Nitrification_Rate = tf*self%Roxnhs*lim
+    Nitrification_Rate = tf * self%Roxnhs * Michaelis(DOX,ksoxnhsdox)
+    
    ! Compute Ammonium oxidation by nitrate 
-             !lim   = inhibition(ODU,kinoxnhsodu) ! REMOVE (POSSIBLY)
-    lim   = michaelis(NOS,0.3_wp)
-    inhib = inhibition(DOX,kinoxnhsdox)
-    Ammonium_Oxidation_rate_by_Nitrate = tf*self%Roxnhsnos*inhib*lim*inhibition(ODU,kinoxnhsodu)  ! BUG TEST 2019-01-21
+    Ammonium_Oxidation_rate_by_Nitrate = tf*self%Roxnhsnos*inhibition(ODU,kinoxnhsodu) * Inhibition(DOX,kinoxnhsdox) * Michaelis(NOS,0.3_wp)
+    
    ! Compute ODU oxidation by oxygen 
-    lim = michaelis(DOX,ksoxodudox)
-    ODU_Oxidation_Rate_by_oxygen = tf*self%Roxodu*lim
+    ODU_Oxidation_Rate_by_oxygen = tf * self%Roxodu * Michaelis(DOX,ksoxodudox)
+    
    ! Compute ODU oxidation by nitrate 
-    lim = michaelis(NOS,ksoxodunos)
-    inhib = inhibition(DOX,kinoxodudox)
-    ODU_Oxidation_Rate_by_nitrate = tf*self%Roxodunos*inhib*lim
-   ! ADJUSTING THE RATE OF CHANGE 
-   ! oxidation of Ammonium by oxygen consumes oxygen and ammonium and produces nitrate 
+    ODU_Oxidation_Rate_by_nitrate = tf * self%Roxodunos * Inhibition(DOX,kinoxodudox) * Michaelis(NOS,ksoxodunos)
+    
+   ! Oxidation of ammonium by oxygen produces nitrate 
    _ADD_SOURCE_(self%id_nos,1.0*( Nitrification_Rate*NHS)) 
    _ADD_SOURCE_(self%id_nhs,-1.0*( Nitrification_Rate*NHS)) 
    _ADD_SOURCE_(self%id_dox,-1.0*( Nitrification_Rate*NHS*self%ONoxnhsr)) 
-   ! Oxidation of ammonium by nitrate consumes nitrate and ammonium and produces N2 which is definitely lost for the system 
-#ifdef testcons 
-    Ammonium_Oxidation_rate_by_Nitrate=0.
-#endif 
+    
+   ! Oxidation of ammonium by nitrate produces N2 (loss term) 
    _ADD_SOURCE_(self%id_nos,-1.0*( Ammonium_Oxidation_rate_by_Nitrate*NHS*self%NOsNHsr)) 
    _ADD_SOURCE_(self%id_nhs,-1.0*( Ammonium_Oxidation_rate_by_Nitrate*NHS)) 
-   !oxidation of ODU by oxygen consumes oxygen and ODU and produces oxydant not modelled 
+    
+   ! Oxidation of ODU by oxygen produces oxydant (not modelled) 
    _ADD_SOURCE_(self%id_dox,-1.0*( ODU_Oxidation_Rate_by_oxygen*ODU*self%OODUr)) 
    _ADD_SOURCE_(self%id_odu,-1.0*( ODU_Oxidation_Rate_by_oxygen*ODU)) 
-   ! oxidation of ODU by nitrate consumes nitrate and ODU and produces oxydant not modelled 
-#ifdef testcons 
-    ODU_Oxidation_Rate_by_nitrate=0.
-#endif 
+    
+   ! Oxidation of ODU by nitrate produces oxydant (not modelled) 
    _ADD_SOURCE_(self%id_odu,-1.0*( ODU_Oxidation_Rate_by_nitrate*ODU)) 
    _ADD_SOURCE_(self%id_nos,-1.0*( ODU_Oxidation_Rate_by_nitrate*ODU*self%NODUr)) 
-   ! Diagnostics Compute auxillary variables 
+    
 #ifdef biodiag2 
           Oxidation_by_oxygen =  ODU_Oxidation_Rate_by_oxygen* ODU*self%OODUr + Nitrification_Rate*NHS*self%ONoxnhsr
           Oxidation_by_nitrate = ODU_Oxidation_Rate_by_nitrate*ODU*self%NODUr + Ammonium_Oxidation_rate_by_Nitrate*NHS*self%NOsNHsr
 #endif 
 #ifdef biodiag1 
-          Nitrification=Nitrification_Rate*NHS
-          ANAMMOX=Ammonium_Oxidation_rate_by_Nitrate*NHS
+          Nitrification = Nitrification_Rate*NHS
+          ANAMMOX = Ammonium_Oxidation_rate_by_Nitrate*NHS
 #endif 
-           end if ! REMOVE (POSSIBLY)
-         end do ! REMOVE (POSSIBLY)
-       end do ! REMOVE (POSSIBLY)
-     end do ! REMOVE (POSSIBLY)
+
    ! OUTPUT VARIABLES 
 #ifdef biodiag2 
    _SET_DIAGNOSTIC_(self%id_Oxidation_by_nitrate, Oxidation_by_nitrate)
@@ -251,3 +220,5 @@
 
    end subroutine do
 
+
+   end module fabm_ulg_Chemical 

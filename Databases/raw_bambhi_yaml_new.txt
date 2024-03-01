@@ -1,0 +1,246 @@
+Q10Gelatinous			3.5		-			Temperature dependency for GEL (Kremer, 1977)				scale
+Q10Phy				2.0		-			Temperature factor (Soetaert et al., 2001)				scale
+Q10PhyDiatoms			1.8		-			Temperature factor for DI						scale
+Q10PhyFlagellates		1.8		-			Temperature factor for FL						scale
+Q10PhyEmilianna			1.8		-			Temperature factor for EM						scale
+Q10chem				2.0		-			Temperature factor for chemical processes				scale
+Q10bac				2.0		-			Temperature factor for BAC						scale
+Q10SilicateDiss			3.3		-			Temperature factor for chemical processes				scale
+Q10Zoo				2.0		-			Temperature factor Soetart et al., 2001					scale
+Capt_eff_MicroZoo_Flagellates	0.0		-			Capture efficiency of MIC on FL						effic
+Capt_eff_MicroZoo_Emiliana	1.0		-			Capture efficiency of MIC on EM						effic
+Capt_eff_MicroZoo_Diatoms	0.0		-			Capture efficiency of MIC on DI						effic
+Capt_eff_MicroZoo_MicroZoo	0.0		-			Capture efficiency of MIC on MIC					effic
+Capt_eff_MicroZoo_MesoZoo	0.0		-			Capture efficiency of MIC on MES					effic
+Capt_eff_MicroZoo_POM		0.0		-			Capture efficiency of MIC on POM					effic
+Capt_eff_MicroZoo_BAC		0.7		-			Capture efficiency of MIC on BAC					effic
+Capt_eff_MesoZoo_Flagellates	0.4		-			Capture efficiency of MES on FL						effic
+Capt_eff_MesoZoo_Emiliana	0.4		-			Capture efficiency of MES on EM						effic
+Capt_eff_MesoZoo_Diatoms	1.0		-			Capture efficiency of MES on DI						effic
+Capt_eff_MesoZoo_MicroZoo	1.0		-			Capture efficiency of MES on MIC					effic
+Capt_eff_MesoZoo_MesoZoo	0.0		-			Capture efficiency of MES on MES					effic
+Capt_eff_MesoZoo_POM		0.8		-			Capture efficiency of MES on POM					effic
+Capt_eff_MesoZoo_BAC		0.0		-			Capture efficiency of MES on BAC					effic
+Capt_eff_Noctiluca_Flagellates	0.5		-			Capture efficiency of NOC on FL						effic
+Capt_eff_Noctiluca_Emiliana	1.0		-			Capture efficiency of NOC on EM						effic
+Capt_eff_Noctiluca_Diatoms	1.0		-			Capture efficiency of NOC on DI						effic
+Capt_eff_Noctiluca_Microzoo	1.0		-			Capture efficiency of NOC on MIC					effic
+Capt_eff_Noctiluca_Mesozoo	0.0		-			Capture efficiency of NOC on MES					effic
+Capt_eff_Noctiluca_POM		1.0		-			Capture efficiency of NOC on POM					effic
+Capt_eff_Gelatinous_Flagellates	0.0		-			Capture efficiency of GEL on FL						effic
+Capt_eff_Gelatinous_Emiliana	0.0		-			Capture efficiency of GEL on EM						effic
+Capt_eff_Gelatinous_Diatoms	0.0		-			Capture efficiency of GEL on DI						effic
+Capt_eff_Gelatinous_Microzoo	0.0		-			Capture efficiency of GEL on MIC					effic
+Capt_eff_Gelatinous_Mesozoo	1.0		-			Capture efficiency of GEL on MES					effic
+Capt_eff_Gelatinous_POM		0.0		-			Capture efficiency of GEL on POM					effic
+Ass_Eff_OnNitrogen		0.77		-			ZOO assimilation efficiencies on N (Anderson and Pondhaven, 2003)	effic
+Ass_Eff_OnCarbon		0.64		-			ZOO assimilation efficiency on C (Anderson and Pondhaven, 2003)		effic
+Ass_Eff_Noctiluca		0.75		-			NOC assimilation efficiency on prey (Lancelot et al., 2002)		effic
+Ass_Eff_Gelatinous		0.75		-			GEL assimilation efficiency on prey (Lancelot et al., 2002)		effic
+efficiency_growth_MicroZoo	0.8		-			MIC net growth efficiency on C (Anderson and Pondhaven, 2003)		effic
+efficiency_growth_MesoZoo	0.8		-			MES net growth efficiency on C						effic
+bactgrowtheff			0.17		-			BAC gross growth efficiency on C (Anderson and Pondhaven, 2003)		effic
+efficiency_growth_Gelatinous	0.2		-			Part of the assimil. food used for GEL growth (Lancelot et al., 2002)	effic
+efficiency_growth_Noctiluca	0.2		-			Part of the assimil. food used for GEL growth (Lancelot et al., 2002)	effic
+MinNCrFlagellates		0.05		molN molC-1		Minimum N:C ratio in FL (Soetaert et al., 2001)				ratio
+MinNCrEmiliana			0.05		molN molC-1		Minimum N:C ratio in EM (Soetaert et al., 2001)				ratio
+MinNCrDiatoms			0.05		molN molC-1		Minimum N:C ratio in DI (Soetaert et al., 2001)				ratio
+MaxNCrFlagellates		0.2		mol N molC-1		Maximum N:C ratio in FL (Soetaert et al., 2001)				ratio
+MaxNCrEmiliana			0.2		molN molC-1		Maximum N:C ratio in EM (Soetaert et al., 2001)				ratio
+MaxNCrDiatoms			0.2		molN molC-1		Maximum N:C ratio in DI (Soetaert et al., 2001)				ratio
+MinChlNrFlagellates		1.0		g Chla molN-1		Minimum Chl:N ratio in FL (Soetaert et al., 2001)			ratio
+MinChlNrEmiliana		1.0		g Chla molN-1		Minimum Chl:N ratio in EM (Soetaert et al., 2001)			ratio
+MinChlNrDiatoms			1.0		g Chla molN-1		Minimum Chl:N ratio in DI (Soetaert et al., 2001)			ratio
+MaxChlNrFlagellates		2.0		g Chla molN-1		Maximum Chl:N ratio in FL (Soetaert et al., 2001)			ratio
+MaxChlNrEmiliana		2.0		g Chla molN-1		Maximum Chl:N ratio in EM (Soetaert et al., 2001)			ratio
+MaxChlNrDiatoms			2.0		g Chla molN-1		Maximum Chl:N ratio in DI (Soetaert et al., 2001)			ratio
+NCrNoctiluca			0.21		molN molC-1		N:C molar ratio in NOC (Nakamura, 1998, JPR)				ratio
+NCrGelatinous			0.25		molN molC-1		N:C molar ratio in GEL							ratio
+NCrMicroZoo			0.18		molN molC-1		N:C molar ratio in MIC (Anderson and Pondhaven, 2003)			ratio
+NCrMesoZoo			0.21		molN molC-1		N:C molar ratio in MES							ratio
+NCrBac				0.196		molN molC-1		N:C (Goldman) ratio in BAC (Anderson and Pondhaven, 2003)		ratio
+SiNrDiatoms			0.83		molSi molN-1		Si:N ratio in DI (Aksnes et al. 1994)					ratio
+PNRedfield			0.0625		molP molN-1		N:P Redfield ratio in PHY						ratio
+NosMaxUptakeFlagellates		0.50		molN molC-1 d-1		Maximal NOS uptake rate by FL						urate
+NosMaxUptakeEmiliana		1.5		molN molC-1 d-1		Maximal NOS uptake rate by EM						urate
+NosMaxUptakeDiatoms		1.0		molN molC-1 d-1		Maximal NOS uptake rate by DI						urate
+NHsMaxUptakeFlagellates		0.5		molN molC-1 d-1		Maximal NHS uptake rate by FL						urate
+NHsMaxUptakeEmiliana		1.5		molN molC-1 d-1		Maximal NHS uptake rate by EM						urate
+NHsMaxUptakeDiatoms		1.0		molN molC-1 d-1		Maximal NHS uptake rate by DI						urate
+SiMaxUptakeDiatoms		0.5		molSi molC-1 d-1	Maximal SiOs uptake rate by DI						urate
+PO4MaxUptakeEmiliana		0.09375		molP molC-1 d-1		Maximal PO4 uptake rate by EM						urate
+PO4MaxUptakeDiatoms		0.0625		molP molC-1 d-1		Maximal PO4 uptake rate by DI						urate
+PO4MaxUptakeFlagellates		0.03125		molP molC-1 d-1		Maximal PO4 uptake rate by FL						urate
+kinNHsPhy			0.5		mmolN m-3		Inhib. constant of NHS for NOS uptake by PHY (Soetaert et al., 2001)	ihfcs
+ksNOsFlagellates		3.0		mmolN m-3		Half-saturation constant for NOS uptake by FL				uhfcs
+ksNOsEmiliana			0.05		mmolN m-3		Half-saturation constant for NOS uptake by EM				uhfcs
+ksNOsDiatoms			1.0		mmolN m-3		Half-saturation constant for NOS uptake by DI				uhfcs
+ksNHsFlagellates		3.0		mmolN m-3		Half-saturation constant for NHS uptake by FL				uhfcs
+ksNHsEmiliana			0.05		mmolN m-3		Half-saturation constant for NHS uptake by EM				uhfcs
+ksNHsDiatoms			1.0		mmolN m-3		Half-saturation constant for NHS uptake by DI				uhfcs
+ksPO4Flagellates		0.2		mmolP m-3		Half-saturation constant for PO4 uptake by FL				uhfcs
+ksPO4Diatoms			0.1		mmolP m-3		Half-saturation constant for PO4 uptake by DI				uhfcs
+ksPO4Emiliana			0.02		mmolP m-3		Half-saturation constant for PO4 uptake by EM				uhfcs
+ksSiDiatoms			3.5		mmolSi m-3		Half-saturation constant for SiOs uptake by DI (Paasche, 1980)		uhfcs
+csatdocsl			417.0		mmolC m-3		Half-sat. constant for DSC uptake by BAC (Anderson and Pondhaven, 2003)	uhfcs
+csatdocl			25.0		mmolC m-3		Half-sat. constant for DLC uptake by BAC (Anderson and Pondhaven, 2003)	uhfcs
+csatamm				0.5		mmolN m-3		Half-sat. constant for NHS uptake by BAC (Anderson and Pondhaven, 2003)	uhfcs
+csatpo4				0.031		mmolP m-3		Half-saturation constant for PO4 uptake by BAC				uhfcs
+Half_Saturation_MicroZoo	5.0		mmolC m-3		Half-saturation constant for MIC grazing (Soetart et al., 2001)		ghfcs
+Half_Saturation_MesoZoo		5.0		mmolC m-3		Half-saturation constant for MEC grazing (Soetart et al., 2001)		ghfcs
+HalfSatMort_MicroZoo		1.0		mmolC m-3		(?) Mortality half-saturation rate of MIC					mhfcs
+HalfSatMort_MesoZoo		1.0		mmolC m-3		(?) Mortality half-saturation rate of MES					mhfcs
+HalfSatMort_Noctiluca		0.0		mmolC m-3		(?) Mortality half-saturation rate of NOC					mhfcs
+HalfSatMort_Gelatinous		0.0		mmolC m-3		(?) Mortality half-saturation rate of GEL					mhfcs
+ksatOxygenHydrolysis		2.7		mmolO2 m-3		Half-saturation constant for oxic hydrolysis rate			hhfcs
+ksremindox			3.0		mmolO2 m-3		Half-sat. constant for O2 lim. in oxic min. (Soetaert et al., 1996)	chfcs	
+ksdeninos			0.3		mmolN m-3		Half-sat. constant for NOS lim. in denitrif. (Soetaert et al., 1996)	chfcs
+Halfsaturation_Iron		100.0		mmolFe m-3		Half-sat. constant for iron lim. in solid ODU formation			chfcs
+ksoxodunos			2.0		mmolN m-3		Half-sat. constant for NOS lim. in ODU oxidation by NOS			chfcs
+ksoxnhsdox			3.0		mmolO2 m-3		Half-sat. constant for O2 lim. in NHS oxidation by O2			chfcs
+ksoxodudox			1.0		mmolO2 m-3		Half-sat. constant for O2 lim. in ODU oxidation (Soetaert et al., 1996)	chfcs
+ksoxnhsnos			0.3		mmolN m-3		Half-sat. constant for NOS lim. in NHS oxidation by NOS			chfcs
+kinanoxremdox			0.0005		mmolO2 m-3		Half-sat. constant for O2 inhibition in anoxic remineralization		ihfcs
+kinanoxremnos			0.0005		mmolN m-3		Half-sat. constant for NOS inhibition in anoxic remineralization	ihfcs
+kinoxnhsdox			8.0		mmolO2 m-3		Half-sat. constant for O2 inhibition in NHS oxidation by NOS		ihfcs
+kindenidox			0.5		mmolO2 m-3		Half-sat. constant for O2 inhibition in denitrification			ihfcs
+kinoxodudox			5.0		mmolO2 m-3		Half-sat. constant for O2 inhibition in ODU oxidation by NOS		ihfcs
+kinoxnhsodu			0.5		(?)			(?) Half-sat. constant for O2 inhibition in NHS oxidation (?) by ODU	ihfcs
+alphaPIFlagellates		0.2153		m2 W-1 d-1		Initial slope of photosynthesis-light curve for FL			light	
+alphaPIEmiliana			0.3		m2 W-1 d-1		Initial slope of photosynthesis-light curve for EM			light
+alphaPIDiatoms			0.3312		m2 W-1 d-1		Initial slope of photosynthesis-light curve for DI			light
+MortalityFlagellates		0.03		d-1			Mortality rate of FL (Asknes et al., 1994)				rate
+MortalityEmiliana		0.03		d-1			Mortality rate of EM (Asknes et al., 1994)				rate
+MortalityDiatoms		0.03		d-1			Mortality rate of DI (Asknes et al., 1994)				rate
+NLin_Mort_MicroZoo		0.3		d-1			Maximum mortality rate of MIC (Anderson and William)			rate
+NLin_Mort_MesoZoo		0.3		d-1			Maximum mortality rate of MES (Anderson and William)			rate
+NLin_Mort_Noctiluca		0.06		(?) d-1			Quadratic mortality rate of NOC (Lancelot et al., 2002)			rate
+NLin_Mort_Gelatinous		0.009		(?) d-1			Quadratic mortality rate of GEL (Lancelot et al., 2002)			rate
+expmortMicroZoo			2.0		(?)			? mortality rate of MIC							rate
+expmortMesoZoo			2.0		(?°			? mortality rate of MES							rate
+mortbac				0.05		d-1			Bacteria natural mortality (Anderson and Pondhaven, 2003)		rate
+Mortanoxic			0.25		d-1			Mortality rate in anoxia						rate
+MuMaxFlagellates		1.0		d-1			Maximum specific growth rate of FL					rate
+MuMaxEmiliana			2.5		d-1			Maximum specific growth rate of EM					rate
+MuMaxDiatoms			3.5		d-1			Maximum specific growth rate of DI					rate
+Messy_feeding_MicroZoo		0.23		-			Messy feeding fraction of MIC grazing (Anderson and Pondhaven, 2003)	effic
+Messy_feeding_MesoZoo		0.23		-			Messy feeding fraction of MES grazing 					effic
+hydPOCmax			0.04		d-1			POC hydrolysis rate (Anderson and Pondhaven, 2003)			rate
+hydPONmax			0.055		d-1			PON hydrolysis rate (Anderson and Pondhaven, 2003)			rate
+maxhydrDOCSL			4.0		d-1			Maximum DSL hydrolysis (Anderson and Pondhaven, 2003)			rate
+kdis_Silicious_Detritus		0.08		d-1			Rate of dissolution of silicious detritus (Tusseau, 1996)		rate
+MaxgrazingrateMicroZoo		3.6		d-1			Maximum grazing rate of MIC (Strom and Morello, 1998)			rate
+MaxgrazingrateMesoZoo		1.2		d-1			Maximum grazing rate of MES						rate
+MaxgrazingrateGelatinous	0.3		d-1			Maximum grazing rate of GEL						rate
+MaxgrazingrateNoctiluca		0.06		d-1			Maximum grazing rate of NOC						rate
+RespirationFlagellates		0.009		d-1			Basal respiration rate of FL (Lancelot et al., 2002)			rate
+RespirationEmiliana		0.009		d-1			Basal respiration rate of EM (Lancelot et al., 2002)			rate
+RespirationDiatoms		0.009		d-1			Basal respiration rate of DI (Lancelot et al., 2002)			rate
+basal_Resp_Noctiluca		0.0001		d-1			Basal respiration rate of NOC						rate
+basal_Resp_Gelatinous		0.0001		d-1			Basal respiration rate of GEL						rate
+GrowthRespEmiliana		0.1		-			Part of primary production used for respiration by EM 			effic
+GrowthRespDiatoms		0.1		-			Part of primary production used for respiration by DI			effic
+GrowthRespFlagellates		0.1		-			Part of primary production used for respiration by FL			effic
+IronCsurf			10.0		mmolFe m-3		Concentration of iron in surface water					conc
+Param1IronCurve			25000.0		-			Parameter of the curve simulating the iron concentration		scale
+Param2IronCurve			50.0		-			Parameter of the curve simulating the iron c				scale
+leakagephy			0.02		-			Phytoplankton leakage fraction (Van der Molen et al., 2004)		effic
+labilefraction			0.7		-			Labile fraction of PHY- and nonPHY-produced DOM (A&P, 2003)		effic
+mortphydom			0.34		-			DOM fraction of phytoplankton mortality					effic
+labileextradocphyexcr		0.65		-			Labile fraction phytoxcreted DOC (Anderson and Pondhaven, 2003)		effic
+extradocphyexcr			0.05		-			Extra-photosynthetic DOC excretion (Van der Molen et al, 2004)		effic
+maxgrowthbac			0.000154 (?)	d-1			Maximum labile DOC or NHS uptake (A&P, 2003)				?			
+MinGrowthRespFlagellates	0.1		-			respirated fraction (linked to activity) Soetaert et al., 2001
+MaxGrowthRespFlagellates	0.1		-			Max repisrated fraction
+DOXsatmort			7.8125		mmolO2 m-3		Percentage of saturation where metabolic respiration is half the one under oxygen satyrated conditions		
+threshold_feeding_Gelatinous	0		? mmolC m-3		Feeding threshold for GEL grazing (Lancelot et al., 2002)		
+threshold_feeding_Noctiluca	?		?			Feeding threshold for NOC grazing					
+Roxnhs				0.03		d-1			Maximum NHS oxidation rate of NHS by O2					rate
+Roxnhsnos			0.05		d-1			Maximum NHS oxidation rate by NOS					rate
+Roxodu				0.1		d-1			Maximum ODU oxidation rate by O2 (Oguz et al. 2000)			rate
+Roxodunos			0.05		d-1			Maximum ODU oxidation rate by NOS					rate
+ODU_solid			0.2		-			Percentage of solid ODU formation					effic
+NCr				0.8		molN molC-1		N:C ratio of denitrification						ratio
+OCr				1.0		molO2 molC-1		O2:C ratio of respiration process					ratio
+ODUCr				1.0		molODU molC-1		ODU:C ratio in anoxic remineralization					ratio
+ONoxnhsr			2.0		molO2 molNS-1		O2:NHS ratio in NHS oxidation in nitrification				ratio
+OODUr				1.0		molO2 molODU-1		O2:ODU ratio in ODU oxidation						ratio
+NODUr				0.8		molNOS molODU-1		NOS:ODU ratio in ODU oxidation						ratio
+NOsNHsr				0.6		molNOS molNHS-1		NOS:NHS ratio in NHS oxidation						ratio
+BurialOfCarbon			0.28		-			Percentage of the sediment C flux which is burried			effic
+BurialOfNitrogen		0.28		-			Percentage of the sediment N flux which is burried			effic
+SinkingRatePOM_Constant		2		m d-1			Sedimentation rate of POM						sinki
+vsinkingrate_Silicious_Detritus	2		m d-1			Sedimentation rate of SID						sinki
+SinkingRateNoctiluca		0		m d-1			Sedimentation rate of NOC						sinki
+SinkingRateGelatinous		0		m d-1			Sedimentation rate of GEL						sinki
+QuantumYieldDiatoms		0.8		mmolC (mg Chl dW m-2)-1	Maximum quantum yield of DI (Soetaert et al., 2001)			obsol
+QuantumYieldFlagellates		0.6		mmolC (mg Chl dW m-2)-1	Maximum quantum yield of FL (Soetaert et al., 2001)			obsol
+QuantumYieldEmiliana		0.6		mmolC (mg Chl dW m-2)-1	Maximum quantum yield of EM (Soetaert et al., 2001)			obsol
+expmortNoctiluca		2.0		d-2 (?)			Quadratic mortality of NOC						obsol
+expmortGelatinous		2.0		d-2 (?)			Quadratic mortality of GEL						obsol
+mu_d				0.8		?			average downward cosine 						other
+shear				0.84		?			Shear rate (Kriest et al., 2002)					other
+etabio				0.62		-			Sinking exponent (Kriest et al., 2002)					other
+B				2294		m^(etabio-1) d-1	Sinking factor (Kriest et al., 2002)					other
+stick				0.55		-			Stickness (Kriest et al., 2002)						other
+m				2e-05		m			Minimal cell size (Kriest et al., 2002)					other
+Maxsize				0.015		m 			Maximum cell size (Kriest et al., 2002)					other
+dzetabio			1.62		?			N content exponent (Kriest et al., 2002)				other
+C				0.4744		mmolN (m^dzetabio)-1	N content coefficient (Kriest et al., 2002)				other
+epsini				3.5		(?)			Epsilon initial value (Kriest et al., 2002)				other
+pfCSED				0.29		-			Fraction of fast C flux							other
+pfSSed				0.5		-			Fraction of slow Si flux						other
+fCdegrate			0.0753		d-1			Degradation rate of the fast degrated C					other
+sCdegrate			0.003		d-1			Degradation rate of the slow degrated C					other
+fSdisrate			0.014		d-1			Dissolution rate of the fast degrated Si				other
+sSdisrate			0.0014		d-1			Dissolution rate of the slow degrated Si				other
+psoliddepo			0.11		-			Fraction of precipiting ODU						bent
+OCrdegrad			1.0		molO molC-1		Oxygen consumption for POM degradation					other
+ONrnitrif			2.0		molO molN-1		Oxygen consumption for nitrification					other
+NCrsedinit			0.15		molO molN-1		Oxygen consumption for nitrification					other
+Q10CDEG				2.0		-			Temperature factor on carbon remineralization				bent
+vsinkingSMI			1e-05		m d-1			(?) Diatom sunking velocity						other
+criticalstress_DEP_SMI		0.05		N m-2			Bottom stress threshold for deposition of Si				bent
+criticalstress_ERO_SMI		0.05		N m-2			Bottom stress threshold for erosion of Si				bent
+Me_smi				0.00037		g (m2s)-1		Erosion constant for mineral particles					other
+smiburialrate			1e-13		s-1			?									other
+alphaRESUSP			1.0		?			?									other
+kbulk				1.0		?			?									other
+MeanpC02air			287.355		?			?									other
+LightAbsA			0.54		?			?									other
+LightAbsB			0.63		?			? Part of PAR with a long wavelegth					other
+LightAbsIR			4.0		?			?									other
+LightAbsVisL			0.23		? m-1			? Background attenuation coefficient for longwave radiation		other
+LightAbsVisS			0.02		?			?									other
+kBIOABSCHL			0.03		(mg Chl a m2)-1		Self-shading extinction coefficient by chlorophyll			other
+kBIOABSPOC			0.03		(mmolC m2)-1		Self-shading extinction coefficient by detritus				other
+a_w_short			0.0196		m-1			Absorption by pure sea water (Smith and Baker, 1981)			other
+bb_w_short			0.0015		m-1			Backscattering by pure sea water (Smith and Baker, 1981)		other
+a_chl_A_short			0.029		m-1			A*CHL^B (Bricaud et al., 1995, Dmitriev et al., 2007)			other
+a_chl_B_short			0.6		m-1			A*CHL^B (Bricaud et al., 1995, Dmitriev et al., 2007)			other
+bb_dia_short			5.8e-06		m2 (mg POC_DIA)-1	Backscattering by DI (Vaillancourt et al., 2004)			other
+bb_fla_short			8.17e-06	m2 (mg POC_FLA)-1	Backscattering by DI (Vaillancourt et al., 2004)			other
+bb_emi_short			1.008e-05	m2 (mg POC_EMI)-1	Backscattering by DI (Vaillancourt et al., 2004)			other
+a_smi_short			0.01		m2 g-1			Absorption by suspended minerals (Neuckermans et al., 2012)		other
+bb_smi_short			0.0155		m-1			Backscattering by suspended minerals (Neuckermans et al., 2012)		other
+a_poc_short			0.05		m2 g-1			Absorption by organic matter (Neuckermans et al., 2012)			other
+bb_poc_short			0.0055		m-1			Backscattering by organic matter (Neuckermans et al., 2012)		other
+a_cdom_intercept_short		0.2522		?			?									other
+a_cdom_slope_short		-0.0122		?			?									other
+a_w_long			0.24		m-1			Absorption by pure sea water (Smith and Baker, 1981)			other
+bb_w_long			0.0007		m-1			Backscattering by pure sea water (Smith and Baker, 1981)		other
+a_chl_A_long			0.0066		m-1			A*CHL^B (Dmitriev et al., 2007)						other
+a_chl_B_long			0.8		m-1			A*CHL^B (Bricaud et al., 1995, Dmitriev et al., 2007)			other
+bb_dia_long			4.41e-06	m2 (mg POC_DIA)-1	Backscattering by DI (Vaillancourt et al., 2004)			other
+bb_fla_long			6.12e-06	m2 (mg POC_FLA)-1	Backscattering by DI (Vaillancourt et al., 2004)			other
+bb_emi_long			7.56e-06	m2 (mg POC_EMI)-1	Backscattering by DI (Vaillancourt et al., 2004)			other
+a_smi_long			0.001		m2 g-1			Absorption by suspended minerals (Neuckermans et al., 2012)		other
+bb_smi_long			0.014		m-1			Backscattering by suspended minerals (Neuckermans et al., 2012)		other
+a_poc_long			0.0195		m2 g-1			Absorption by organic matter (Neuckermans et al., 2012)			other
+bb_poc_long			0.005		m-1			Backscattering by OM (Neuckermans et al., 2012)				other
+a_cdom_intercept_long		0.2155		?			?									other	
+a_cdom_slope_long		-0.0113		?			?									other
+Me_sS				1e-05		mmolSi (m2s)-1		Erosion constant for slow Si sediment					other
+Me_fS				1e-05		mmolSi (m2s)-1		Erosion constant for fast Si sediment					other
+Me_sC				1e-05		mmolC (m2s)-1		Erosion constant for slow C sediment					other
+Me_fC				1e-05		mmolC (m2s)-1		Erosion constant for fast C sediment					other

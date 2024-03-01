@@ -5,6 +5,7 @@
 !
 ! 1-D ecosystem model - Biological model of Tett
 !
+! References to the microplankton model:
 ! Tett, P., 1998. Parameterising a microplankton model.
 ! Department of Biological Sciences, Napier University,
 ! Report ISBN 0 902703 60 9, 60 pp.
@@ -14,15 +15,8 @@
 !
 ! Implementation: Marilaure Gregoire,                 NIOO-CEME
 ! Translation into FABM : Evgeny Ivanov, ULg / MAST
-!
-!--------------------------------------------------------------------
-! Contains the pelagic submodel, as used in Soetaert et al., 2001.
-! References to the microplankton model:
-! Tett, P., 1998. Parameterising a microplankton model.
-! Department of Biological Sciences, Napier University,
-! Report ISBN 0 902703 60 9, 60 pp.                                                                                                                                                                                                                                           !
-! Sharples Tett (1994). Modeling the effect of physical! variability on the midwater chlorophyll maximum.
-! Journal of marine research 52: 219-238
+
+! Contains the pelagic submodel, as used in Soetaert et al 2001.                                                                                     !
 !
 !--------------------------------------------------------------------*
 
@@ -38,38 +32,21 @@
 ! PUBLIC DERIVED TYPES: 
    type,extends(type_base_model),public :: type_ulg_Flagellates 
       type (type_state_variable_id)         :: id_cfl,id_nfl
-      type (type_state_variable_id)         :: id_agg,id_cem,id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_nem,id_nhs,id_nos,id_pho,id_poc,id_pon
+      type (type_state_variable_id)         :: id_cem,id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_nem,id_nhs,id_nos,id_pho,id_poc,id_pon
       type (type_dependency_id)             :: id_par,id_temp 
       type (type_diagnostic_variable_id)    :: id_Carbon_UptakeFlagellates,id_Nitrogen_Uptake_Flagellates,id_NPP,id_PhytoNitrateReduction,id_TotalRespirationFlagellates
       type (type_diagnostic_variable_id)    :: id_Carbon_UptakeFlagellatesIntegrated,id_Nitrogen_Uptake_FlagellatesIntegrated,id_TotalRespirationFlagellatesIntegrated
 
 !     Model parameters 
-      real(rk) :: alphaPIFlagellates
-      real(rk) :: extradocphyexcr
-      real(rk) :: GrowthRespFlagellates
-      real(rk) :: kinNHsPhy
-      real(rk) :: ksNHsFlagellates
-      real(rk) :: ksNOsFlagellates
-      real(rk) :: ksPO4Flagellates
-      real(rk) :: labileextradocphyexcr
-      real(rk) :: labilefraction
-      real(rk) :: leakagephy
-      real(rk) :: MaxChlNrFlagellates
-      real(rk) :: MaxNCrFlagellates
-      real(rk) :: MinChlNrFlagellates
-      real(rk) :: MinNCrFlagellates
-      real(rk) :: MortalityFlagellates
-      real(rk) :: mortphydom
-      real(rk) :: MuMaxFlagellates
-      real(rk) :: NHsMaxUptakeFlagellates
-      real(rk) :: NosMaxUptakeFlagellates
-      real(rk) :: OCr
-      real(rk) :: ONoxnhsr
-      real(rk) :: PNRedfield
-      real(rk) :: PO4MaxUptakeFlagellates
-      real(rk) :: Q10Phy
-      real(rk) :: QuantumYieldFlagellates
-      real(rk) :: RespirationFlagellates
+      real(rk)     :: alphaPIFlagellates, extradocphyexcr, GrowthRespFlagellates
+      real(rk)     :: kinNHsPhy, ksNHsFlagellates, ksNOsFlagellates
+      real(rk)     :: ksPO4Flagellates, labileextradocphyexcr
+      real(rk)     :: labilefraction, leakagephy, MaxChlNrFlagellates
+      real(rk)     :: MaxNCrFlagellates, MinChlNrFlagellates, MinNCrFlagellates
+      real(rk)     :: MortalityFlagellates, mortphydom, MuMaxFlagellates
+      real(rk)     :: NHsMaxUptakeFlagellates, NosMaxUptakeFlagellates
+      real(rk)     :: OCr, ONoxnhsr, PNRedfield, PO4MaxUptakeFlagellates
+      real(rk)     :: Q10Phy, QuantumYieldFlagellates, RespirationFlagellates
 
       contains 
 
@@ -91,32 +68,6 @@
    class (type_ulg_Flagellates), intent(inout), target :: self
    integer,                        intent(in)          :: configunit
 
-   real(rk)     :: alphaPIFlagellates=0.2153/daytosecond
-   real(rk)     :: extradocphyexcr=0.05
-   real(rk)     :: GrowthRespFlagellates=0.1
-   real(rk)     :: kinNHsPhy=0.5
-   real(rk)     :: ksNHsFlagellates=3.0
-   real(rk)     :: ksNOsFlagellates=3.0
-   real(rk)     :: ksPO4Flagellates=0.2
-   real(rk)     :: labileextradocphyexcr=0.65
-   real(rk)     :: labilefraction=0.7
-   real(rk)     :: leakagephy=0.02
-   real(rk)     :: MaxChlNrFlagellates=2.0
-   real(rk)     :: MaxNCrFlagellates=0.2
-   real(rk)     :: MinChlNrFlagellates=1.0
-   real(rk)     :: MinNCrFlagellates=0.05
-   real(rk)     :: MortalityFlagellates=0.03/daytosecond
-   real(rk)     :: mortphydom=0.34
-   real(rk)     :: MuMaxFlagellates=1./daytosecond
-   real(rk)     :: NHsMaxUptakeFlagellates=0.50/daytosecond
-   real(rk)     :: NosMaxUptakeFlagellates=0.50/daytosecond
-   real(rk)     :: OCr=1.0
-   real(rk)     :: ONoxnhsr=2.0
-   real(rk)     :: PNRedfield=1.0/16.0
-   real(rk)     :: PO4MaxUptakeFlagellates=0.5/16.0/daytosecond
-   real(rk)     :: Q10Phy=2.0
-   real(rk)     :: QuantumYieldFlagellates=0.6
-   real(rk)     :: RespirationFlagellates=0.009/daytosecond
 
    namelist /ulg_Flagellates/ alphaPIFlagellates, 	 & 
                       extradocphyexcr, GrowthRespFlagellates, 	 & 
@@ -136,32 +87,32 @@
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
-   call self%get_parameter(self%alphaPIFlagellates, 'alphaPIFlagellates', default=alphaPIFlagellates) 
-   call self%get_parameter(self%extradocphyexcr, 'extradocphyexcr', default=extradocphyexcr) 
-   call self%get_parameter(self%GrowthRespFlagellates, 'GrowthRespFlagellates', default=GrowthRespFlagellates) 
-   call self%get_parameter(self%kinNHsPhy, 'kinNHsPhy', default=kinNHsPhy) 
-   call self%get_parameter(self%ksNHsFlagellates, 'ksNHsFlagellates', default=ksNHsFlagellates) 
-   call self%get_parameter(self%ksNOsFlagellates, 'ksNOsFlagellates', default=ksNOsFlagellates) 
-   call self%get_parameter(self%ksPO4Flagellates, 'ksPO4Flagellates', default=ksPO4Flagellates) 
-   call self%get_parameter(self%labileextradocphyexcr, 'labileextradocphyexcr', default=labileextradocphyexcr) 
-   call self%get_parameter(self%labilefraction, 'labilefraction', default=labilefraction) 
-   call self%get_parameter(self%leakagephy, 'leakagephy', default=leakagephy) 
-   call self%get_parameter(self%MaxChlNrFlagellates, 'MaxChlNrFlagellates', default=MaxChlNrFlagellates) 
-   call self%get_parameter(self%MaxNCrFlagellates, 'MaxNCrFlagellates', default=MaxNCrFlagellates) 
-   call self%get_parameter(self%MinChlNrFlagellates, 'MinChlNrFlagellates', default=MinChlNrFlagellates) 
-   call self%get_parameter(self%MinNCrFlagellates, 'MinNCrFlagellates', default=MinNCrFlagellates) 
-   call self%get_parameter(self%MortalityFlagellates, 'MortalityFlagellates', default=MortalityFlagellates) 
-   call self%get_parameter(self%mortphydom, 'mortphydom', default=mortphydom) 
-   call self%get_parameter(self%MuMaxFlagellates, 'MuMaxFlagellates', default=MuMaxFlagellates) 
-   call self%get_parameter(self%NHsMaxUptakeFlagellates, 'NHsMaxUptakeFlagellates', default=NHsMaxUptakeFlagellates) 
-   call self%get_parameter(self%NosMaxUptakeFlagellates, 'NosMaxUptakeFlagellates', default=NosMaxUptakeFlagellates) 
-   call self%get_parameter(self%OCr, 'OCr', default=OCr) 
-   call self%get_parameter(self%ONoxnhsr, 'ONoxnhsr', default=ONoxnhsr) 
-   call self%get_parameter(self%PNRedfield, 'PNRedfield', default=PNRedfield) 
-   call self%get_parameter(self%PO4MaxUptakeFlagellates, 'PO4MaxUptakeFlagellates', default=PO4MaxUptakeFlagellates) 
-   call self%get_parameter(self%Q10Phy, 'Q10Phy', default=Q10Phy) 
-   call self%get_parameter(self%QuantumYieldFlagellates, 'QuantumYieldFlagellates', default=QuantumYieldFlagellates) 
-   call self%get_parameter(self%RespirationFlagellates, 'RespirationFlagellates', default=RespirationFlagellates) 
+   call self%get_parameter(self%alphaPIFlagellates, 'alphaPIFlagellates', 'm2 W-1 d-1', 'Initial slope of photosynthesis-light curve for FL', default=0.2153_rk) 
+   call self%get_parameter(self%extradocphyexcr, 'extradocphyexcr', '-', 'Extra-photosynthetic DOC excretion', default=0.05_rk) 
+   call self%get_parameter(self%GrowthRespFlagellates, 'GrowthRespFlagellates', '-', 'Part of primary production used for respiration by FL', default=0.1_rk) 
+   call self%get_parameter(self%kinNHsPhy, 'kinNHsPhy', 'mmolN m-3', 'Inhib. constant of NHS for NOS uptake by PHY', default=0.5_rk) 
+   call self%get_parameter(self%ksNHsFlagellates, 'ksNHsFlagellates', 'mmolN m-3', 'Half-saturation constant for NHS uptake by FL', default=3.0_rk) 
+   call self%get_parameter(self%ksNOsFlagellates, 'ksNOsFlagellates', 'mmolN m-3', 'Half-saturation constant for NOS uptake by FL', default=3.0_rk) 
+   call self%get_parameter(self%ksPO4Flagellates, 'ksPO4Flagellates', 'mmolP m-3', 'Half-saturation constant for PO4 uptake by FL', default=0.2_rk) 
+   call self%get_parameter(self%labileextradocphyexcr, 'labileextradocphyexcr', '-', 'Labile fraction phytoxcreted DOC', default=0.65_rk) 
+   call self%get_parameter(self%labilefraction, 'labilefraction', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
+   call self%get_parameter(self%leakagephy, 'leakagephy', '-', 'Phytoplankton leakage fraction', default=0.02_rk) 
+   call self%get_parameter(self%MaxChlNrFlagellates, 'MaxChlNrFlagellates', 'g Chla molN-1', 'Maximum Chl:N ratio in FL', default=2.0_rk) 
+   call self%get_parameter(self%MaxNCrFlagellates, 'MaxNCrFlagellates', 'mol N molC-1', 'Maximum N:C ratio in FL', default=0.2_rk) 
+   call self%get_parameter(self%MinChlNrFlagellates, 'MinChlNrFlagellates', 'g Chla molN-1', 'Minimum Chl:N ratio in FL', default=1.0_rk) 
+   call self%get_parameter(self%MinNCrFlagellates, 'MinNCrFlagellates', 'molN molC-1', 'Minimum N:C ratio in FL', default=0.05_rk) 
+   call self%get_parameter(self%MortalityFlagellates, 'MortalityFlagellates', 'd-1', 'Mortality rate of FL', default=0.03_rk) 
+   call self%get_parameter(self%mortphydom, 'mortphydom', '-', 'DOM fraction of phytoplankton mortality', default=0.34_rk) 
+   call self%get_parameter(self%MuMaxFlagellates, 'MuMaxFlagellates', 'd-1', 'Maximum specific growth rate of FL', default=1.0_rk) 
+   call self%get_parameter(self%NHsMaxUptakeFlagellates, 'NHsMaxUptakeFlagellates', 'molN molC-1 d-1', 'Maximal NHS uptake rate by FL', default=0.5_rk) 
+   call self%get_parameter(self%NosMaxUptakeFlagellates, 'NosMaxUptakeFlagellates', 'molN molC-1 d-1', 'Maximal NOS uptake rate by FL', default=0.50_rk) 
+   call self%get_parameter(self%OCr, 'OCr', 'molO2 molC-1', 'O2:C ratio of respiration process', default=1.0_rk) 
+   call self%get_parameter(self%ONoxnhsr, 'ONoxnhsr', 'molO2 molNS-1', 'O2:NHS ratio in NHS oxidation in nitrification', default=2.0_rk) 
+   call self%get_parameter(self%PNRedfield, 'PNRedfield', 'molP molN-1', 'N:P Redfield ratio in PHY', default=0.0625_rk) 
+   call self%get_parameter(self%PO4MaxUptakeFlagellates, 'PO4MaxUptakeFlagellates', 'molP molC-1 d-1', 'Maximal PO4 uptake rate by FL', default=0.03125_rk) 
+   call self%get_parameter(self%Q10Phy, 'Q10Phy', '-', 'Temperature factor', default=2.0_rk) 
+   call self%get_parameter(self%QuantumYieldFlagellates, 'QuantumYieldFlagellates', 'mmolC (mg Chl dW m-2)-1', 'Maximum quantum yield of FL', default=0.6_rk) 
+   call self%get_parameter(self%RespirationFlagellates, 'RespirationFlagellates', 'd-1', 'Basal respiration rate of FL', default=0.009_rk) 
 
    ! Register state variables 
 
@@ -171,7 +122,6 @@
    call self%register_state_variable(self%id_nfl, 'NFL'  & 
          , 'mmol N m-3', 'Large flagellate biomass in nitrogen' & 
          minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
-   call self%register_state_dependency(self%id_agg, 'Aggregates', 'm-3') 
    call self%register_state_dependency(self%id_cem, 'Small flagellate biomass in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_dcl, 'Labile detritus concentration in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_dcs, 'Semi-labile detritus concentration in carbon', 'mmol C m-3') 
@@ -218,41 +168,42 @@
 
    ! Right hand sides of Flagellates model
    subroutine do(self,_ARGUMENTS_DO_)
-   class (type_uhh_dinoflag), intent(in) :: self
+   class (type_ulg_Flagellates), intent(in) :: self
    _DECLARE_ARGUMENTS_DO_
 
-      real(rk) ::  AGG,CEM,DCL,DCS,DIC,DNL,DNS,DOX,NEM,NHS,NOS,PHO,POC,PON
+      real(rk) ::  CEM,DCL,DCS,DIC,DNL,DNS,DOX,NEM,NHS,NOS,PHO,POC,PON
       real(rk) ::  par,temp
       real(rk) ::  CFL,NFL
       real(rk) ::   Carbon_UptakeFlagellates,Nitrogen_Uptake_Flagellates,NPP,PhytoNitrateReduction,TotalRespirationFlagellates
       real(rk) ::   Carbon_UptakeFlagellatesIntegrated,Nitrogen_Uptake_FlagellatesIntegrated,TotalRespirationFlagellatesIntegrated
-      real(rk) ::   Ammonium_UpPHY	 + ! mmol N m-3, Ammonium uptake of phytoplankton
-      real(rk) ::   C_PHYMort	 + ! mmol C m-3, Phytoplankton mortality flux
-      real(rk) ::   Carbon_UptakePHY	 + ! mmol C m-3, C assimilation of phytoplankton
-      real(rk) ::   ChlCrFlagellates	 + ! g Chla mol C-1, Chl/C ratio in large flagellates
-      real(rk) ::   DOC_extra_excr	 + ! mmol C d-1, Phytoplankton extra excretion
-      real(rk) ::   DOC_leakage	 + ! mmol C d-1, Phytoplankton passive leakage rate for carbon
-      real(rk) ::   DON_leakage	 + ! mmol N d-1, Phytoplankton passive leakage rate for nitrogen
-      real(rk) ::   GrowthPHY	 + ! mmol C m-3 d-1, Phytoplankton growth
-      real(rk) ::   LightLimitationFlagellates	 + ! ?, Light limitation for flagellates
-      real(rk) ::   Mu_Nitrogen	 + ! ?, ?
-      real(rk) ::   Mu_Silicate	 + ! ?, ?
-      real(rk) ::   N_PHYMort	 + ! mmol N m-3, Phytoplankton mortality flux
-      real(rk) ::   NCrat	 + ! ?, ?
-      real(rk) ::   NCrFlagellates	 + ! mol N mol C-1, N/C ratio in large flagellates
-      real(rk) ::   Nitrate_UpPHY	 + ! mmol N m-3, Nitrate uptake of phytoplankton
-      real(rk) ::   Nitrogen_UpPHY	 + ! mmol N m-3, Nitrogen uptake of phytoplankton
-      real(rk) ::   Nutrient_UpPHY	 + ! mmol m-3, Nutrient uptake of phytoplankton
-      real(rk) ::   NutrientLimitationFlagellates	 + ! ?, Nutrient limitation for flagellates
-      real(rk) ::   Phosphate_upFlagellates	 + ! mmol P m-3, Phosphate uptake by large flagellates
-      real(rk) ::   PHYMort	 + ! mmol m-3, Phytoplankton mortality rate
-      real(rk) ::   SiCrat	 + ! ?, ?
-      real(rk) ::   tf	 + ! -, Temperature factor
-      real(rk) ::   TotalRespirationPHY	 + ! mmol C m-3, Total phytoplankton respiration (basal & activity)
+      real(rk) ::   Ammonium_UpPHY	  ! mmol N m-3, Ammonium uptake of phytoplankton
+      real(rk) ::   C_PHYMort	  ! mmol C m-3, Phytoplankton mortality flux
+      real(rk) ::   Carbon_UptakePHY	  ! mmol C m-3, C assimilation of phytoplankton
+      real(rk) ::   ChlCrFlagellates	  ! g Chla mol C-1, Chl/C ratio in large flagellates
+      real(rk) ::   DOC_extra_excr	  ! mmol C d-1, Phytoplankton extra excretion
+      real(rk) ::   DOC_leakage	  ! mmol C d-1, Phytoplankton passive leakage rate for carbon
+      real(rk) ::   DON_leakage	  ! mmol N d-1, Phytoplankton passive leakage rate for nitrogen
+      real(rk) ::   GrowthPHY	  ! mmol C m-3 d-1, Phytoplankton growth
+      real(rk) ::   LightLimitationFlagellates	  ! -, Light limitation for flagellates
+      real(rk) ::   Mu_Nitrogen	  ! ?, ?
+      real(rk) ::   Mu_Silicate	  ! ?, ?
+      real(rk) ::   N_PHYMort	  ! mmol N m-3, Phytoplankton mortality flux
+      real(rk) ::   NCrat	  ! ?, ?
+      real(rk) ::   NCrFlagellates	  ! mol N mol C-1, N/C ratio in large flagellates
+      real(rk) ::   Nitrate_UpPHY	  ! mmol N m-3, Nitrate uptake of phytoplankton
+      real(rk) ::   Nitrogen_UpPHY	  ! mmol N m-3, Nitrogen uptake of phytoplankton
+      real(rk) ::   Nutrient_UpPHY	  ! mmol m-3, Nutrient uptake of phytoplankton
+      real(rk) ::   NutrientLimitationFlagellates	  ! -, Nutrient limitation for flagellates
+      real(rk) ::   Phosphate_upFlagellates	  ! mmol P m-3, Phosphate uptake by large flagellates
+      real(rk) ::   PHYMort	  ! mmol m-3, Phytoplankton mortality rate
+      real(rk) ::   SiCrat	  ! ?, ?
+      real(rk) ::   tf	  ! -, Temperature factor
+      real(rk) ::   TotalRespirationPHY	  ! mmol C m-3, Total phytoplankton respiration (basal & activity)
    _LOOP_BEGIN_
 
    ! Retrieve current (local) state variable values.
-   _GET_(self%id_agg,AGG)       ! Aggregates
+   _GET_(self%id_cfl,CFL)       ! Small flagellate biomass in carbon
+   _GET_(self%id_nfl,NFL)       ! Large flagellate biomass in nitrogen
    _GET_(self%id_cem,CEM)       ! Small flagellate biomass in carbon
    _GET_(self%id_dcl,DCL)       ! Labile detritus concentration in carbon
    _GET_(self%id_dcs,DCS)       ! Semi-labile detritus concentration in carbon
@@ -270,118 +221,93 @@
    ! Retrieve current environmental conditions.
     _GET_(self%id_par,par)              ! local photosynthetically active radiation
     _GET_(self%id_temp,temp)            ! local temperature
-   ! TEMPERATURE EFFECT on rates (all rates are defined at 20 dg C) 
+    
     tf = Q10Factor(temp,Q10Phy)
-   ! PHYTOPLANKTON 
-   ! N/C ratio 
-    NCrFlagellates  = Ratio(NFL,CFL)
-   ! Chlorophyll to carbon ratio (ChlCrPHY, mg Chl/mol C) 
-   CALL CHL_C_RATIO(NCrFlagellates,MaxNCrFlagellates,MinNCrFlagellates,MinChlNrFlagellates,MaxChlNrFlagellates,ChlCrFlagellates) ! REMOVE (POSSIBLY)
-    chlorophyll(i,j,k,1) = ChlCrFlagellates * CFL
-   ! Nitrate uptake rates of phytoplankton (NO3_upPHY, mmol N/m3/day) 
-   CALL NO_UPTAKE_RATE(NCrFlagellates,NOS,NHS,CFL,tf,MaxNCrFlagellates,NosMaxUptakeFlagellates,ksNOsFlagellates,kinNHsPhy, Nitrate_UpPHY) ! REMOVE (POSSIBLY)
-   ! Ammonium uptake rates of phytoplankton (NH3_upPHY, mmolN /m3/day) 
-   ! (and excretion if NC ratio too high) 
-   CALL NUT_UPTAKE_RATE(NCrFlagellates,NHS,CFL,tf,MaxNCrFlagellates,NHsMaxUptakeFlagellates,ksNHsFlagellates,0.0_wp, Ammonium_UpPHY) ! REMOVE (POSSIBLY)
-   CALL NUT_UPTAKE_RATE(NCrFlagellates,PHO,CFL,tf,MaxNCrFlagellates,PO4MaxUptakeFlagellates,ksPO4Flagellates,0.0_wp, Phosphate_upFlagellates) ! REMOVE (POSSIBLY)
-   ! Potential Nitrogen uptake 
-    Nitrogen_UpPHY=Ammonium_UpPHY + Nitrate_UpPHY
+    
+   ! Calculate ratios in phytoplankton 
+    NCrFlagellates  = NFL/CFL
+    ChlCrFlagellates = ChlCrPHY(NCratio,MaxNCr,MinNCr,MinChlNr,MaxChlNr)
+    
+             ! chlorophyll(i,j,k,1) = ChlCrFlagellates * CFL	! REMOVE (POSSIBLY) 
+    
+   ! Nitrate uptake rate 
+    Nitrate_UpPHY = NOuptake(NCrFlagellates,tf,MaxNCrFlagellates,NosMaxUptakeFlagellates) * Michaelis(NOS,ksNOsFlagellates) * Inhibition(NHS,kinNHsPhy) * CFL
+    
+   ! Ammonium uptake rate 
+    Ammonium_UpPHY = NUT_UPTAKE_RATE(NCrFlagellates,(NHS-0.0),tf,MaxNCrFlagellates,NHsMaxUptakeFlagellates,ksNHsFlagellates) * CFL
+    
+   ! Phosphate uptake rate 
+    Phosphate_upFlagellates = NUT_UPTAKE_RATE(NCrFlagellates,(PHO-0.0),tf,MaxNCrFlagellates,PO4MaxUptakeFlagellates,ksPO4Flagellates) * CFL
+    
+   ! Potential nitrogen uptake 
+    Nitrogen_UpPHY = Ammonium_UpPHY + Nitrate_UpPHY
+    
    ! Nutrient uptake 
-    Nutrient_UpPHY=min(Nitrogen_UpPHY,Phosphate_upFlagellates/self%PNRedfield)
-             ! Nutrient_UpPHY=max(Nutrient_UpPHY,0)                                                                                                                                                                                                                         ! REMOVE (POSSIBLY)
-   ! ################################# FORMER SUBROUTINE PHYT GROWTH RATE ########################################### 
-   ! Potential nutrient controlled growth rate; due to droop kinetics, the actual NC ratio can slightly surpass the maximal or minimal ratio 
-             IF(NCrFlagellates > MaxNCrFlagellates) THEN ! REMOVE (POSSIBLY)
-    NCrat = self%MaxNCrFlagellates
-             ELSEIF (NCrFlagellates < MinNCrFlagellates) THEN ! REMOVE (POSSIBLY)
-    NCrat = self%MinNCrFlagellates
-             ELSE ! REMOVE (POSSIBLY)
-    NCrat = NCrFlagellates
-             ENDIF ! REMOVE (POSSIBLY)
-   ! the actual SiC ratio can slightly surpass the maximal or minimal ratio 
-             IF(SiCrFlagellates > MaxSiCrFlagellates) THEN ! REMOVE (POSSIBLY)
-    SiCrat = MaxSiCrFlagellates
-             ELSEIF (SiCrFlagellates < MinSiCrFlagellates) THEN ! REMOVE (POSSIBLY)
-    SiCrat = MinSiCrFlagellates
-             ELSE ! REMOVE (POSSIBLY)
-    SiCrat = SiCrFlagellates
-             ENDIF ! REMOVE (POSSIBLY)
-   ! Tett model 
-    Mu_Nitrogen = 1. - self%MinNCrFlagellates  / NCrat
-    Mu_Silicate = 1. - MinSiCrFlagellates / SiCrat
-    NutrientLimitationFlagellates = min(Mu_Nitrogen,Mu_Silicate)
+    Nutrient_UpPHY = min(Nitrogen_UpPHY,Phosphate_upFlagellates/self%PNRedfield)
+                                                                                                                                                                                               
+   ! Compute actual N:C and Si:C ratios 
+    NCrat = Ratio_PHYT(NCrFlagellates,MaxNCrFlagellates,MinNCrFlagellates)
+    SiCrat = Ratio_PHYT(SiCrFlagellates,MaxSiCrFlagellates,MinSiCrFlagellates)
+    
+   ! Compute nutrient and light limitation 
+    NutrientLimitationFlagellates = Nutr_LIM(MinNCrFlagellates,MinSiCrFlagellates,NCrat,SiCrat)
           LightLimitationFlagellates = 1.-exp(-self%alphaPIFlagellates*PAR/self%MuMaxFlagellates)
-    Carbon_UptakePHY=self%MuMaxFlagellates*LightLimitationFlagellates*NutrientLimitationFlagellates*CFL*tf
-    TotalRespirationPHY=Carbon_UptakePHY*self%GrowthRespFlagellates + self%RespirationFlagellates*CFL*tf
-    GrowthPHY=Carbon_UptakePHY-TotalRespirationPHY
-   ! Compute the extra DOC excretion as a fraction (extradocphyexcr) of the difference of growth in nutrient limited (actual NC ratio) and nutrient saturated (max NC ratio) as in VDM et al 2004 L&O 
-    DOC_extra_excr=abs(extradocphyexcr*self%MuMaxFlagellates*CFL*tf*(min(LightLimitationFlagellates,(1. - self%self%MinNCrFlagellates  / self%MaxNCrFlagellates))- min(LightLimitationFlagellates,(1. - self%self%MinNCrFlagellates  / NCrat))))
-   ! ################################# END OF FORMER SUBROUTINE PHYT GROWTH RATE ########################################### 
-   !Compute the leakage    and extra DOC excretion, DOC_extra_excr 
-    DOC_leakage = self%leakagephy*Carbon_UptakePHY
-    DON_leakage  =self%leakagephy*abs(Nutrient_upPHY)
-   ! Phytoplankton mortality rate (PHYMort, /day) 
-             CALL PHYMORT_RATE(MortalityFlagellates,tf, PHYmort) ! REMOVE (POSSIBLY)
-   ! Phytoplankton mortality flux C_PHYmort,N_PHYMort (in mmol C/m3/day or mmol N/m3/day) 
-    C_PHYMort  = PHYMort * CFL
-    N_PHYMort  = PHYMort * NFL
-   ! ADJUSTING THE RATE OF CHANGE 
-   ! phytoplankton C increases by growth, 
-   ! it decreases by zooplankton grazing (see the zooplankton subroutine) and phytoplankton mortality 
+    
+   ! Compute carbon uptake 
+    Carbon_UptakePHY = self%MuMaxFlagellates*LightLimitationFlagellates*NutrientLimitationFlagellates*CFL*tf
+    
+   ! Compute respiration 
+    TotalRespirationPHY = Carbon_UptakePHY*self%GrowthRespFlagellates + self%RespirationFlagellates*CFL*tf
+    
+   ! Compute growth 
+    GrowthPHY = Carbon_UptakePHY - TotalRespirationPHY
+    
+   ! Compute the extra DOC excretion from the difference of growth in nutrient limited (actual NC ratio) and nutrient saturated (max NC ratio) 
+    DOC_extra_excr = CFL * tf * self%extradocphyexcr * self%MuMaxFlagellates * ExtraEXCR_term(LightLimitationFlagellates,MinNCrFlagellates,MaxNCrFlagellates,NCrat)
+    
+   ! Compute the leakage 
+    DOC_leakage = self%leakagephy * Carbon_UptakePHY
+    DON_leakage = self%leakagephy * abs(Nutrient_upPHY)
+    
+   ! Compute mortality 
+    C_PHYMort  = PHYMORT(MortalityFlagellates,tf) * CFL
+    N_PHYMort  = PHYMORT(MortalityFlagellates,tf) * NFL
+    
+   ! Carbon/nitrogen in flagellates increases by growth and decreases by leakage and mortality 
    _ADD_SOURCE_(self%id_cfl,1.0*( GrowthPHY)) 
    _ADD_SOURCE_(self%id_cfl,-1.0*( C_PHYMort + DOC_leakage)) 
-   ! phytoplankton N increases by N uptake, 
-   ! it decreases by zooplankton grazing and phytoplankton mortality 
    _ADD_SOURCE_(self%id_nfl,1.0*( Nutrient_UpPHY)) 
-   _ADD_SOURCE_(self%id_nfl,-1.0*( N_PHYMort +  DON_leakage)) 
-   ! IF CN ratio of phytoplankton not lower than CNmin, than nitrogen is taken up 
-   ! Nitrate is taken up by phytoplankton 
-             IF (Nutrient_UpPHY.gt.0) THEN ! REMOVE (POSSIBLY)
+   _ADD_SOURCE_(self%id_nfl,-1.0*( N_PHYMort + DON_leakage)) 
+    
+   ! IF CN ratio of phytoplankton higher than CNmin, than nitrogen is taken up, unless it gets excreted 
+             IF (Nutrient_UpPHY.gt.0) THEN 
    _ADD_SOURCE_(self%id_nos,-1.0*( Nutrient_UpPHY*Nitrate_UpPHY/Nitrogen_UpPHY)) 
    _ADD_SOURCE_(self%id_dox,1.0*( Nutrient_UpPHY*Nitrate_UpPHY/Nitrogen_UpPHY*self%ONoxnhsr)) 
-   ! Ammonium is taken up by phytoplankton 
    _ADD_SOURCE_(self%id_nhs,-1.0*( Nutrient_UpPHY*Ammonium_UpPHY/Nitrogen_UpPHY)) 
    _ADD_SOURCE_(self%id_pho,-1.0*( Nutrient_UpPHY*self%PNRedfield)) 
-             ELSE ! REMOVE (POSSIBLY)
-   ! IF CN ratio of phytoplankton is lower than CNmin, than ammonium is excreted 
+             ELSE 
    _ADD_SOURCE_(self%id_nhs,1.0*( - Nutrient_UpPHY)) 
    _ADD_SOURCE_(self%id_pho,1.0*( - Nutrient_UpPHY*self%PNRedfield)) 
-             ENDIF ! REMOVE (POSSIBLY)
-   ! As in Anderson and Pondhaven (2003), the phytoplanton mortality increases the pool of POM and DOM with a coefficient of mortdom 
-   ! for the DOM pool a part is considered as labile (labilefraction) and another part as semi labile (1-labilefraction) 
+             ENDIF 
+    
+   ! Mortality increases the pool of POM and DOM with proper partitioning and leakage adds to the labile pool 
    _ADD_SOURCE_(self%id_poc,1.0*( (1.0 - self%mortphydom)*C_PHYMort)) 
    _ADD_SOURCE_(self%id_pon,1.0*( (1.0 - self%mortphydom)*N_PHYMort)) 
-   _ADD_SOURCE_(self%id_dcl,1.0*( self%mortphydom*C_PHYMort*self%labilefraction)) 
-   _ADD_SOURCE_(self%id_dnl,1.0*( self%mortphydom*N_PHYMort*self%labilefraction)) 
+   _ADD_SOURCE_(self%id_dcl,1.0*( self%mortphydom*C_PHYMort*self%labilefraction + DOC_leakage)) 
+   _ADD_SOURCE_(self%id_dnl,1.0*( self%mortphydom*N_PHYMort*self%labilefraction + DON_leakage)) 
    _ADD_SOURCE_(self%id_dcs,1.0*( self%mortphydom*C_PHYMort*(1.0 - self%labilefraction))) 
    _ADD_SOURCE_(self%id_dns,1.0*( self%mortphydom*N_PHYMort*(1.0 - self%labilefraction))) 
-   ! As in Anderson and Pondhaven (2003), the DOCL and DONL concentration increases also due to phytoplankton leakage which is considered 
-   ! to produce only labile DOC and DON 
-   _ADD_SOURCE_(self%id_dcl,1.0*( DOC_leakage)) 
-   _ADD_SOURCE_(self%id_dnl,1.0*( DON_leakage)) 
-   ! As in Anderson and Pondhaven (2003), the phytoplankton extra DOC excretion, DOC_extra_excr, increases the pool of DOC (only DOC and not DON) 
-   ! this extra-excretion is composed of a part (leakage) which is assimilated to leakage and is thus only labile 
-   ! the remaining part (1-leakage) is composed of a labile (labileextradocexcr) and semi labile part (1-labileextradocexcr) 
+    
+   ! Extra-excretion and leakage add to the labile and semi-labile detritus 
    _ADD_SOURCE_(self%id_dcl,1.0*( self%self%leakagephy*DOC_extra_excr + self%labileextradocphyexcr*(1.0 - self%self%leakagephy)*DOC_extra_excr)) 
    _ADD_SOURCE_(self%id_dcs,1.0*( (1.0 - self%labileextradocphyexcr)*(1.0 - self%leakagephy)*DOC_extra_excr)) 
-             SELECT CASE (SinkingVelocityType) ! REMOVE (POSSIBLY)
-             CASE ('aggregation') ! REMOVE (POSSIBLY)
-   ! The number of aggregates, POMNOS including  PON increases and decreases with PON 
-               !      dPAGGI(i,j,k) = dPAGGI(i,j,k) + (1.0 - mortphydom)*N_PHYMort*AGGI(i,j,k)/(PONI(I,J,K)+PNSI(I,J,K)) ! REMOVE (POSSIBLY)
-   _ADD_SOURCE_(self%id_agg,1.0*( (1.0 - self%mortphydom)*N_PHYMort*AGG/(PON))) 
-#ifdef nanquest 
-               if (isnan(dPAGG(I,J,K))) then ! REMOVE (POSSIBLY)
-                 write (*,*) '** NAN QUEST ** in Calcflagellates' ! REMOVE (POSSIBLY)
-                 write (*,*) 'i,j,k,PON(I,J,K),AGG(I,J,K)',i,j,k,PON,AGG ! REMOVE (POSSIBLY)
-                 stop ! REMOVE (POSSIBLY)
-            endif 
-#endif 
-             END SELECT ! REMOVE (POSSIBLY)
-   ! The oxygen concentration increases due to photosynthesis 
+    
+   ! Oxygen increases due to photosynthesis 
    _ADD_SOURCE_(self%id_dox,1.0*( (GrowthPHY + DOC_extra_excr)*self%OCr)) 
+    
    ! CO2 production and consumption 
    _ADD_SOURCE_(self%id_dic,-1.0*( GrowthPHY + DOC_extra_excr)) 
-   !Diagnostics Store the fluxes 
+    
 #ifdef primaryprod 
    ! initialized here because FL is called first ... 
           NPP = Carbon_UptakePHY-TotalRespirationPHY
@@ -394,10 +320,7 @@
 #ifdef biodiag1 
           PhytoNitrateReduction=Nutrient_UpPHY*ratio(Nitrate_UpPHY,Nitrogen_UpPHY)*self%ONoxnhsr
 #endif 
-        endif 
-         END DO ! REMOVE (POSSIBLY)
-       END DO ! REMOVE (POSSIBLY)
-     END DO ! REMOVE (POSSIBLY)
+
    ! OUTPUT VARIABLES 
    ! Diagnostics Averaged over entire water column 
 #ifdef biodiag2 
@@ -409,3 +332,5 @@
 
    end subroutine do
 
+
+   end module fabm_ulg_Flagellates 

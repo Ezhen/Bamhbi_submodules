@@ -30,33 +30,21 @@
 ! PUBLIC DERIVED TYPES: 
    type,extends(type_base_model),public :: type_ulg_Noctiluca 
       type (type_state_variable_id)         :: id_noc
-      type (type_state_variable_id)         :: id_agg,id_cdi,id_cem,id_cfl,id_dic,id_dox,id_mes,id_mic,id_ndi,id_nem,id_nfl,id_nhs,id_pho,id_poc,id_pon,id_sid
+      type (type_state_variable_id)         :: id_cdi,id_cem,id_cfl,id_dic,id_dox,id_mes,id_mic,id_ndi,id_nem,id_nfl,id_nhs,id_pho,id_poc,id_pon,id_sid
       type (type_dependency_id)             :: id_par,id_temp 
       type (type_diagnostic_variable_id)    :: id_TotalRespiration_Gel
       type (type_diagnostic_variable_id)    :: id_TotalRespiration_GelIntegrated
 
 !     Model parameters 
-      real(rk) :: Ass_Eff_Noctiluca
-      real(rk) :: basal_Resp_Noctiluca
-      real(rk) :: Capt_eff_Noctiluca_Diatoms
-      real(rk) :: Capt_eff_Noctiluca_Emiliana
-      real(rk) :: Capt_eff_Noctiluca_Flagellates
-      real(rk) :: Capt_eff_Noctiluca_Mesozoo
-      real(rk) :: Capt_eff_Noctiluca_Microzoo
-      real(rk) :: Capt_eff_Noctiluca_POM
-      real(rk) :: DOXsatmort
-      real(rk) :: efficiency_growth_Noctiluca
-      real(rk) :: expmortNoctiluca
-      real(rk) :: HalfSatMort_Noctiluca
-      real(rk) :: MaxgrazingrateNoctiluca
-      real(rk) :: Mortanoxic
-      real(rk) :: NCrNoctiluca
-      real(rk) :: NLin_Mort_Noctiluca
-      real(rk) :: OCr
-      real(rk) :: PNRedfield
-      real(rk) :: Q10Zoo
-      real(rk) :: SiNrDiatoms
-      real(rk) :: threshold_feeding_Noctiluca
+      real(rk)     :: Ass_Eff_Noctiluca, basal_Resp_Noctiluca
+      real(rk)     :: Capt_eff_Noctiluca_Diatoms, Capt_eff_Noctiluca_Emiliana
+      real(rk)     :: Capt_eff_Noctiluca_Flagellates, Capt_eff_Noctiluca_Mesozoo
+      real(rk)     :: Capt_eff_Noctiluca_Microzoo, Capt_eff_Noctiluca_POM
+      real(rk)     :: DOXsatmort, efficiency_growth_Noctiluca
+      real(rk)     :: expmortNoctiluca, HalfSatMort_Noctiluca
+      real(rk)     :: MaxgrazingrateNoctiluca, Mortanoxic, NCrNoctiluca
+      real(rk)     :: NLin_Mort_Noctiluca, OCr, PNRedfield, Q10Zoo
+      real(rk)     :: SiNrDiatoms, threshold_feeding_Noctiluca
 
       contains 
 
@@ -78,27 +66,6 @@
    class (type_ulg_Noctiluca), intent(inout), target :: self
    integer,                        intent(in)          :: configunit
 
-   real(rk)     :: Ass_Eff_Noctiluca=0.75
-   real(rk)     :: basal_Resp_Noctiluca=0.0001/daytosecond
-   real(rk)     :: Capt_eff_Noctiluca_Diatoms=1.0
-   real(rk)     :: Capt_eff_Noctiluca_Emiliana=1.0
-   real(rk)     :: Capt_eff_Noctiluca_Flagellates=0.5
-   real(rk)     :: Capt_eff_Noctiluca_Mesozoo=0.0
-   real(rk)     :: Capt_eff_Noctiluca_Microzoo=1.0
-   real(rk)     :: Capt_eff_Noctiluca_POM=1.0
-   real(rk)     :: DOXsatmort=7.8125
-   real(rk)     :: efficiency_growth_Noctiluca=?
-   real(rk)     :: expmortNoctiluca=2.0
-   real(rk)     :: HalfSatMort_Noctiluca=0.0
-   real(rk)     :: MaxgrazingrateNoctiluca=?
-   real(rk)     :: Mortanoxic=0.25/daytosecond
-   real(rk)     :: NCrNoctiluca=0.21
-   real(rk)     :: NLin_Mort_Noctiluca=0.06/daytosecond
-   real(rk)     :: OCr=1.0
-   real(rk)     :: PNRedfield=1.0/16.0
-   real(rk)     :: Q10Zoo=2.0
-   real(rk)     :: SiNrDiatoms=5./6.
-   real(rk)     :: threshold_feeding_Noctiluca=?
 
    namelist /ulg_Noctiluca/ Ass_Eff_Noctiluca, 	 & 
                       basal_Resp_Noctiluca, 	 & 
@@ -118,34 +85,33 @@
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
-   call self%get_parameter(self%Ass_Eff_Noctiluca, 'Ass_Eff_Noctiluca', default=Ass_Eff_Noctiluca) 
-   call self%get_parameter(self%basal_Resp_Noctiluca, 'basal_Resp_Noctiluca', default=basal_Resp_Noctiluca) 
-   call self%get_parameter(self%Capt_eff_Noctiluca_Diatoms, 'Capt_eff_Noctiluca_Diatoms', default=Capt_eff_Noctiluca_Diatoms) 
-   call self%get_parameter(self%Capt_eff_Noctiluca_Emiliana, 'Capt_eff_Noctiluca_Emiliana', default=Capt_eff_Noctiluca_Emiliana) 
-   call self%get_parameter(self%Capt_eff_Noctiluca_Flagellates, 'Capt_eff_Noctiluca_Flagellates', default=Capt_eff_Noctiluca_Flagellates) 
-   call self%get_parameter(self%Capt_eff_Noctiluca_Mesozoo, 'Capt_eff_Noctiluca_Mesozoo', default=Capt_eff_Noctiluca_Mesozoo) 
-   call self%get_parameter(self%Capt_eff_Noctiluca_Microzoo, 'Capt_eff_Noctiluca_Microzoo', default=Capt_eff_Noctiluca_Microzoo) 
-   call self%get_parameter(self%Capt_eff_Noctiluca_POM, 'Capt_eff_Noctiluca_POM', default=Capt_eff_Noctiluca_POM) 
-   call self%get_parameter(self%DOXsatmort, 'DOXsatmort', default=DOXsatmort) 
-   call self%get_parameter(self%efficiency_growth_Noctiluca, 'efficiency_growth_Noctiluca', default=efficiency_growth_Noctiluca) 
-   call self%get_parameter(self%expmortNoctiluca, 'expmortNoctiluca', default=expmortNoctiluca) 
-   call self%get_parameter(self%HalfSatMort_Noctiluca, 'HalfSatMort_Noctiluca', default=HalfSatMort_Noctiluca) 
-   call self%get_parameter(self%MaxgrazingrateNoctiluca, 'MaxgrazingrateNoctiluca', default=MaxgrazingrateNoctiluca) 
-   call self%get_parameter(self%Mortanoxic, 'Mortanoxic', default=Mortanoxic) 
-   call self%get_parameter(self%NCrNoctiluca, 'NCrNoctiluca', default=NCrNoctiluca) 
-   call self%get_parameter(self%NLin_Mort_Noctiluca, 'NLin_Mort_Noctiluca', default=NLin_Mort_Noctiluca) 
-   call self%get_parameter(self%OCr, 'OCr', default=OCr) 
-   call self%get_parameter(self%PNRedfield, 'PNRedfield', default=PNRedfield) 
-   call self%get_parameter(self%Q10Zoo, 'Q10Zoo', default=Q10Zoo) 
-   call self%get_parameter(self%SiNrDiatoms, 'SiNrDiatoms', default=SiNrDiatoms) 
-   call self%get_parameter(self%threshold_feeding_Noctiluca, 'threshold_feeding_Noctiluca', default=threshold_feeding_Noctiluca) 
+   call self%get_parameter(self%Ass_Eff_Noctiluca, 'Ass_Eff_Noctiluca', '-', 'NOC assimilation efficiency on prey', default=0.75_rk) 
+   call self%get_parameter(self%basal_Resp_Noctiluca, 'basal_Resp_Noctiluca', 'd-1', 'Basal respiration rate of NOC', default=0.0001_rk) 
+   call self%get_parameter(self%Capt_eff_Noctiluca_Diatoms, 'Capt_eff_Noctiluca_Diatoms', '-', 'Capture efficiency of NOC on DI', default=1.0_rk) 
+   call self%get_parameter(self%Capt_eff_Noctiluca_Emiliana, 'Capt_eff_Noctiluca_Emiliana', '-', 'Capture efficiency of NOC on EM', default=1.0_rk) 
+   call self%get_parameter(self%Capt_eff_Noctiluca_Flagellates, 'Capt_eff_Noctiluca_Flagellates', '-', 'Capture efficiency of NOC on FL', default=0.5_rk) 
+   call self%get_parameter(self%Capt_eff_Noctiluca_Mesozoo, 'Capt_eff_Noctiluca_Mesozoo', '-', 'Capture efficiency of NOC on MES', default=0.0_rk) 
+   call self%get_parameter(self%Capt_eff_Noctiluca_Microzoo, 'Capt_eff_Noctiluca_Microzoo', '-', 'Capture efficiency of NOC on MIC', default=1.0_rk) 
+   call self%get_parameter(self%Capt_eff_Noctiluca_POM, 'Capt_eff_Noctiluca_POM', '-', 'Capture efficiency of NOC on POM', default=1.0_rk) 
+   call self%get_parameter(self%DOXsatmort, 'DOXsatmort', 'mmolO2 m-3', 'Percentage of saturation where metabolic respiration is half the one under oxygen satyrated conditions', default=7.8125_rk) 
+   call self%get_parameter(self%efficiency_growth_Noctiluca, 'efficiency_growth_Noctiluca', '-', 'Part of the assimil. food used for GEL growth', default=0.2_rk) 
+   call self%get_parameter(self%expmortNoctiluca, 'expmortNoctiluca', 'd-2 (?)', 'Quadratic mortality of NOC', default=2.0_rk) 
+   call self%get_parameter(self%HalfSatMort_Noctiluca, 'HalfSatMort_Noctiluca', 'mmolC m-3', '', default=0.0_rk) 
+   call self%get_parameter(self%MaxgrazingrateNoctiluca, 'MaxgrazingrateNoctiluca', 'd-1', 'Maximum grazing rate of NOC', default=0.06_rk) 
+   call self%get_parameter(self%Mortanoxic, 'Mortanoxic', 'd-1', 'Mortality rate in anoxia', default=0.25_rk) 
+   call self%get_parameter(self%NCrNoctiluca, 'NCrNoctiluca', 'molN molC-1', 'N:C molar ratio in NOC', default=0.21_rk) 
+   call self%get_parameter(self%NLin_Mort_Noctiluca, 'NLin_Mort_Noctiluca', '(?) d-1', 'Quadratic mortality rate of NOC', default=0.06_rk) 
+   call self%get_parameter(self%OCr, 'OCr', 'molO2 molC-1', 'O2:C ratio of respiration process', default=1.0_rk) 
+   call self%get_parameter(self%PNRedfield, 'PNRedfield', 'molP molN-1', 'N:P Redfield ratio in PHY', default=0.0625_rk) 
+   call self%get_parameter(self%Q10Zoo, 'Q10Zoo', '-', 'Temperature factor Soetart et al., 2001', default=2.0_rk) 
+   call self%get_parameter(self%SiNrDiatoms, 'SiNrDiatoms', 'molSi molN-1', 'Si:N ratio in DI', default=0.83_rk) 
+   call self%get_parameter(self%threshold_feeding_Noctiluca, 'threshold_feeding_Noctiluca', '?', 'Feeding threshold for NOC grazing', default=?_rk) 
 
    ! Register state variables 
 
    call self%register_state_variable(self%id_noc, 'NOC'  & 
          , 'mmol C m-3', 'Gelatinous carnivorous biomass' & 
          minimum=0.0e-7_rk)
-   call self%register_state_dependency(self%id_agg, 'Aggregates', 'm-3') 
    call self%register_state_dependency(self%id_cdi, 'Diatom biomass in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_cem, 'Small flagellate biomass in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_cfl, 'Small flagellate biomass in carbon', 'mmol C m-3') 
@@ -182,32 +148,32 @@
 
    ! Right hand sides of Noctiluca model
    subroutine do(self,_ARGUMENTS_DO_)
-   class (type_uhh_dinoflag), intent(in) :: self
+   class (type_ulg_Noctiluca), intent(in) :: self
    _DECLARE_ARGUMENTS_DO_
 
-      real(rk) ::  AGG,CDI,CEM,CFL,DIC,DOX,MES,MIC,NDI,NEM,NFL,NHS,PHO,POC,PON,SID
+      real(rk) ::  CDI,CEM,CFL,DIC,DOX,MES,MIC,NDI,NEM,NFL,NHS,PHO,POC,PON,SID
       real(rk) ::  par,temp
       real(rk) ::  NOC
       real(rk) ::   TotalRespiration_Gel
       real(rk) ::   TotalRespiration_GelIntegrated
-      real(rk) ::   C_ZOOAdjust	 + ! mmol N m-3, Potential excretion rate necessary to keep the N/C ratio of Gelationous constant
-      real(rk) ::   C_ZOOEgest	 + ! mmol C m-3, Zooplankton POM egestion in carbon
-      real(rk) ::   C_ZOOMort	 + ! mmol C m-3, Zooplankton mortality flux in carbon
-      real(rk) ::   C_ZOOResp	 + ! flux, Zooplankton respiration
-      real(rk) ::   FluxPrey_carbon	 + ! mmol C m-3, Flux of ingested preys in carbon 
-      real(rk) ::   FluxPrey_nitrogen	 + ! mmol N m-3, Flux of consummed preys in nitrogen
-      real(rk) ::   grazing_carbonNoctiluca	 + ! mmol C m-3, Grazing in carbon by Noctiluca
-      real(rk) ::   grazing_nitrogen	 + ! mmol N m-3 d-1, Grazing in nitrogen by gelatinous
-      real(rk) ::   N_ZOOAdjust	 + ! mmol C m-3, Potential additional respiration flux to keep the N/C ratio of Gelationous constant
-      real(rk) ::   N_ZOOEgest	 + ! mmol N m-3, Zooplankton POM egestion in nitrogen
-      real(rk) ::   N_ZOOMort	 + ! mmol N m-3, Zooplankton mortality flux in nitrogen
-      real(rk) ::   NCrfoodNoctiluca	 + ! mmol N mmol C-1, N/C ratio in food of noctiluca
-      real(rk) ::   NCrzootest	 + ! -, N/C ratio of the zooplankton before adjustment
-      real(rk) ::   tf	 + ! -, Temperature factor
+      real(rk) ::   C_ZOOAdjust	  ! mmol N m-3, Potential excretion rate necessary to keep the N/C ratio of Gelationous constant
+      real(rk) ::   C_ZOOEgest	  ! mmol C m-3, Zooplankton POM egestion in carbon
+      real(rk) ::   C_ZOOMort	  ! mmol C m-3, Zooplankton mortality flux in carbon
+      real(rk) ::   C_ZOOResp	  ! flux, Zooplankton respiration
+      real(rk) ::   FluxPrey_carbon	  ! mmol C m-3, Flux of ingested preys in carbon 
+      real(rk) ::   FluxPrey_nitrogen	  ! mmol N m-3, Flux of consummed preys in nitrogen
+      real(rk) ::   grazing_carbonNoctiluca	  ! mmol C m-3, Grazing in carbon by Noctiluca
+      real(rk) ::   grazing_nitrogen	  ! mmol N m-3, Grazing in nitrogen by gelatinous
+      real(rk) ::   N_ZOOAdjust	  ! mmol C m-3, Potential additional respiration flux to keep the N/C ratio of Gelationous constant
+      real(rk) ::   N_ZOOEgest	  ! mmol N m-3, Zooplankton POM egestion in nitrogen
+      real(rk) ::   N_ZOOMort	  ! mmol N m-3, Zooplankton mortality flux in nitrogen
+      real(rk) ::   NCrfoodNoctiluca	  ! mmol N mmol C-1, N/C ratio in food of noctiluca
+      real(rk) ::   NCrzootest	  ! -, N/C ratio of the zooplankton before adjustment
+      real(rk) ::   tf	  ! -, Temperature factor
    _LOOP_BEGIN_
 
    ! Retrieve current (local) state variable values.
-   _GET_(self%id_agg,AGG)       ! Aggregates
+   _GET_(self%id_noc,NOC)       ! Gelatinous carnivorous biomass
    _GET_(self%id_cdi,CDI)       ! Diatom biomass in carbon
    _GET_(self%id_cem,CEM)       ! Small flagellate biomass in carbon
    _GET_(self%id_cfl,CFL)       ! Small flagellate biomass in carbon
@@ -227,71 +193,66 @@
    ! Retrieve current environmental conditions.
     _GET_(self%id_par,par)              ! local photosynthetically active radiation
     _GET_(self%id_temp,temp)            ! local temperature
-   ! TEMPERATURE EFFECT on rates (all rates are defined at 20 dg C) 
+    
     tf = Q10Factor (temp,Q10Zoo)
-   ! ZOOPLANKTON 
-   ! Grazing rate of zooplankton (grazing_carbonZoo(I),NCrfoodZoo(I),mmolC/day) 
+    
    ! Flux of consummed preys in carbon 
-   ! #################################### FORMER SUBROUTINE GRAZING RATE GELATINOUS ###################################### 
-    FluxPrey_carbon=self%Capt_eff_Noctiluca_Flagellates*CFL+self%Capt_eff_Noctiluca_Emiliana*CEM+self%Capt_eff_Noctiluca_Diatoms*CDI+self%Capt_eff_Noctiluca_Microzoo*MIC+self%Capt_eff_Noctiluca_Mesozoo*MES+self%Capt_eff_Noctiluca_POM*POC
+    FluxPrey_carbon = self%Capt_eff_Noctiluca_Flagellates*CFL+self%Capt_eff_Noctiluca_Emiliana*CEM+self%Capt_eff_Noctiluca_Diatoms*CDI+self%Capt_eff_Noctiluca_Microzoo*MIC+self%Capt_eff_Noctiluca_Mesozoo*MES+self%Capt_eff_Noctiluca_POM*POC
+    
    ! Flux of consummed preys in nitrogen 
-    FluxPrey_nitrogen=self%Capt_eff_Noctiluca_Flagellates*NFL+self%Capt_eff_Noctiluca_Emiliana*NEM+self%Capt_eff_Noctiluca_Diatoms*NDI+self%Capt_eff_Noctiluca_Microzoo*MIC*self%NCrMicroZoo + self%Capt_eff_Noctiluca_Mesozoo*MES*self%NCrMesoZoo+self%Capt_eff_Noctiluca_POM*PON
+    FluxPrey_nitrogen = self%Capt_eff_Noctiluca_Flagellates*NFL+self%Capt_eff_Noctiluca_Emiliana*NEM+self%Capt_eff_Noctiluca_Diatoms*NDI+self%Capt_eff_Noctiluca_Microzoo*MIC*self%NCrMicroZoo + self%Capt_eff_Noctiluca_Mesozoo*MES*self%NCrMesoZoo+self%Capt_eff_Noctiluca_POM*PON
+    
    ! Grazing rate in carbon 
-             if (FluxPrey_carbon>threshold_feeding_Noctiluca) then ! REMOVE (POSSIBLY)
+             if (FluxPrey_carbon>threshold_feeding_Noctiluca) then 
     grazing_carbonNoctiluca = tf*self%MaxgrazingrateNoctiluca*(FluxPrey_carbon-self%threshold_feeding_Noctiluca)*NOC
-             else ! REMOVE (POSSIBLY)
-    grazing_carbonNoctiluca = 0
+             else 
+    grazing_carbonNoctiluca = 0.0
           endif 
-   ! N:C molar ratio of the consumed food 
-    NCrfoodNoctiluca=FluxPrey_nitrogen/FluxPrey_carbon
-   ! #################################### FORMER SUBROUTINE GRAZING RATE NOCTILUCA ###################################### 
-    grazing_nitrogen=grazing_carbonNoctiluca*NCrfoodNoctiluca
-   ! Egestion rate of zooplankton(C_ZOOEgest,N_ZOOEgest,mmol/day) 
-             CALL GELATINOUS_EGESTION_RATE(Ass_Eff_Noctiluca,grazing_carbonNoctiluca,C_ZOOEgest) ! REMOVE (POSSIBLY)
+    
+   ! Grazing rate of nitrogen 
+    NCrfoodNoctiluca = FluxPrey_nitrogen/FluxPrey_carbon
+    grazing_nitrogen = grazing_carbonNoctiluca*NCrfoodNoctiluca
+    
+   ! Egestion rate of zooplankton 
+    C_ZOOEgest = ZOOEgestion(Ass_Eff_Noctiluca,grazing_carbonNoctiluca)
     N_ZOOEgest = C_ZOOEgest*NCrfoodNoctiluca
-   ! Zooplankton respiration(C_ZOOResp, mmolC/m3/day) 
-   CALL GELATINOUS_RESPIRATION_RATE(tf,Ass_Eff_Noctiluca,efficiency_growth_Noctiluca,basal_Resp_Noctiluca,NOC,grazing_carbonNoctiluca,C_ZOOResp) ! REMOVE (POSSIBLY)
-   ! Zooplankton mortality rate (C_ZOOMort,N_ZOOMort, /day) 
-   ! Attention do not forget to add OXYGEN 
-   CALL GELATINOUS_MORTALITY_RATE(HalfSatMort_Noctiluca,NLin_Mort_Noctiluca,expmortNoctiluca,DOXsatmort,Mortanoxic,tf,NOC,DOX,C_ZOOMort) ! REMOVE (POSSIBLY)
-   ! Mortality in nitrogen units 
-    N_ZOOMort  = C_ZOOMort* self%NCrNoctiluca
-   !Computes the nitrogen/carbon fluxes necessary to conserve the NCrzoo (C_ZOOAdjust,N_ZOOAdjust) 
-   !The adjustment is realised through an extra-respiration or an excretion term on the model of the zooplankton in ERSEM 
-   ! in this case excretion can be zero. We have to compute the N:C ratio of zooplankton with the computed fluxes 
-   
-             if (NCrzootest> NCrNoctiluca) then ! REMOVE (POSSIBLY)
-    C_ZOOAdjust=0
-   
-             else ! REMOVE (POSSIBLY)
-    N_ZOOAdjust=0
-   
+    
+   ! Zooplankton respiration 
+    C_ZOOResp = GELRespiration(tf,Ass_Eff_Noctiluca,efficiency_growth_Noctiluca,basal_Resp_Noctiluca,NOC,grazing_carbonNoctiluca)
+    
+   ! Zooplankton mortality rate 
+    C_ZOOMort = Mortality_consument(HalfSatMort_Noctiluca,NLin_Mort_Noctiluca,DOXsatmort,Mortanoxic,tf,NOC,DOX)
+    N_ZOOMort = C_ZOOMort* self%NCrNoctiluca
+    
+   ! Computes the N/C fluxes necessary to conserve the N/C ratio 
+    NCrzootest = (grazing_carbonNoctiluca*NCrfoodNoctiluca-N_ZOOEgest)/(grazing_carbonNoctiluca-C_ZOOEgest-C_ZOOResp)
+             if (NCrzootest> NCrNoctiluca) then 
+    C_ZOOAdjust = 0
+    N_ZOOAdjust = (grazing_carbonNoctiluca*NCrfoodNoctiluca-N_ZOOEgest)-(grazing_carbonNoctiluca-C_ZOOEgest-C_ZOOResp)*self%NCrNoctiluca
+             else 
+    N_ZOOAdjust = 0
           endif 
-   ! ADJUSTING THE RATE OF CHANGE 
-   ! zoooplankton C increases by intake of preys, 
-   ! it decreases by egestion,respiration,mortality,predation,adjustement 
+    
+   ! Carbon content increases by intake of preys and decreases by egestion, respiration, mortality and adjustement 
    _ADD_SOURCE_(self%id_noc,1.0*( grazing_carbonNoctiluca)) 
    _ADD_SOURCE_(self%id_noc,-1.0*( C_ZOOEgest + C_ZOOResp + C_ZOOMort + C_ZOOAdjust)) 
-   ! Detritus is formed by the non-assimilated zooplankton grazing, 
-   ! when phytoplankton dies, when zooplankton dies 
+    
+   ! Particulate detritus pool if formed from non-assimilated grazed food and dead zooplatkton 
    _ADD_SOURCE_(self%id_poc,1.0*( C_ZOOEgest+C_ZOOMort)) 
    _ADD_SOURCE_(self%id_pon,1.0*( N_ZOOEgest+N_ZOOMort)) 
-   ! The number of aggregates increases with PON 
-   ! if diatoms can form aggregate 
-             SELECT CASE (SinkingVelocityType) ! REMOVE (POSSIBLY)
-             CASE ('aggregation') ! REMOVE (POSSIBLY)
-               !dPAGG(i,j,k) = dPAGG(i,j,k) +(N_ZOOEgest+N_ZOOMort)*AGG(i,j,k)/(PON(i,j,k) +PNS(i,j,k)) ! REMOVE (POSSIBLY)
-   _ADD_SOURCE_(self%id_agg,1.0*((N_ZOOEgest+N_ZOOMort)*AGG/(PON))) 
-             END SELECT ! REMOVE (POSSIBLY)
-   ! Ammonium is excreyed by zooplankton 
+    
+   ! Ammonium is excreted by zooplankton 
    _ADD_SOURCE_(self%id_nhs,1.0*( N_ZOOAdjust)) 
    _ADD_SOURCE_(self%id_pho,1.0*( N_ZOOAdjust*self%PNRedfield)) 
+    
    ! Grazing on zoooplankton 
    _ADD_SOURCE_(self%id_mic,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Microzoo*MIC)) 
    _ADD_SOURCE_(self%id_mes,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Mesozoo*MES)) 
+    
    !  Grazing on detritus 
    _ADD_SOURCE_(self%id_poc,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_POM*POC)) 
    _ADD_SOURCE_(self%id_pon,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_POM*PON)) 
+    
    ! Grazing on phytoplankton 
    _ADD_SOURCE_(self%id_cfl,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Flagellates*CFL)) 
    _ADD_SOURCE_(self%id_cem,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Emiliana*CEM)) 
@@ -299,27 +260,18 @@
    _ADD_SOURCE_(self%id_nfl,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Flagellates*NFL)) 
    _ADD_SOURCE_(self%id_nem,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Emiliana*NEM)) 
    _ADD_SOURCE_(self%id_ndi,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Diatoms*NDI)) 
-   !When eating diatoms, micro ejects silicate as silicious_Detritus 
+    
+   ! When eating diatoms, zooplankton, ejects silicate as silicious_detritus 
    _ADD_SOURCE_(self%id_sid,1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_Diatoms*NDI*self%SiNrDiatoms)) 
-   ! POMNOS decreases by the grazing 
-   ! If diatoms can form aggregate 
-             SELECT CASE (SinkingVelocityType) ! REMOVE (POSSIBLY)
-             CASE ('aggregation') ! REMOVE (POSSIBLY)
-               !dDAGG(i,j,k) = dDAGG(i,j,k) + grazing_carbonNoctiluca/FluxPrey_carbon*Capt_eff_Noctiluca_POM*PON(i,j,k)*AGG(i,j,k)/(PON(i,j,k)+PNS(i,j,k)) ! REMOVE (POSSIBLY)
-   _ADD_SOURCE_(self%id_agg,-1.0*( grazing_carbonNoctiluca/FluxPrey_carbon*self%Capt_eff_Noctiluca_POM*AGG)) 
-             END SELECT ! REMOVE (POSSIBLY)
+    
    ! DOX decreases due to respiration of zooplankton 
    _ADD_SOURCE_(self%id_dox,-1.0*( (C_ZOOResp + C_ZOOAdjust)*self%OCr)) 
-   _ADD_SOURCE_(self%id_dic,1.0*( (C_ZOOResp + C_ZOOAdjust))) 
-   ! diagnostics 
+   _ADD_SOURCE_(self%id_dic,1.0*( C_ZOOResp + C_ZOOAdjust)) 
+    
 #ifdef biodiag1 
           TotalRespiration_Gel = TotalRespiration_Gel + C_ZOOResp + C_ZOOAdjust
 #endif 
-          end if ! REMOVE (POSSIBLY)
-         END DO ! REMOVE (POSSIBLY)
-       END DO ! REMOVE (POSSIBLY)
-     END DO ! REMOVE (POSSIBLY)
-   ! OUTPUT VARIABLES 
+
    !******************************************************************** 
    ! Averaged over entire water column 
 #ifdef biodiag1 
@@ -329,3 +281,5 @@
 
    end subroutine do
 
+
+   end module fabm_ulg_Noctiluca 
