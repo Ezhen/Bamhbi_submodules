@@ -289,8 +289,8 @@
     N_ZOOMort  = C_ZOOMort * self%NCrMesoZoo
     
    ! Zoooplankton C increases by intake of preys (growth minus messy feeding) and decreases by egestion (where is it?), respiration, mortality 
-   _ADD_SOURCE_(self%id_mes,1.0*( ZOOGrowth)) 
-   _ADD_SOURCE_(self%id_mes,-1.0*( C_ZOOMort)) 
+
+   _ADD_SOURCE_(self%id_mes, ZOOGrowth - C_ZOOMort) 
     
    ! Particulate detritus pool if formed from non-assimilated grazed food and dead zooplatkton 
    ! Dissolved orgaqnic matter is formed by messy feeding taking into account labile/semi-labile partitioning; Ammonium is excreyed by zooplankton
