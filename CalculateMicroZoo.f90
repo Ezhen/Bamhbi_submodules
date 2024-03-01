@@ -252,13 +252,13 @@
     NCrfoodZooref = self%Ass_Eff_OnCarbon*self%efficiency_growth_MicroZoo/self%Ass_Eff_OnNitrogen*self%NCrMicroZoo
     
    ! Growth and extrection as a function of N:C ratio of food 
-             if (NCrfoodMicroZoo < NCrfoodZooref) then 
-    ZOOGrowth = self%Ass_Eff_OnNitrogen*N_ZOOIntake/self%NCrMicroZoo
-    N_ZOOExcr = 0
-             else 
-    ZOOGrowth = self%Ass_Eff_OnCarbon*self%efficiency_growth_MicroZoo*C_ZOOIntake
-    N_ZOOExcr = C_ZOOIntake*(self%Ass_Eff_OnNitrogen*NCrfoodMicroZoo-self%Ass_Eff_OnCarbon*self%efficiency_growth_MicroZoo*self%NCrMicroZoo)
-          endif 
+    if (NCrfoodMicroZoo < NCrfoodZooref) then 
+      ZOOGrowth = self%Ass_Eff_OnNitrogen*N_ZOOIntake/self%NCrMicroZoo
+      N_ZOOExcr = 0
+    else 
+      ZOOGrowth = self%Ass_Eff_OnCarbon*self%efficiency_growth_MicroZoo*C_ZOOIntake
+      N_ZOOExcr = C_ZOOIntake*(self%Ass_Eff_OnNitrogen*NCrfoodMicroZoo-self%Ass_Eff_OnCarbon*self%efficiency_growth_MicroZoo*self%NCrMicroZoo)
+    endif 
     
    ! Zooplankton respiration  
     C_ZOOResp = self%Ass_Eff_OnCarbon*C_ZOOIntake-ZOOGrowth
@@ -270,64 +270,45 @@
    ! Zooplankton mortality rate  
     C_ZOOMort = Mortality_consument(HalfSatMort_MicroZoo,NLin_Mort_MicroZoo,expmortMicroZoo,DOXsatmort,Mortanoxic,tf,MIC,DOX)
     N_ZOOMort  = C_ZOOMort * self%NCrMicroZoo
-    
+ 
+    phy_to_Zoo = grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Flagellates*CFL+ grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Emiliana *CEM+ grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Diatoms *CDI
+    bac_to_ZOO = grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_BAC * BAC
+    POC_to_ZOO = grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_POM * POC  
     
    ! Zoooplankton C increases by intake of preys (growth minus messy feeding) and decreases by egestion (where is it?), respiration, mortality 
-   _ADD_SOURCE_(self%id_mic,1.0*( ZOOGrowth)) 
-   _ADD_SOURCE_(self%id_mic,-1.0*( C_ZOOMort)) 
+
+   _ADD_SOURCE_(self%id_mic, ZOOGrowth - C_ZOOMort) 
     
    ! Particulate detritus pool if formed from non-assimilated grazed food and dead zooplatkton 
-   _ADD_SOURCE_(self%id_poc,1.0*( C_ZOOEgest + C_ZOOMort)) 
-   _ADD_SOURCE_(self%id_pon,1.0*( N_ZOOEgest + N_ZOOMort)) 
-    
-   ! Dissolved orgaqnic matter is formed by messy feeding taking into account labile/semi-labile partitioning 
-   _ADD_SOURCE_(self%id_dcl,1.0*( self%labilefraction*C_ZOOMessyfeeding)) 
-   _ADD_SOURCE_(self%id_dnl,1.0*( self%labilefraction*N_ZOOMessyfeeding)) 
-   _ADD_SOURCE_(self%id_dcs,1.0*( (1.0 - self%labilefraction)*C_ZOOMessyfeeding)) 
-   _ADD_SOURCE_(self%id_dns,1.0*( (1.0 - self%labilefraction)*N_ZOOMessyfeeding)) 
-    
-   ! Ammonium is excreyed by zooplankton 
-   _ADD_SOURCE_(self%id_nhs,1.0*( N_ZOOExcr)) 
-   _ADD_SOURCE_(self%id_pho,1.0*( N_ZOOExcr*self%PNRedfield)) 
-    
-   ! Grazing on phytoplankton 
-   _ADD_SOURCE_(self%id_cfl,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Flagellates*CFL)) 
-   _ADD_SOURCE_(self%id_cem,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Emiliana*CEM)) 
-   _ADD_SOURCE_(self%id_cdi,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Diatoms*CDI)) 
-   _ADD_SOURCE_(self%id_nfl,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Flagellates*NFL)) 
-   _ADD_SOURCE_(self%id_nem,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Emiliana*NEM)) 
-   _ADD_SOURCE_(self%id_ndi,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Diatoms*NDI)) 
-    
-   ! When eating diatoms, zooplankton, ejects silicate as silicious_detritus 
-   _ADD_SOURCE_(self%id_sid,1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Diatoms*NDI*self%SiNrDiatoms)) 
-    
-   !  Grazing on detritus 
-   _ADD_SOURCE_(self%id_poc,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_POM*POC)) 
-   _ADD_SOURCE_(self%id_pon,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_POM*PON)) 
-    
-   ! Grazing on Bacteria 
-   _ADD_SOURCE_(self%id_bac,-1.0*( grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_BAC*BAC)) 
-    
-   ! DOX decreases due to respiration of zooplankton 
-   _ADD_SOURCE_(self%id_dox,-1.0*( C_ZOOResp*self%OCr)) 
-   _ADD_SOURCE_(self%id_dic,1.0*( C_ZOOResp)) 
-    
-#ifdef biodiag1 
-   !mic est appele d abord par updatebioflux,donc on initialise ici ce diagnostique cumulatif pour les zoo 
-    Totalrespiration_ZOO(I,j,k) = C_ZOOResp
-#endif 
-#ifdef biodiagtrophic 
-   !  Diagnostics Store the fluxes 
-phy_to_Zoo = grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Flagellates*CFL+ grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Emiliana *CEM+ grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Diatoms *CDI
-          bac_to_ZOO = grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_BAC * BAC
-          POC_to_ZOO = grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_POM * POC
-#endif 
+   ! Dissolved orgaqnic matter is formed by messy feeding taking into account labile/semi-labile partitioning; Ammonium is excreyed by zooplankton
+   ! Grazing on phytoplankton, detritus and bacteria; When eating diatoms, zooplankton, ejects silicate as silicious_detritus
 
-   ! OUTPUT VARIABLES 
-   ! diagnostics   Averaged over entire water column 
-#ifdef biodiag 
-   !! as diagnostics are gathered for all zoo it is integrated in the mesozoo routine 
-#endif 
+   _ADD_SOURCE_(self%id_poc, C_ZOOEgest + C_ZOOMort - grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_POM*POC)
+   _ADD_SOURCE_(self%id_pon, N_ZOOEgest + N_ZOOMort - grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_POM*PON)
+   _ADD_SOURCE_(self%id_dcl, self%labilefraction*C_ZOOMessyfeeding)
+   _ADD_SOURCE_(self%id_dnl, self%labilefraction*N_ZOOMessyfeeding)
+   _ADD_SOURCE_(self%id_dcs, (1.0 - self%labilefraction)*C_ZOOMessyfeeding)
+   _ADD_SOURCE_(self%id_dns, (1.0 - self%labilefraction)*N_ZOOMessyfeeding)
+   _ADD_SOURCE_(self%id_nhs, N_ZOOExcr)
+   _ADD_SOURCE_(self%id_pho, N_ZOOExcr*self%PNRedfield) 
+   _ADD_SOURCE_(self%id_cfl, -grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Flagellates*CFL)
+   _ADD_SOURCE_(self%id_cem, -grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Emiliana*CEM) 
+   _ADD_SOURCE_(self%id_cdi, -grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Diatoms*CDI) 
+   _ADD_SOURCE_(self%id_nfl, -grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Flagellates*NFL)
+   _ADD_SOURCE_(self%id_nem, -grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Emiliana*NEM)
+   _ADD_SOURCE_(self%id_ndi, -grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Diatoms*NDI)
+   _ADD_SOURCE_(self%id_sid, grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_Diatoms*NDI*self%SiNrDiatoms) 
+   _ADD_SOURCE_(self%id_bac, -grazing_carbonMicroZoo/FluxPrey_carbon*self%Capt_eff_MicroZoo_BAC*BAC) 
+   _ADD_SOURCE_(self%id_dox, -C_ZOOResp*self%OCr)
+   _ADD_SOURCE_(self%id_dic, C_ZOOResp)
+
+    ! Totalrespiration_ZOO(I,j,k) = C_ZOOResp
+    ! _SET_DIAGNOSTIC_(self%id_Totalrespiration_ZOO, C_ZOOResp)
+   _SET_DIAGNOSTIC_(self%id_phy_to_ZOO, phy_to_ZOO)
+   _SET_DIAGNOSTIC_(self%id_bac_to_ZOO, bac_to_ZOO)
+   _SET_DIAGNOSTIC_(self%id_POC_to_ZOO, POC_to_ZOO)
+
+
    _LOOP_END_
 
    end subroutine do
