@@ -166,7 +166,7 @@
     _GET_(self%id_par,par)              ! local photosynthetically active radiation
     _GET_(self%id_temp,temp)            ! local temperature
     
-    tf = Q10Factor (temp,Q10chem)
+    tf = Q10Factor(temp,Q10chem)
     
    ! Compute ammonium oxidation by oxygen 
     Nitrification_Rate = tf * self%Roxnhs * Michaelis(DOX,ksoxnhsdox)
@@ -179,43 +179,23 @@
     
    ! Compute ODU oxidation by nitrate 
     ODU_Oxidation_Rate_by_nitrate = tf * self%Roxodunos * Inhibition(DOX,kinoxodudox) * Michaelis(NOS,ksoxodunos)
-    
-   ! Oxidation of ammonium by oxygen produces nitrate 
-   _ADD_SOURCE_(self%id_nos,1.0*( Nitrification_Rate*NHS)) 
-   _ADD_SOURCE_(self%id_nhs,-1.0*( Nitrification_Rate*NHS)) 
-   _ADD_SOURCE_(self%id_dox,-1.0*( Nitrification_Rate*NHS*self%ONoxnhsr)) 
-    
-   ! Oxidation of ammonium by nitrate produces N2 (loss term) 
-   _ADD_SOURCE_(self%id_nos,-1.0*( Ammonium_Oxidation_rate_by_Nitrate*NHS*self%NOsNHsr)) 
-   _ADD_SOURCE_(self%id_nhs,-1.0*( Ammonium_Oxidation_rate_by_Nitrate*NHS)) 
-    
-   ! Oxidation of ODU by oxygen produces oxydant (not modelled) 
-   _ADD_SOURCE_(self%id_dox,-1.0*( ODU_Oxidation_Rate_by_oxygen*ODU*self%OODUr)) 
-   _ADD_SOURCE_(self%id_odu,-1.0*( ODU_Oxidation_Rate_by_oxygen*ODU)) 
-    
-   ! Oxidation of ODU by nitrate produces oxydant (not modelled) 
-   _ADD_SOURCE_(self%id_odu,-1.0*( ODU_Oxidation_Rate_by_nitrate*ODU)) 
-   _ADD_SOURCE_(self%id_nos,-1.0*( ODU_Oxidation_Rate_by_nitrate*ODU*self%NODUr)) 
-    
-#ifdef biodiag2 
-          Oxidation_by_oxygen =  ODU_Oxidation_Rate_by_oxygen* ODU*self%OODUr + Nitrification_Rate*NHS*self%ONoxnhsr
-          Oxidation_by_nitrate = ODU_Oxidation_Rate_by_nitrate*ODU*self%NODUr + Ammonium_Oxidation_rate_by_Nitrate*NHS*self%NOsNHsr
-#endif 
-#ifdef biodiag1 
-          Nitrification = Nitrification_Rate*NHS
-          ANAMMOX = Ammonium_Oxidation_rate_by_Nitrate*NHS
-#endif 
 
-   ! OUTPUT VARIABLES 
-#ifdef biodiag2 
+   Oxidation_by_oxygen =  ODU_Oxidation_Rate_by_oxygen* ODU*self%OODUr + Nitrification_Rate*NHS*self%ONoxnhsr
+   Oxidation_by_nitrate = ODU_Oxidation_Rate_by_nitrate*ODU*self%NODUr + Ammonium_Oxidation_rate_by_Nitrate*NHS*self%NOsNHsr
+   Nitrification = Nitrification_Rate*NHS
+   ANAMMOX = Ammonium_Oxidation_rate_by_Nitrate*NHS
+
+   ! Oxidation of NHS by O2 produces NO3, oxidation of NHS by NO3 produces N2, oxidation of ODU by NO3 produces oxydant
+   _ADD_SOURCE_(self%id_nos, Nitrification_Rate*NHS - Ammonium_Oxidation_rate_by_Nitrate*NHS*self%NOsNHsr - ODU_Oxidation_Rate_by_nitrate*ODU*self%NODUr) 
+   _ADD_SOURCE_(self%id_nhs, -NHS * (Nitrification_Rate + Ammonium_Oxidation_rate_by_Nitrate)) 
+   _ADD_SOURCE_(self%id_dox, -Nitrification_Rate*NHS*self%ONoxnhsr - ODU_Oxidation_Rate_by_oxygen*ODU*self%OODUr) 
+   _ADD_SOURCE_(self%id_odu, -ODU * (ODU_Oxidation_Rate_by_oxygen*ODU + ODU_Oxidation_Rate_by_nitrate)) 
+
    _SET_DIAGNOSTIC_(self%id_Oxidation_by_nitrate, Oxidation_by_nitrate)
    _SET_DIAGNOSTIC_(self%id_Oxidation_by_oxygen, Oxidation_by_oxygen)
-#endif 
-#ifdef biodiag1 
    _SET_DIAGNOSTIC_(self%id_Nitrification, Nitrification)
    _SET_DIAGNOSTIC_(self%id_ANAMMOX, ANAMMOX)
-#endif 
-   ! Diagnostics Averaged over entire water column 
+
    _LOOP_END_
 
    end subroutine do
