@@ -44,8 +44,6 @@
       type (type_state_variable_id)         :: id_dcl,id_dcs,id_dnl,id_dns,id_poc,id_pon
       type (type_state_variable_id)         :: id_bac,id_dox
       type (type_dependency_id)             :: id_par,id_temp 
-      type (type_diagnostic_variable_id)    :: 
-      type (type_diagnostic_variable_id)    :: 
 
 !     Model parameters 
       real(rk)     :: csatdocsl, hydPOCmax, hydPONmax, ksatOxygenHydrolysis
@@ -133,8 +131,6 @@
       real(rk) ::  BAC,DOX
       real(rk) ::  par,temp
       real(rk) ::  DCL,DCS,DNL,DNS,POC,PON
-      real(rk) ::   
-      real(rk) ::   
       real(rk) ::   DOCSLHYDR	  ! mmol C m-3, Hydrolysis flux of DSL to DL in carbon
       real(rk) ::   DONSLHYDR	  ! mmol N m-3, Hydrolysis flux of DSL to DL in nitrogen
       real(rk) ::   hydroPOMLim	  ! -, Limiting function on POM hydrolysis
