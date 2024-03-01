@@ -171,8 +171,6 @@
    _ADD_SOURCE_(self%id_dns, (1.0 - self%labilefraction)*PONHYDR - DONSLHYDR) 
    _ADD_SOURCE_(self%id_poc,-POCHYDR) 
    _ADD_SOURCE_(self%id_pon,-PONHYDR) 
-   
-   _ADD_SOURCE_(self%id_dns,-1.0*( )) 
 
    _LOOP_END_
 
