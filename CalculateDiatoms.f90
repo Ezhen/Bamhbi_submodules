@@ -33,20 +33,17 @@
       type (type_state_variable_id)         :: id_cdi,id_ndi,id_sid,id_sio
       type (type_state_variable_id)         :: id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_nhs,id_nos,id_pho,id_poc,id_pon
       type (type_dependency_id)             :: id_par,id_temp 
-      type (type_diagnostic_variable_id)    :: id_Carbon_UptakeDiatoms,id_Nitrogen_Uptake_Diatoms,id_NPP,id_PhytoNitrateReduction,id_Silicate_upDiatoms,id_TotalRespirationDiatoms
-      type (type_diagnostic_variable_id)    :: id_Carbon_UptakeDiatomsIntegrated,id_Nitrogen_Uptake_DiatomsIntegrated,id_Silicate_upDiatomsIntegrated,id_TotalRespirationDiatomsIntegrated
+      type (type_diagnostic_variable_id)    :: id_uptake_c_dia,id_uptake_n_dia,id_npp,id_reduction_nitrate_phy,id_uptake_sio_dia,id_respiration_dia
 
 !     Model parameters 
-      real(rk)     :: alphaPIDiatoms, extradocphyexcr, GrowthRespDiatoms
-      real(rk)     :: kdis_Silicious_Detritus, kinNHsPhy, ksNHsDiatoms
-      real(rk)     :: ksNOsDiatoms, ksPO4Diatoms, ksSiDiatoms
-      real(rk)     :: labileextradocphyexcr, labilefraction, leakagephy
-      real(rk)     :: MaxChlNrDiatoms, MaxNCrDiatoms, MinChlNrDiatoms
-      real(rk)     :: MinNCrDiatoms, MortalityDiatoms, mortphydom
-      real(rk)     :: MuMaxDiatoms, NHsMaxUptakeDiatoms, NosMaxUptakeDiatoms
-      real(rk)     :: OCr, ONoxnhsr, PNRedfield, PO4MaxUptakeDiatoms
-      real(rk)     :: Q10PhyDiatoms, Q10SilicateDiss, QuantumYieldDiatoms
-      real(rk)     :: RespirationDiatoms, SiMaxUptakeDiatoms, SiNrDiatoms
+      real(rk)     :: exc_extra_doc, f_dl_dom, f_dl_phy_ex, f_dl_phy_mo
+      real(rk)     :: f_leak_phy, f_pp_resp_dia, hmax_sid, ki_nhs_phy
+      real(rk)     :: ks_nhs_dia, ks_nos_dia, ks_po4_dia, ks_sio_dia
+      real(rk)     :: mo_dia, mumax_dia, pi_dia, q10_dia, q10_si_diss
+      real(rk)     :: r_o2_c_resp, r_o2_nhs_nitr, r_p_n_redfield
+      real(rk)     :: r_si_n_dia, respb_dia, rmax_chl_n_dia, rmax_n_c_dia
+      real(rk)     :: rmin_chl_n_dia, rmin_n_c_dia, umax_nhs_dia
+      real(rk)     :: umax_nos_dia, umax_po4_dia, umax_si_dia
 
       contains 
 
@@ -69,57 +66,53 @@
    integer,                        intent(in)          :: configunit
 
 
-   namelist /ulg_Diatoms/ alphaPIDiatoms, 	 & 
-                      extradocphyexcr, GrowthRespDiatoms, 	 & 
-                      kdis_Silicious_Detritus, kinNHsPhy, 	 & 
-                      ksNHsDiatoms, ksNOsDiatoms, 	 & 
-                      ksPO4Diatoms, ksSiDiatoms, 	 & 
-                      labileextradocphyexcr, labilefraction, 	 & 
-                      leakagephy, MaxChlNrDiatoms, 	 & 
-                      MaxNCrDiatoms, MinChlNrDiatoms, 	 & 
-                      MinNCrDiatoms, MortalityDiatoms, 	 & 
-                      mortphydom, MuMaxDiatoms, 	 & 
-                      NHsMaxUptakeDiatoms, 	 & 
-                      NosMaxUptakeDiatoms, OCr, ONoxnhsr, 	 & 
-                      PNRedfield, PO4MaxUptakeDiatoms, 	 & 
-                      Q10PhyDiatoms, Q10SilicateDiss, 	 & 
-                      QuantumYieldDiatoms, RespirationDiatoms, 	 & 
-                      SiMaxUptakeDiatoms, SiNrDiatoms
+
+   namelist /ulg_Diatoms/ exc_extra_doc, 	 & 
+                      f_dl_dom, f_dl_phy_ex, f_dl_phy_mo, 	 & 
+                      f_leak_phy, f_pp_resp_dia, hmax_sid, 	 & 
+                      ki_nhs_phy, ks_nhs_dia, ks_nos_dia, 	 & 
+                      ks_po4_dia, ks_sio_dia, mo_dia, 	 & 
+                      mumax_dia, pi_dia, q10_dia, q10_si_diss, 	 & 
+                      r_o2_c_resp, r_o2_nhs_nitr, 	 & 
+                      r_p_n_redfield, r_si_n_dia, respb_dia, 	 & 
+                      rmax_chl_n_dia, rmax_n_c_dia, 	 & 
+                      rmin_chl_n_dia, rmin_n_c_dia, 	 & 
+                      umax_nhs_dia, umax_nos_dia, 	 & 
+                      umax_po4_dia, umax_si_dia
 
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
-   call self%get_parameter(self%alphaPIDiatoms, 'alphaPIDiatoms', 'm2 W-1 d-1', 'Initial slope of photosynthesis-light curve for DI', default=0.3312_rk) 
-   call self%get_parameter(self%extradocphyexcr, 'extradocphyexcr', '-', 'Extra-photosynthetic DOC excretion', default=0.05_rk) 
-   call self%get_parameter(self%GrowthRespDiatoms, 'GrowthRespDiatoms', '-', 'Part of primary production used for respiration by DI', default=0.1_rk) 
-   call self%get_parameter(self%kdis_Silicious_Detritus, 'kdis_Silicious_Detritus', 'd-1', 'Rate of dissolution of silicious detritus', default=0.08_rk) 
-   call self%get_parameter(self%kinNHsPhy, 'kinNHsPhy', 'mmolN m-3', 'Inhib. constant of NHS for NOS uptake by PHY', default=0.5_rk) 
-   call self%get_parameter(self%ksNHsDiatoms, 'ksNHsDiatoms', 'mmolN m-3', 'Half-saturation constant for NHS uptake by DI', default=1.0_rk) 
-   call self%get_parameter(self%ksNOsDiatoms, 'ksNOsDiatoms', 'mmolN m-3', 'Half-saturation constant for NOS uptake by DI', default=1.0_rk) 
-   call self%get_parameter(self%ksPO4Diatoms, 'ksPO4Diatoms', 'mmolP m-3', 'Half-saturation constant for PO4 uptake by DI', default=0.1_rk) 
-   call self%get_parameter(self%ksSiDiatoms, 'ksSiDiatoms', 'mmolSi m-3', 'Half-saturation constant for SiOs uptake by DI', default=3.5_rk) 
-   call self%get_parameter(self%labileextradocphyexcr, 'labileextradocphyexcr', '-', 'Labile fraction phytoxcreted DOC', default=0.65_rk) 
-   call self%get_parameter(self%labilefraction, 'labilefraction', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
-   call self%get_parameter(self%leakagephy, 'leakagephy', '-', 'Phytoplankton leakage fraction', default=0.02_rk) 
-   call self%get_parameter(self%MaxChlNrDiatoms, 'MaxChlNrDiatoms', 'g Chla molN-1', 'Maximum Chl:N ratio in DI', default=2.0_rk) 
-   call self%get_parameter(self%MaxNCrDiatoms, 'MaxNCrDiatoms', 'molN molC-1', 'Maximum N:C ratio in DI', default=0.2_rk) 
-   call self%get_parameter(self%MinChlNrDiatoms, 'MinChlNrDiatoms', 'g Chla molN-1', 'Minimum Chl:N ratio in DI', default=1.0_rk) 
-   call self%get_parameter(self%MinNCrDiatoms, 'MinNCrDiatoms', 'molN molC-1', 'Minimum N:C ratio in DI', default=0.05_rk) 
-   call self%get_parameter(self%MortalityDiatoms, 'MortalityDiatoms', 'd-1', 'Mortality rate of DI', default=0.03_rk) 
-   call self%get_parameter(self%mortphydom, 'mortphydom', '-', 'DOM fraction of phytoplankton mortality', default=0.34_rk) 
-   call self%get_parameter(self%MuMaxDiatoms, 'MuMaxDiatoms', 'd-1', 'Maximum specific growth rate of DI', default=3.5_rk) 
-   call self%get_parameter(self%NHsMaxUptakeDiatoms, 'NHsMaxUptakeDiatoms', 'molN molC-1 d-1', 'Maximal NHS uptake rate by DI', default=1.0_rk) 
-   call self%get_parameter(self%NosMaxUptakeDiatoms, 'NosMaxUptakeDiatoms', 'molN molC-1 d-1', 'Maximal NOS uptake rate by DI', default=1.0_rk) 
-   call self%get_parameter(self%OCr, 'OCr', 'molO2 molC-1', 'O2:C ratio of respiration process', default=1.0_rk) 
-   call self%get_parameter(self%ONoxnhsr, 'ONoxnhsr', 'molO2 molNS-1', 'O2:NHS ratio in NHS oxidation in nitrification', default=2.0_rk) 
-   call self%get_parameter(self%PNRedfield, 'PNRedfield', 'molP molN-1', 'N:P Redfield ratio in PHY', default=0.0625_rk) 
-   call self%get_parameter(self%PO4MaxUptakeDiatoms, 'PO4MaxUptakeDiatoms', 'molP molC-1 d-1', 'Maximal PO4 uptake rate by DI', default=0.0625_rk) 
-   call self%get_parameter(self%Q10PhyDiatoms, 'Q10PhyDiatoms', '-', 'Temperature factor for DI', default=1.8_rk) 
-   call self%get_parameter(self%Q10SilicateDiss, 'Q10SilicateDiss', '-', 'Temperature factor for chemical processes', default=3.3_rk) 
-   call self%get_parameter(self%QuantumYieldDiatoms, 'QuantumYieldDiatoms', 'mmolC (mg Chl dW m-2)-1', 'Maximum quantum yield of DI', default=0.8_rk) 
-   call self%get_parameter(self%RespirationDiatoms, 'RespirationDiatoms', 'd-1', 'Basal respiration rate of DI', default=0.009_rk) 
-   call self%get_parameter(self%SiMaxUptakeDiatoms, 'SiMaxUptakeDiatoms', 'molSi molC-1 d-1', 'Maximal SiOs uptake rate by DI', default=0.5_rk) 
-   call self%get_parameter(self%SiNrDiatoms, 'SiNrDiatoms', 'molSi molN-1', 'Si:N ratio in DI', default=0.83_rk) 
+   call self%get_parameter(self%exc_extra_doc, 'exc_extra_doc', '-', 'Extra-photosynthetic DOC excretion', default=0.05_rk) 
+   call self%get_parameter(self%f_dl_dom, 'f_dl_dom', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
+   call self%get_parameter(self%f_dl_phy_ex, 'f_dl_phy_ex', '-', 'Labile fraction phytoxcreted DOC', default=0.65_rk) 
+   call self%get_parameter(self%f_dl_phy_mo, 'f_dl_phy_mo', '-', 'DOM fraction of phytoplankton mortality', default=0.34_rk) 
+   call self%get_parameter(self%f_leak_phy, 'f_leak_phy', '-', 'Phytoplankton leakage fraction', default=0.02_rk) 
+   call self%get_parameter(self%f_pp_resp_dia, 'f_pp_resp_dia', '-', 'Part of primary production used for respiration by DI', default=0.1_rk) 
+   call self%get_parameter(self%hmax_sid, 'hmax_sid', 'd-1', 'Rate of dissolution of silicious detritus', default=0.08_rk) 
+   call self%get_parameter(self%ki_nhs_phy, 'ki_nhs_phy', 'mmolN m-3', 'Inhib. constant of NHS for NOS uptake by PHY', default=0.5_rk) 
+   call self%get_parameter(self%ks_nhs_dia, 'ks_nhs_dia', 'mmolN m-3', 'Half-saturation constant for NHS uptake by DI', default=1.0_rk) 
+   call self%get_parameter(self%ks_nos_dia, 'ks_nos_dia', 'mmolN m-3', 'Half-saturation constant for NOS uptake by DI', default=1.0_rk) 
+   call self%get_parameter(self%ks_po4_dia, 'ks_po4_dia', 'mmolP m-3', 'Half-saturation constant for PO4 uptake by DI', default=0.1_rk) 
+   call self%get_parameter(self%ks_sio_dia, 'ks_sio_dia', 'mmolSi m-3', 'Half-saturation constant for SiOs uptake by DI', default=3.5_rk) 
+   call self%get_parameter(self%mo_dia, 'mo_dia', 'd-1', 'Mortality rate of DI', default=0.03_rk) 
+   call self%get_parameter(self%mumax_dia, 'mumax_dia', 'd-1', 'Maximum specific growth rate of DI', default=3.5_rk) 
+   call self%get_parameter(self%pi_dia, 'pi_dia', 'm2 W-1 d-1', 'Initial slope of photosynthesis-light curve for DI', default=0.3312_rk) 
+   call self%get_parameter(self%q10_dia, 'q10_dia', '-', 'Temperature factor for DI', default=1.8_rk) 
+   call self%get_parameter(self%q10_si_diss, 'q10_si_diss', '-', 'Temperature factor for chemical processes', default=3.3_rk) 
+   call self%get_parameter(self%r_o2_c_resp, 'r_o2_c_resp', 'molO2 molC-1', 'O2:C ratio of respiration process', default=1.0_rk) 
+   call self%get_parameter(self%r_o2_nhs_nitr, 'r_o2_nhs_nitr', 'molO2 molNS-1', 'O2:NHS ratio in NHS oxidation in nitrification', default=2.0_rk) 
+   call self%get_parameter(self%r_p_n_redfield, 'r_p_n_redfield', 'molP molN-1', 'N:P Redfield ratio in PHY', default=0.0625_rk) 
+   call self%get_parameter(self%r_si_n_dia, 'r_si_n_dia', 'molSi molN-1', 'Si:N ratio in DI', default=0.83_rk) 
+   call self%get_parameter(self%respb_dia, 'respb_dia', 'd-1', 'Basal respiration rate of DI', default=0.009_rk) 
+   call self%get_parameter(self%rmax_chl_n_dia, 'rmax_chl_n_dia', 'g Chla molN-1', 'Maximum Chl:N ratio in DI', default=2.0_rk) 
+   call self%get_parameter(self%rmax_n_c_dia, 'rmax_n_c_dia', 'molN molC-1', 'Maximum N:C ratio in DI', default=0.2_rk) 
+   call self%get_parameter(self%rmin_chl_n_dia, 'rmin_chl_n_dia', 'g Chla molN-1', 'Minimum Chl:N ratio in DI', default=1.0_rk) 
+   call self%get_parameter(self%rmin_n_c_dia, 'rmin_n_c_dia', 'molN molC-1', 'Minimum N:C ratio in DI', default=0.05_rk) 
+   call self%get_parameter(self%umax_nhs_dia, 'umax_nhs_dia', 'molN molC-1 d-1', 'Maximal NHS uptake rate by DI', default=1.0_rk) 
+   call self%get_parameter(self%umax_nos_dia, 'umax_nos_dia', 'molN molC-1 d-1', 'Maximal NOS uptake rate by DI', default=1.0_rk) 
+   call self%get_parameter(self%umax_po4_dia, 'umax_po4_dia', 'molP molC-1 d-1', 'Maximal PO4 uptake rate by DI', default=0.0625_rk) 
+   call self%get_parameter(self%umax_si_dia, 'umax_si_dia', 'molSi molC-1 d-1', 'Maximal SiOs uptake rate by DI', default=0.5_rk) 
 
    ! Register state variables 
 
@@ -153,27 +146,18 @@
 
 
     ! Register diagnostic variables 
-   call self%register_diagnostic_variable(self%id_Carbon_UptakeDiatoms, 'Carbon_UptakeDiatoms', '-', & 
+   call self%register_diagnostic_variable(self%id_uptake_c_dia, 'uptake_c_dia', 'mmol C m-3 d-1', & 
+      'Carbon uptake by diatoms', output=output_instantaneous) 
+   call self%register_diagnostic_variable(self%id_uptake_n_dia, 'uptake_n_dia', 'mmol N m-3 d-1', & 
+      'Nitrogen uptake by diatoms', output=output_instantaneous) 
+   call self%register_diagnostic_variable(self%id_npp, 'npp', 'mmol N m-3 d-1', & 
+      ' Primary production of nitrogen by all types of phytoplankton', output=output_instantaneous) 
+   call self%register_diagnostic_variable(self%id_reduction_nitrate_phy, 'reduction_nitrate_phy', '-', & 
       '-', output=output_instantaneous) 
-   call self%register_diagnostic_variable(self%id_Carbon_UptakeDiatomsIntegrated, 'Carbon_UptakeDiatomsIntegrated', '-', & 
-      '-', output=output_instantaneous) 
-   call self%register_diagnostic_variable(self%id_Nitrogen_Uptake_Diatoms, 'Nitrogen_Uptake_Diatoms', '-', & 
-      '-', output=output_instantaneous) 
-   call self%register_diagnostic_variable(self%id_Nitrogen_Uptake_DiatomsIntegrated, 'Nitrogen_Uptake_DiatomsIntegrated', '-', & 
-      '-', output=output_instantaneous) 
-   call self%register_diagnostic_variable(self%id_NPP, 'NPP', 'mmol N m-3 d-1', & 
-      ' Primary production', output=output_instantaneous) 
-   call self%register_diagnostic_variable(self%id_PhytoNitrateReduction, 'PhytoNitrateReduction', '-', & 
-      '-', output=output_instantaneous) 
-   call self%register_diagnostic_variable(self%id_Silicate_upDiatoms, 'Silicate_upDiatoms', '-', & 
-      '-', output=output_instantaneous) 
-   call self%register_diagnostic_variable(self%id_Silicate_upDiatomsIntegrated, 'Silicate_upDiatomsIntegrated', '-', & 
-      '-', output=output_instantaneous) 
-   call self%register_diagnostic_variable(self%id_TotalRespirationDiatoms, 'TotalRespirationDiatoms', '-', & 
-      '-', output=output_instantaneous) 
-   call self%register_diagnostic_variable(self%id_TotalRespirationDiatomsIntegrated, 'TotalRespirationDiatomsIntegrated', '-', & 
-      '-', output=output_instantaneous) 
-
+   call self%register_diagnostic_variable(self%id_uptake_sio_dia, 'uptake_sio_dia', 'mmol Si m-3 d-1', & 
+      'Uptake of silicates by diatoms', output=output_instantaneous) 
+   call self%register_diagnostic_variable(self%id_respiration_dia, 'respiration_dia', 'mmol C m-3 d-1', & 
+      'Total Respiration of Diatoms', output=output_instantaneous) 
    return 
 
 99 call self%fatal_error('Diatoms', 'Error reading namelist ulg_Diatoms') 
@@ -189,36 +173,31 @@
       real(rk) ::  DCL,DCS,DIC,DNL,DNS,DOX,NHS,NOS,PHO,POC,PON
       real(rk) ::  par,temp
       real(rk) ::  CDI,NDI,SID,SIO
-      real(rk) ::   Carbon_UptakeDiatoms,Nitrogen_Uptake_Diatoms,NPP,PhytoNitrateReduction,Silicate_upDiatoms,TotalRespirationDiatoms
-      real(rk) ::   Carbon_UptakeDiatomsIntegrated,Nitrogen_Uptake_DiatomsIntegrated,Silicate_upDiatomsIntegrated,TotalRespirationDiatomsIntegrated
-      real(rk) ::   Ammonium_UpPHY	  ! mmol N m-3, Ammonium uptake of phytoplankton
-      real(rk) ::   C_PHYMort	  ! mmol C m-3, Phytoplankton mortality flux
-      real(rk) ::   Carbon_UptakePHY	  ! mmol C m-3, C assimilation of phytoplankton
-      real(rk) ::   ChlCrDiatoms	  ! g Chla mol C-1, Chl/C ratio in large flagellates
-      real(rk) ::   DOC_extra_excr	  ! mmol C d-1, Phytoplankton extra excretion
-      real(rk) ::   DOC_leakage	  ! mmol C d-1, Phytoplankton passive leakage rate for carbon
-      real(rk) ::   DON_leakage	  ! mmol N d-1, Phytoplankton passive leakage rate for nitrogen
-      real(rk) ::   GrowthPHY	  ! mmol C m-3 d-1, Phytoplankton growth
-      real(rk) ::   LightLimitationDiatoms	  ! -, Light limitation diatoms
-      real(rk) ::   MaxSiCrDiatoms	  ! mol Si mol C-1, Maximum Si/C ratio in diatoms
-      real(rk) ::   MinSiCrDiatoms	  ! mol Si mol C-1, Minimum Si/C ratio in diatoms
-      real(rk) ::   Mu_Nitrogen	  ! ?, ?
-      real(rk) ::   Mu_Silicate	  ! ?, ?
-      real(rk) ::   NCrat	  ! ?, ?
-      real(rk) ::   N_PHYMort	  ! mmol N m-3, Phytoplankton mortality flux
-      real(rk) ::   NCrDiatoms	  ! mol N mol C-1, N/C ratio in diatoms
-      real(rk) ::   Nitrate_UpPHY	  ! mmol N m-3, Nitrate uptake of phytoplankton
-      real(rk) ::   Nitrogen_UpPHY	  ! mmol N m-3, Nitrogen uptake of phytoplankton
-      real(rk) ::   Nutrient_UpPHY	  ! mmol m-3, Nutrient uptake of phytoplankton
-      real(rk) ::   NutrientLimitationDiatoms	  ! -, Nutrient limitation diatoms
-      real(rk) ::   Phosphate_upDiatoms	  ! mmol P m-3, Diatoms phosphate uptake
-      real(rk) ::   PHYMort	  ! mmol m-3, Phytoplankton mortality rate
-      real(rk) ::   SiCrat	  ! ?, ?
-      real(rk) ::   SiCrDiatoms	  ! mol Si mol C-1, Si/C ratio in diatoms
-      real(rk) ::   Silicate_upDia	  ! mmol Si m-3, Diatoms silicate uptake
+      real(rk) ::   Excretion_ext	  ! mmol C d-1, Phytoplankton extra excretion
+      real(rk) ::   Growth	  ! mmol C m-3 d-1, Phytoplankton growth
+      real(rk) ::   Leakage_DOC	  ! mmol C d-1, Phytoplankton passive leakage rate for carbon
+      real(rk) ::   Leakage_DON	  ! mmol N d-1, Phytoplankton passive leakage rate for nitrogen
+      real(rk) ::   Limitation_light	  ! -, Light limitation for small flagellates
+      real(rk) ::   Limitation_nutrient	  ! -, Nutrient limitation for small flagellates
+      real(rk) ::   Mortality	  ! mmol m-3, Phytoplankton mortality rate
+      real(rk) ::   Mortality_C	  ! mmol C m-3, Phytoplankton mortality flux
+      real(rk) ::   Mortality_N	  ! mmol N m-3, Phytoplankton mortality flux
+      real(rk) ::   Ratio_Chl_C	  ! g Chla mol C-1, Chl/C ratio in small flagellates
+      real(rk) ::   Ratio_N_C	  ! mol N mol C-1, N/C ratio in small flagellates
+      real(rk) ::   Ratio_Si_C	  ! mol Si mol C-1, Si/C ratio in diatoms
+      real(rk) ::   Ratio_max_Si_C	  ! mol Si mol C-1, Maximum Si/C ratio in diatoms
+      real(rk) ::   Ratio_min_SiO_C	  ! mol Si mol C-1, Minimum Si/C ratio in diatoms
+      real(rk) ::   Respiration_tot	  ! mmol C m-3, Total phytoplankton respiration (basal & activity)
+      real(rk) ::   Uptake_C	  ! mmol C m-3, C assimilation of phytoplankton
+      real(rk) ::   Uptake_NHS	  ! mmol N m-3, Ammonium uptake of phytoplankton
+      real(rk) ::   Uptake_NO3	  ! mmol N m-3, Nitrate uptake of phytoplankton
+      real(rk) ::   Uptake_Nit	  ! mmol N m-3, Nitrogen uptake of phytoplankton
+      real(rk) ::   Uptake_PO4	  ! mmol P m-3, Phosphate uptake by large flagellates
+      real(rk) ::   Uptake_SiO	  ! mmol Si m-3, Diatoms silicate uptake
+      real(rk) ::   Uptake_nutrient	  ! mmol m-3, Nutrient uptake of phytoplankton
       real(rk) ::   tf	  ! -, Temperature factor
-      real(rk) ::   tfsilicate	  ! -, Silicate dissolution adjusted for temperature
-      real(rk) ::   TotalRespirationPHY	  ! mmol C m-3, Total phytoplankton respiration (basal & activity)
+      real(rk) ::   tf_SiO_dissolution	  ! -, Silicate dissolution adjusted for temperature
+
    _LOOP_BEGIN_
 
    ! Retrieve current (local) state variable values.
@@ -242,99 +221,99 @@
     _GET_(self%id_par,par)              ! local photosynthetically active radiation
     _GET_(self%id_temp,temp)            ! local temperature
     
-    tf = Q10Factor (temp,Q10PhyDiatoms)
-    tfsilicate = Q10Factor(temp,Q10SilicateDiss)
+    tf = Q10Factor (temp,self%q10_dia)
+    tf_SiO_dissolution = Q10Factor(temp,self%q10_si_diss)
     
    ! Calculate ratios in phytoplankton 
-    NCrDiatoms  = NDI/CDI
-    ChlCrDiatoms = ChlCrPHY(NCratio,MaxNCr,MinNCr,MinChlNr,MaxChlNr)
+    Ratio_N_C  = Ratio(NDI,CDI)
+    Ratio_Chl_C = ChlCrPHY(Ratio_N_C,self%rmax_n_c_dia,self%rmin_n_c_dia,self%rmin_chl_n_dia,self%rmax_chl_n_dia)
     
-   ! chlorophyll(i,j,k,2) = ChlCrDiatoms * CDI		! REMOVE (POSSIBLY) 
+   ! chlorophyll(i,j,k,2) = ChlCrDiatoms * CDI ! REMOVE (POSSIBLY) 
     
    ! Nitrate uptake rate 
-    Nitrate_UpPHY = NOuptake(NCrDiatoms,tf,MaxNCrDiatoms,NosMaxUptakeDiatoms) * Michaelis(NOS,ksNOsDiatoms) * Inhibition(NHS,kinNHsPhy) * CDI
+    Uptake_NO3 = NOuptake(Ratio_N_C,tf,self%rmax_n_c_dia,self%umax_nos_dia) * Michaelis(NOS,self%ks_nos_dia) * Inhibition(NHS,self%ki_nhs_phy) * CDI
     
    ! Ammonium uptake rate 
-    Ammonium_UpPHY = NUT_UPTAKE_RATE(NCrDiatoms,(NHS-0.0),tf,MaxNCrDiatoms,NHsMaxUptakeDiatoms,ksNHsDiatoms) * CDI
+    Uptake_NHS = NUTuptake(Ratio_N_C,(NHS-0.0),tf,self%rmax_n_c_dia,self%umax_nhs_dia,self%ks_nhs_dia) * CDI
     
    ! Phosphate uptake rate 
-    Phosphate_upDiatoms = NUT_UPTAKE_RATE(NCrDiatoms,(PHO-0.0),tf,MaxNCrDiatoms,PO4MaxUptakeDiatoms,ksPO4Diatoms) * CDI
+    Uptake_PO4 = NUTuptake(Ratio_N_C,(PHO-0.0),tf,self%rmax_n_c_dia,self%umax_po4_dia,self%ks_po4_dia) * CDI
     
    ! Compute silicate uptake 
-    MaxSiCrDiatoms = self%MaxNCrDiatoms*self%SiNrDiatoms
-    MinSiCrDiatoms = self%MinNCrDiatoms*self%SiNrDiatoms
-    SiCrDiatoms = NCrDiatoms*self%SiNrDiatoms
-    Silicate_upDia = NUT_UPTAKE_RATE(SiCrDiatoms,(SIO-0.0),tf,MaxSiCrDiatoms,SiMaxUptakeDiatoms,ksSiDiatoms) * CDI
+    Ratio_max_Si_C = self%rmax_n_c_dia * self%r_si_n_dia
+    Ratio_min_SiO_C = self%rmin_n_c_dia * self%r_si_n_dia
+    Ratio_Si_C = Ratio_N_C * self%r_si_n_dia
+    Silicate_upDiatoms = NUTuptake(Ratio_Si_C,(SIO-0.0),tf,Ratio_max_Si_C,self%umax_si_dia,self%ks_sio_dia) * CDI
     
    ! Potential nitrogen uptake 
-    Nitrogen_UpPHY = Ammonium_UpPHY + Nitrate_UpPHY
+    Uptake_Nit = Uptake_NHS + Uptake_NO3
     
    ! Nutrient uptake 
-    Nutrient_UpPHY = min(Nitrogen_UpPHY,Silicate_upDia/SiNrDiatoms,Phosphate_upDiatoms/self%PNRedfield)
+    Uptake_nutrient = min(Uptake_Nit,Silicate_upDiatoms/self%r_si_n_dia,Uptake_PO4/self%r_p_n_redfield)
     
    ! Compute actual N:C and Si:C ratios 
-    NCrat = Ratio_PHYT(NCrDiatoms,MaxNCrDiatoms,MinNCrDiatoms)
-    SiCrat = Ratio_PHYT(SiCrDiatoms,MaxSiCrDiatoms,MinSiCrDiatoms)
+    Ratio_N_C = Ratio_PHYT(Ratio_N_C,self%rmax_n_c_dia,self%rmin_n_c_dia)
+    Ratio_Si_C = Ratio_PHYT(Ratio_Si_C,Ratio_max_Si_C,Ratio_min_SiO_C)
     
    ! Compute nutrient and light limitation 
-    NutrientLimitationDiatoms = Nutr_LIM(MinNCrDiatoms,MinSiCrDiatoms,NCrat,SiCrat)
-    LightLimitationDiatoms = 1.-exp(-self%alphaPIDiatoms*PAR/self%MuMaxDiatoms)
+    Limitation_nutrient = Nutr_LIM(self%rmin_n_c_dia,Ratio_min_SiO_C,Ratio_N_C,Ratio_Si_C)
+    Limitation_light = 1.-exp(-self%pi_dia * par / self%mumax_dia)
     
    ! Compute carbon uptake 
-    Carbon_UptakePHY = self%MuMaxDiatoms*LightLimitationDiatoms*NutrientLimitationDiatoms*CDI*tf
+    Uptake_C = self%mumax_dia * Limitation_light * Limitation_nutrient * CDI * tf
     
    ! Compute respiration 
-    TotalRespirationPHY = Carbon_UptakePHY*self%GrowthRespDiatoms + self%RespirationDiatoms*CDI*tf
+    Respiration_tot = Uptake_C * self%f_pp_resp_dia + self%respb_dia * CDI * tf
     
    ! Compute growth 
-    GrowthPHY = Carbon_UptakePHY-TotalRespirationPHY
+    Growth = Uptake_C - Respiration_tot
     
    ! Compute the extra DOC excretion from the difference of growth in nutrient limited (actual NC ratio) and nutrient saturated (max NC ratio)        
-    DOC_extra_excr = CDI * tf * self%extradocphyexcr * self%MuMaxDiatoms * ExtraEXCR_term(LightLimitationDiatoms,MinNCrDiatoms,MaxNCrDiatoms,NCrat)    
+    Excretion_ext = CDI * tf * self%exc_extra_doc * self%mumax_dia * ExtraEXCR_term(Limitation_light,self%rmin_n_c_dia,self%rmax_n_c_dia,Ratio_N_C)    
     
    ! Compute the leakage 
-    DOC_leakage = self%leakagephy * Carbon_UptakePHY
-    DON_leakage = self%leakagephy * abs(Nutrient_UpPHY)
+    Leakage_DOC = self%f_leak_phy * Uptake_C
+    Leakage_DON = self%f_leak_phy * abs(Uptake_nutrient)
     
    ! Compute mortality 
-    C_PHYMort  = PHYMORT(MortalityDiatoms,tf) * CDI
-    N_PHYMort  = PHYMORT(MortalityDiatoms,tf) * NDI
+    Mortality_C  = PHYMORT(self%mo_dia,tf) * CDI
+    Mortality_N  = PHYMORT(self%mo_dia,tf) * NDI
     
    !Carbon in Diatoms increases by growth and decreases by leakage and mortality 
-   _ADD_SOURCE_(self%id_cdi, GrowthPHY - C_PHYMort - DOC_leakage)
-   _ADD_SOURCE_(self%id_ndi, Nutrient_UpPHY - N_PHYMort - DON_leakage) 
+   _ADD_SOURCE_(self%id_cdi, Growth - Mortality_C - Leakage_DOC)
+   _ADD_SOURCE_(self%id_ndi, Uptake_nutrient - Mortality_N - Leakage_DON) 
     
    ! IF CN ratio of phytoplankton higher than CNmin, than nitrogen is taken up, unless it gets excreted 
-   IF (Nutrient_UpPHY.gt.0) THEN 
-     _ADD_SOURCE_(self%id_nos, -Nutrient_UpPHY*Nitrate_UpPHY/Nitrogen_UpPHY) 
-     _ADD_SOURCE_(self%id_dox, Nutrient_UpPHY*Nitrate_UpPHY/Nitrogen_UpPHY*self%ONoxnhsr) 
-     _ADD_SOURCE_(self%id_nhs, -Nutrient_UpPHY*Ammonium_UpPHY/Nitrogen_UpPHY)
-     _ADD_SOURCE_(self%id_pho, -Nutrient_UpPHY*self%PNRedfield)
+   IF (Uptake_nutrient.gt.0) THEN 
+     _ADD_SOURCE_(self%id_nos, -Uptake_nutrient * Uptake_NO3 / Uptake_Nit) 
+     _ADD_SOURCE_(self%id_dox, Uptake_nutrient * Uptake_NO3 / Uptake_Nit*self%r_o2_nhs_nitr) 
+     _ADD_SOURCE_(self%id_nhs, -Uptake_nutrient * Uptake_NHS / Uptake_Nit)
+     _ADD_SOURCE_(self%id_pho, -Uptake_nutrient * self%r_p_n_redfield)
    ELSE 
-     _ADD_SOURCE_(self%id_nhs, -Nutrient_UpPHY) 
-     _ADD_SOURCE_(self%id_pho, -Nutrient_UpPHY*self%PNRedfield) 
+     _ADD_SOURCE_(self%id_nhs, -Uptake_nutrient) 
+     _ADD_SOURCE_(self%id_pho, -Uptake_nutrient * self%r_p_n_redfield) 
    ENDIF 
 
-    Silicate_upDia = (Nutrient_UpPHY - DON_leakage)*self%SiNrDiatoms
+    Silicate_upDiatoms = (Uptake_nutrient - Leakage_DON) * self%r_si_n_dia
 
    ! Mortality increases the pool of POM and DOM with proper partitioning and leakage adds to the labile pool, extra-excretion and leakage add to the labile and semi-labile detritus 
-   _ADD_SOURCE_(self%id_sio, tfsilicate*self%kdis_Silicious_Detritus*SID - Silicate_upDia) 
-   _ADD_SOURCE_(self%id_sid, N_PHYMort*self%SiNrDiatoms - tfsilicate*self%kdis_Silicious_Detritus*SID) 
-   _ADD_SOURCE_(self%id_poc, (1.0 - self%mortphydom)*C_PHYMort)
-   _ADD_SOURCE_(self%id_pon, (1.0 - self%mortphydom)*N_PHYMort)
-   _ADD_SOURCE_(self%id_dcl, self%mortphydom*C_PHYMort*self%labilefraction + DOC_leakage + self%self%leakagephy*DOC_extra_excr + self%labileextradocphyexcr*(1.0 - self%self%leakagephy)*DOC_extra_excr))
-   _ADD_SOURCE_(self%id_dnl, self%mortphydom*N_PHYMort*self%labilefraction + DON_leakage)
-   _ADD_SOURCE_(self%id_dcs, self%mortphydom*C_PHYMort*(1.0 - self%labilefraction) + (1.0 - self%labileextradocphyexcr)*(1.0 - self%leakagephy)*DOC_extra_excr)) 
-   _ADD_SOURCE_(self%id_dns, self%mortphydom*N_PHYMort*(1.0 - self%labilefraction))
-   _ADD_SOURCE_(self%id_dox, (GrowthPHY + DOC_extra_excr)*self%OCr)
-   _ADD_SOURCE_(self%id_dic, -GrowthPHY - DOC_extra_excr)
+   _ADD_SOURCE_(self%id_sio, tf_SiO_dissolution * self%hmax_sid * SID - Silicate_upDiatoms) 
+   _ADD_SOURCE_(self%id_sid, Mortality_N * self%r_si_n_dia - tf_SiO_dissolution * self%hmax_sid * SID) 
+   _ADD_SOURCE_(self%id_poc, (1.0 - self%f_dl_phy_mo) * Mortality_C)
+   _ADD_SOURCE_(self%id_pon, (1.0 - self%f_dl_phy_mo) * Mortality_N)
+   _ADD_SOURCE_(self%id_dcl, self%f_dl_phy_mo * Mortality_C * self%f_dl_dom + Leakage_DOC + self%f_leak_phy*Excretion_ext + self%f_dl_phy_ex * (1.0 - self%f_leak_phy) * DOC_extra_excr))
+   _ADD_SOURCE_(self%id_dnl, self%f_dl_phy_mo * Mortality_N * self%f_dl_dom + Leakage_DON)
+   _ADD_SOURCE_(self%id_dcs, self%f_dl_phy_mo * Mortality_C * (1.0 - self%f_dl_dom) + (1.0 - self%f_dl_phy_ex) * (1.0 - self%f_leak_phy) * Excretion_ext)) 
+   _ADD_SOURCE_(self%id_dns, self%f_dl_phy_mo * Mortality_N * (1.0 - self%f_dl_dom))
+   _ADD_SOURCE_(self%id_dox, (Growth + Excretion_ext) * self%r_o2_c_resp)
+   _ADD_SOURCE_(self%id_dic, -Growth - Excretion_ext)
 
-   _SET_DIAGNOSTIC_(self%id_Nitrogen_Uptake_Diatoms, Nutrient_UpPHY)
-   _SET_DIAGNOSTIC_(self%id_Silicate_upDiatoms, Silicate_upDia)
-   _SET_DIAGNOSTIC_(self%id_Carbon_UptakeDiatoms, Carbon_UptakePHY)
-   _SET_DIAGNOSTIC_(self%id_TotalRespirationDiatoms, TotalRespirationPHY)
-   _SET_DIAGNOSTIC_(self%id_NPP, Carbon_UptakePHY-TotalRespirationPHY)
-   _SET_DIAGNOSTIC_(self%id_PhytoNitrateReduction, Nutrient_UpPHY*ratio(Nitrate_upPHY,Nitrogen_UpPHY)*self%ONoxnhsr)
+   _SET_DIAGNOSTIC_(self%id_uptake_n_dia, Uptake_nutrient)
+   _SET_DIAGNOSTIC_(self%id_uptake_sio_dia, Silicate_upDiatoms)
+   _SET_DIAGNOSTIC_(self%id_uptake_c_dia, Uptake_C)
+   _SET_DIAGNOSTIC_(self%id_respiration_dia, Respiration_tot)
+   _SET_DIAGNOSTIC_(self%id_npp, Growth)
+   _SET_DIAGNOSTIC_(self%id_reduction_nitrate_phy, Uptake_nutrient * Ratio(Uptake_NO3,Uptake_Nit) * self%r_o2_nhs_nitr)
 
    _LOOP_END_
 

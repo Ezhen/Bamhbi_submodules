@@ -43,11 +43,11 @@
    type,extends(type_base_model),public :: type_ulg_DOM 
       type (type_state_variable_id)         :: id_dcl,id_dcs,id_dnl,id_dns,id_poc,id_pon
       type (type_state_variable_id)         :: id_bac,id_dox
-      type (type_dependency_id)             :: id_par,id_temp 
+      type (type_dependency_id)             :: id_temp 
 
 !     Model parameters 
-      real(rk)     :: csatdocsl, hydPOCmax, hydPONmax, ksatOxygenHydrolysis
-      real(rk)     :: labilefraction, maxhydrDOCSL, Q10chem
+      real(rk)     :: f_dl_dom, hmax_dsl, hmax_poc, hmax_pon, ks_dsc_bac
+      real(rk)     :: ks_hydr_o2, q10_che
 
       contains 
 
@@ -70,21 +70,21 @@
    integer,                        intent(in)          :: configunit
 
 
-   namelist /ulg_DOM/ csatdocsl, 	 & 
-                      hydPOCmax, hydPONmax, 	 & 
-                      ksatOxygenHydrolysis, labilefraction, 	 & 
-                      maxhydrDOCSL, Q10chem
+
+   namelist /ulg_DOM/ f_dl_dom, 	 & 
+                      hmax_dsl, hmax_poc, hmax_pon, 	 & 
+                      ks_dsc_bac, ks_hydr_o2, q10_che
 
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
-   call self%get_parameter(self%csatdocsl, 'csatdocsl', 'mmolC m-3', 'Half-sat. constant for DSC uptake by BAC', default=417.0_rk) 
-   call self%get_parameter(self%hydPOCmax, 'hydPOCmax', 'd-1', 'POC hydrolysis rate', default=0.04_rk) 
-   call self%get_parameter(self%hydPONmax, 'hydPONmax', 'd-1', 'PON hydrolysis rate', default=0.055_rk) 
-   call self%get_parameter(self%ksatOxygenHydrolysis, 'ksatOxygenHydrolysis', 'mmolO2 m-3', 'Half-saturation constant for oxic hydrolysis rate', default=2.7_rk) 
-   call self%get_parameter(self%labilefraction, 'labilefraction', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
-   call self%get_parameter(self%maxhydrDOCSL, 'maxhydrDOCSL', 'd-1', 'Maximum DSL hydrolysis', default=4.0_rk) 
-   call self%get_parameter(self%Q10chem, 'Q10chem', '-', 'Temperature factor for chemical processes', default=2.0_rk) 
+   call self%get_parameter(self%f_dl_dom, 'f_dl_dom', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
+   call self%get_parameter(self%hmax_dsl, 'hmax_dsl', 'd-1', 'Maximum DSL hydrolysis', default=4.0_rk) 
+   call self%get_parameter(self%hmax_poc, 'hmax_poc', 'd-1', 'POC hydrolysis rate', default=0.04_rk) 
+   call self%get_parameter(self%hmax_pon, 'hmax_pon', 'd-1', 'PON hydrolysis rate', default=0.055_rk) 
+   call self%get_parameter(self%ks_dsc_bac, 'ks_dsc_bac', 'mmolC m-3', 'Half-sat. constant for DSC uptake by BAC', default=417.0_rk) 
+   call self%get_parameter(self%ks_hydr_o2, 'ks_hydr_o2', 'mmolO2 m-3', 'Half-saturation constant for oxic hydrolysis rate', default=2.7_rk) 
+   call self%get_parameter(self%q10_che, 'q10_che', '-', 'Temperature factor for chemical processes', default=2.0_rk) 
 
    ! Register state variables 
 
@@ -110,11 +110,7 @@
    call self%register_state_dependency(self%id_dox, 'Dissolved oxygen concentration', 'mmol O2 m-3') 
 
     ! Register environmental dependencies 
-   call self%register_dependency(self%id_par, standard_variables%downwelling_photosynthetic_radiative_flux) 
    call self%register_dependency(self%id_temp, standard_variables%temperature) 
-
-
-    ! Register diagnostic variables 
 
    return 
 
@@ -129,14 +125,15 @@
    _DECLARE_ARGUMENTS_DO_
 
       real(rk) ::  BAC,DOX
-      real(rk) ::  par,temp
+      real(rk) ::  temp
       real(rk) ::  DCL,DCS,DNL,DNS,POC,PON
-      real(rk) ::   DOCSLHYDR	  ! mmol C m-3, Hydrolysis flux of DSL to DL in carbon
-      real(rk) ::   DONSLHYDR	  ! mmol N m-3, Hydrolysis flux of DSL to DL in nitrogen
-      real(rk) ::   hydroPOMLim	  ! -, Limiting function on POM hydrolysis
-      real(rk) ::   POCHYDR	  ! mmol C m-3, Hydrolysis flux of POC into DSL and DL 
-      real(rk) ::   PONHYDR	  ! mmol N m-3, Hydrolysis flux of PON into DSL and DL
+      real(rk) ::   Hydrolysis_DNS_DNL	  ! mmol N m-3, Hydrolysis flux of DNS to DNL in nitrogen
+      real(rk) ::   Hydrolysis_DSC_DCL	  ! mmol C m-3, Hydrolysis flux of DCS to DCL in carbon
+      real(rk) ::   Hydrolysis_POC_DOC	  ! mmol C m-3, Hydrolysis flux of POC into DSL and DL 
+      real(rk) ::   Hydrolysis_PON_DON	  ! mmol N m-3, Hydrolysis flux of PON into DSL and DL
+      real(rk) ::   Limitation_hydrolysis_POM	  ! -, Limiting function on POM hydrolysis
       real(rk) ::   tf	  ! -, Temperature factor
+
    _LOOP_BEGIN_
 
    ! Retrieve current (local) state variable values.
@@ -150,27 +147,26 @@
    _GET_(self%id_dox,DOX)       ! Dissolved oxygen concentration
 
    ! Retrieve current environmental conditions.
-    _GET_(self%id_par,par)              ! local photosynthetically active radiation
     _GET_(self%id_temp,temp)            ! local temperature
     
-    tf = Q10Factor(temp,Q10chem)
+    tf = Q10Factor(temp,self%q10_che)
     
    ! Compute hydrolysis rates of particulate detritus 
-    hydroPOMLim=(DOX+1.0)/(DOX+self%ksatOxygenHydrolysis +1.0)
-    POCHYDR = tf*hydroPOMLim*self%hydPOCmax*POC
-    PONHYDR = tf*hydroPOMLim*self%hydPONmax*PON
+    Limitation_hydrolysis_POM = Michaelis(DOX+1.0,self%ks_hydr_o2)
+    Hydrolysis_POC_DOC = tf * Limitation_hydrolysis_POM * self%hmax_poc * POC
+    Hydrolysis_PON_DON = tf * Limitation_hydrolysis_POM * self%hmax_pon * PON
     
    ! Compute hydrolysis rates of semi-labile detritus 
-    DOCSLHYDR = tf*self%maxhydrDOCSL*BAC*Michaelis((DCS,csatdocsl)
-    DONSLHYDR = tf*self%maxhydrDOCSL*BAC*DNS/DCS*Michaelis(DCS,csatdocsl)
+    Hydrolysis_DSC_DCL = tf * self%hmax_dsl * BAC * Michaelis(DCS,self%ks_dsc_bac)
+    Hydrolysis_DNS_DNL = tf * self%hmax_dsl * BAC * Ratio(DNS,DCS) * Michaelis(DCS,self%ks_dsc_bac)
     
    ! Assign hydrolysis fluxes
-   _ADD_SOURCE_(self%id_dcl, self%labilefraction*POCHYDR + DOCSLHYDR) 
-   _ADD_SOURCE_(self%id_dnl, self%labilefraction*PONHYDR + DONSLHYDR) 
-   _ADD_SOURCE_(self%id_dcs, (1.0 - self%labilefraction)*POCHYDR - DOCSLHYDR) 
-   _ADD_SOURCE_(self%id_dns, (1.0 - self%labilefraction)*PONHYDR - DONSLHYDR) 
-   _ADD_SOURCE_(self%id_poc,-POCHYDR) 
-   _ADD_SOURCE_(self%id_pon,-PONHYDR) 
+   _ADD_SOURCE_(self%id_dcl, self%f_dl_dom * Hydrolysis_POC_DOC + Hydrolysis_DSC_DCL) 
+   _ADD_SOURCE_(self%id_dnl, self%f_dl_dom * Hydrolysis_PON_DON + Hydrolysis_DNS_DNL) 
+   _ADD_SOURCE_(self%id_dcs, (1.0 - self%f_dl_dom) * Hydrolysis_POC_DOC - Hydrolysis_DSC_DCL) 
+   _ADD_SOURCE_(self%id_dns, (1.0 - self%f_dl_dom) * Hydrolysis_PON_DON - Hydrolysis_DNS_DNL) 
+   _ADD_SOURCE_(self%id_poc,-Hydrolysis_POC_DOC) 
+   _ADD_SOURCE_(self%id_pon,-Hydrolysis_PON_DON) 
 
    _LOOP_END_
 

@@ -43,20 +43,17 @@
    type,extends(type_base_model),public :: type_ulg_Mesozoo 
       type (type_state_variable_id)         :: id_mes
       type (type_state_variable_id)         :: id_bac,id_cdi,id_cem,id_cfl,id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_mic,id_ndi,id_nem,id_nfl,id_nhs,id_pho,id_poc,id_pon,id_sid
-      type (type_dependency_id)             :: id_par,id_temp 
-      type (type_diagnostic_variable_id)    :: id_bac_to_ZOO,id_phy_to_ZOO,id_POC_to_ZOO,id_Totalrespiration_ZOO
-      type (type_diagnostic_variable_id)    :: id_bac_to_ZOOIntegrated,id_phy_to_ZOOIntegrated,id_POC_to_ZOOIntegrated,id_Totalrespiration_zooIntegrated
+      type (type_dependency_id)             :: id_temp 
+      type (type_diagnostic_variable_id)    :: id_zoo_on_bac,id_zoo_on_phy,id_zoo_on_poc,id_respiration_zoo
 
 !     Model parameters 
-      real(rk)     :: Ass_Eff_OnCarbon, Ass_Eff_OnNitrogen, Capt_eff_MesoZoo_BAC
-      real(rk)     :: Capt_eff_MesoZoo_Diatoms, Capt_eff_MesoZoo_Emiliana
-      real(rk)     :: Capt_eff_MesoZoo_Flagellates, Capt_eff_MesoZoo_MesoZoo
-      real(rk)     :: Capt_eff_MesoZoo_MicroZoo, Capt_eff_MesoZoo_POM
-      real(rk)     :: DOXsatmort, efficiency_growth_MesoZoo, expmortMesoZoo
-      real(rk)     :: Half_Saturation_MesoZoo, HalfSatMort_MesoZoo
-      real(rk)     :: labilefraction, MaxgrazingrateMesoZoo, Messy_feeding_MesoZoo
-      real(rk)     :: Mortanoxic, NCrBac, NCrMesoZoo, NLin_Mort_MesoZoo
-      real(rk)     :: OCr, PNRedfield, Q10Zoo, SiNrDiatoms
+      real(rk)     :: doxsatmort, eff_ass_zoo_c, eff_ass_zoo_n
+      real(rk)     :: eff_gr_mes_c, eff_mes_bac, eff_mes_dia, eff_mes_emi
+      real(rk)     :: eff_mes_fla, eff_mes_mes, eff_mes_mic, eff_mes_pom
+      real(rk)     :: f_dl_dom, gmax_mes, ks_mort_mes, ks_prey_mec
+      real(rk)     :: mess_prey_mes, mo_anox_pred, moexp_mes, momax_mes
+      real(rk)     :: q10_zoo, r_n_c_bac, r_n_c_mes, r_o2_c_resp
+      real(rk)     :: r_p_n_redfield, r_si_n_dia
 
       contains 
 
@@ -79,51 +76,46 @@
    integer,                        intent(in)          :: configunit
 
 
-   namelist /ulg_Mesozoo/ Ass_Eff_OnCarbon, 	 & 
-                      Ass_Eff_OnNitrogen, 	 & 
-                      Capt_eff_MesoZoo_BAC, 	 & 
-                      Capt_eff_MesoZoo_Diatoms, 	 & 
-                      Capt_eff_MesoZoo_Emiliana, 	 & 
-                      Capt_eff_MesoZoo_Flagellates, 	 & 
-                      Capt_eff_MesoZoo_MesoZoo, 	 & 
-                      Capt_eff_MesoZoo_MicroZoo, 	 & 
-                      Capt_eff_MesoZoo_POM, DOXsatmort, 	 & 
-                      efficiency_growth_MesoZoo, 	 & 
-                      expmortMesoZoo, Half_Saturation_MesoZoo, 	 & 
-                      HalfSatMort_MesoZoo, labilefraction, 	 & 
-                      MaxgrazingrateMesoZoo, 	 & 
-                      Messy_feeding_MesoZoo, Mortanoxic, 	 & 
-                      NCrBac, NCrMesoZoo, NLin_Mort_MesoZoo, 	 & 
-                      OCr, PNRedfield, Q10Zoo, SiNrDiatoms
+
+   namelist /ulg_Mesozoo/ doxsatmort, 	 & 
+                      eff_ass_zoo_c, eff_ass_zoo_n, 	 & 
+                      eff_gr_mes_c, eff_mes_bac, eff_mes_dia, 	 & 
+                      eff_mes_emi, eff_mes_fla, eff_mes_mes, 	 & 
+                      eff_mes_mic, eff_mes_pom, f_dl_dom, 	 & 
+                      gmax_mes, ks_mort_mes, ks_prey_mec, 	 & 
+                      mess_prey_mes, mo_anox_pred, moexp_mes, 	 & 
+                      momax_mes, q10_zoo, r_n_c_bac, 	 & 
+                      r_n_c_mes, r_o2_c_resp, r_p_n_redfield, 	 & 
+                      r_si_n_dia
 
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
-   call self%get_parameter(self%Ass_Eff_OnCarbon, 'Ass_Eff_OnCarbon', '-', 'ZOO assimilation efficiency on C', default=0.64_rk) 
-   call self%get_parameter(self%Ass_Eff_OnNitrogen, 'Ass_Eff_OnNitrogen', '-', 'ZOO assimilation efficiencies on N', default=0.77_rk) 
-   call self%get_parameter(self%Capt_eff_MesoZoo_BAC, 'Capt_eff_MesoZoo_BAC', '-', 'Capture efficiency of MES on BAC', default=0.0_rk) 
-   call self%get_parameter(self%Capt_eff_MesoZoo_Diatoms, 'Capt_eff_MesoZoo_Diatoms', '-', 'Capture efficiency of MES on DI', default=1.0_rk) 
-   call self%get_parameter(self%Capt_eff_MesoZoo_Emiliana, 'Capt_eff_MesoZoo_Emiliana', '-', 'Capture efficiency of MES on EM', default=0.4_rk) 
-   call self%get_parameter(self%Capt_eff_MesoZoo_Flagellates, 'Capt_eff_MesoZoo_Flagellates', '-', 'Capture efficiency of MES on FL', default=0.4_rk) 
-   call self%get_parameter(self%Capt_eff_MesoZoo_MesoZoo, 'Capt_eff_MesoZoo_MesoZoo', '-', 'Capture efficiency of MES on MES', default=0.0_rk) 
-   call self%get_parameter(self%Capt_eff_MesoZoo_MicroZoo, 'Capt_eff_MesoZoo_MicroZoo', '-', 'Capture efficiency of MES on MIC', default=1.0_rk) 
-   call self%get_parameter(self%Capt_eff_MesoZoo_POM, 'Capt_eff_MesoZoo_POM', '-', 'Capture efficiency of MES on POM', default=0.8_rk) 
-   call self%get_parameter(self%DOXsatmort, 'DOXsatmort', 'mmolO2 m-3', 'Percentage of saturation where metabolic respiration is half the one under oxygen satyrated conditions', default=7.8125_rk) 
-   call self%get_parameter(self%efficiency_growth_MesoZoo, 'efficiency_growth_MesoZoo', '-', 'MES net growth efficiency on C', default=0.8_rk) 
-   call self%get_parameter(self%expmortMesoZoo, 'expmortMesoZoo', '(?°', '? mortality rate of MES', default=2.0_rk) 
-   call self%get_parameter(self%Half_Saturation_MesoZoo, 'Half_Saturation_MesoZoo', 'mmolC m-3', 'Half-saturation constant for MEC grazing', default=5.0_rk) 
-   call self%get_parameter(self%HalfSatMort_MesoZoo, 'HalfSatMort_MesoZoo', 'mmolC m-3', '', default=1.0_rk) 
-   call self%get_parameter(self%labilefraction, 'labilefraction', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
-   call self%get_parameter(self%MaxgrazingrateMesoZoo, 'MaxgrazingrateMesoZoo', 'd-1', 'Maximum grazing rate of MES', default=1.2_rk) 
-   call self%get_parameter(self%Messy_feeding_MesoZoo, 'Messy_feeding_MesoZoo', '-', 'Messy feeding fraction of MES grazing ', default=0.23_rk) 
-   call self%get_parameter(self%Mortanoxic, 'Mortanoxic', 'd-1', 'Mortality rate in anoxia', default=0.25_rk) 
-   call self%get_parameter(self%NCrBac, 'NCrBac', 'molN molC-1', 'N:C', default=0.196_rk) 
-   call self%get_parameter(self%NCrMesoZoo, 'NCrMesoZoo', 'molN molC-1', 'N:C molar ratio in MES', default=0.21_rk) 
-   call self%get_parameter(self%NLin_Mort_MesoZoo, 'NLin_Mort_MesoZoo', 'd-1', 'Maximum mortality rate of MES', default=0.3_rk) 
-   call self%get_parameter(self%OCr, 'OCr', 'molO2 molC-1', 'O2:C ratio of respiration process', default=1.0_rk) 
-   call self%get_parameter(self%PNRedfield, 'PNRedfield', 'molP molN-1', 'N:P Redfield ratio in PHY', default=0.0625_rk) 
-   call self%get_parameter(self%Q10Zoo, 'Q10Zoo', '-', 'Temperature factor Soetart et al., 2001', default=2.0_rk) 
-   call self%get_parameter(self%SiNrDiatoms, 'SiNrDiatoms', 'molSi molN-1', 'Si:N ratio in DI', default=0.83_rk) 
+   call self%get_parameter(self%doxsatmort, 'doxsatmort', 'mmolO2 m-3 (?)', 'Perc. of sat. where metabolic respiration is 1/2 the one under O2 sat.', default=7.8125_rk) 
+   call self%get_parameter(self%eff_ass_zoo_c, 'eff_ass_zoo_c', '-', 'ZOO assimilation efficiency on C', default=0.64_rk) 
+   call self%get_parameter(self%eff_ass_zoo_n, 'eff_ass_zoo_n', '-', 'ZOO assimilation efficiencies on N', default=0.77_rk) 
+   call self%get_parameter(self%eff_gr_mes_c, 'eff_gr_mes_c', '-', 'MES net growth efficiency on C', default=0.8_rk) 
+   call self%get_parameter(self%eff_mes_bac, 'eff_mes_bac', '-', 'Capture efficiency of MES on BAC', default=0.0_rk) 
+   call self%get_parameter(self%eff_mes_dia, 'eff_mes_dia', '-', 'Capture efficiency of MES on DI', default=1.0_rk) 
+   call self%get_parameter(self%eff_mes_emi, 'eff_mes_emi', '-', 'Capture efficiency of MES on EM', default=0.4_rk) 
+   call self%get_parameter(self%eff_mes_fla, 'eff_mes_fla', '-', 'Capture efficiency of MES on FL', default=0.4_rk) 
+   call self%get_parameter(self%eff_mes_mes, 'eff_mes_mes', '-', 'Capture efficiency of MES on MES', default=0.0_rk) 
+   call self%get_parameter(self%eff_mes_mic, 'eff_mes_mic', '-', 'Capture efficiency of MES on MIC', default=1.0_rk) 
+   call self%get_parameter(self%eff_mes_pom, 'eff_mes_pom', '-', 'Capture efficiency of MES on POM', default=0.8_rk) 
+   call self%get_parameter(self%f_dl_dom, 'f_dl_dom', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
+   call self%get_parameter(self%gmax_mes, 'gmax_mes', 'd-1', 'Maximum grazing rate of MES', default=1.2_rk) 
+   call self%get_parameter(self%ks_mort_mes, 'ks_mort_mes', 'mmolC m-3', '', default=1.0_rk) 
+   call self%get_parameter(self%ks_prey_mec, 'ks_prey_mec', 'mmolC m-3', 'Half-saturation constant for MEC grazing', default=5.0_rk) 
+   call self%get_parameter(self%mess_prey_mes, 'mess_prey_mes', '-', 'Messy feeding fraction of MES grazing ', default=0.23_rk) 
+   call self%get_parameter(self%mo_anox_pred, 'mo_anox_pred', 'd-1', 'Mortality rate in anoxia', default=0.25_rk) 
+   call self%get_parameter(self%moexp_mes, 'moexp_mes', '(?)', 'Order of the non-linearity of mortality rate for MES', default=2.0_rk) 
+   call self%get_parameter(self%momax_mes, 'momax_mes', 'd-1', 'Maximum mortality rate of MES', default=0.3_rk) 
+   call self%get_parameter(self%q10_zoo, 'q10_zoo', '-', 'Temperature factor Soetart et al., 2001', default=2.0_rk) 
+   call self%get_parameter(self%r_n_c_bac, 'r_n_c_bac', 'molN molC-1', 'N:C', default=0.196_rk) 
+   call self%get_parameter(self%r_n_c_mes, 'r_n_c_mes', 'molN molC-1', 'N:C molar ratio in MES', default=0.21_rk) 
+   call self%get_parameter(self%r_o2_c_resp, 'r_o2_c_resp', 'molO2 molC-1', 'O2:C ratio of respiration process', default=1.0_rk) 
+   call self%get_parameter(self%r_p_n_redfield, 'r_p_n_redfield', 'molP molN-1', 'N:P Redfield ratio in PHY', default=0.0625_rk) 
+   call self%get_parameter(self%r_si_n_dia, 'r_si_n_dia', 'molSi molN-1', 'Si:N ratio in DI', default=0.83_rk) 
 
    ! Register state variables 
 
@@ -151,28 +143,18 @@
    call self%register_state_dependency(self%id_sid, 'Detrital silicate concentration', 'mmol Si m-3') 
 
     ! Register environmental dependencies 
-   call self%register_dependency(self%id_par, standard_variables%downwelling_photosynthetic_radiative_flux) 
    call self%register_dependency(self%id_temp, standard_variables%temperature) 
 
 
     ! Register diagnostic variables 
-   call self%register_diagnostic_variable(self%id_bac_to_ZOO, 'bac_to_ZOO', '-', & 
-      '-', output=output_instantaneous) 
-   call self%register_diagnostic_variable(self%id_bac_to_ZOOIntegrated, 'bac_to_ZOOIntegrated', '-', & 
-      '-', output=output_instantaneous) 
-   call self%register_diagnostic_variable(self%id_phy_to_ZOO, 'phy_to_ZOO', '-', & 
-      '-', output=output_instantaneous) 
-   call self%register_diagnostic_variable(self%id_phy_to_ZOOIntegrated, 'phy_to_ZOOIntegrated', '-', & 
-      '-', output=output_instantaneous) 
-   call self%register_diagnostic_variable(self%id_POC_to_ZOO, 'POC_to_ZOO', '-', & 
-      '-', output=output_instantaneous) 
-   call self%register_diagnostic_variable(self%id_POC_to_ZOOIntegrated, 'POC_to_ZOOIntegrated', '-', & 
-      '-', output=output_instantaneous) 
-   call self%register_diagnostic_variable(self%id_Totalrespiration_ZOO, 'Totalrespiration_ZOO', '-', & 
-      '-', output=output_instantaneous) 
-   call self%register_diagnostic_variable(self%id_Totalrespiration_zooIntegrated, 'Totalrespiration_zooIntegrated', '-', & 
-      '-', output=output_instantaneous) 
-
+   call self%register_diagnostic_variable(self%id_zoo_on_bac, 'zoo_on_bac', 'mmol C m-3 d-1', & 
+      'Zooplankton grazing on bacteria', output=output_instantaneous) 
+   call self%register_diagnostic_variable(self%id_zoo_on_phy, 'zoo_on_phy', 'mmol C m-3 d-1', & 
+      'Zooplankton grazing on zooplankton', output=output_instantaneous) 
+   call self%register_diagnostic_variable(self%id_zoo_on_poc, 'zoo_on_poc', 'mmol C m-3 d-1', & 
+      'Zooplankton grazing on POC', output=output_instantaneous) 
+   call self%register_diagnostic_variable(self%id_respiration_zoo, 'respiration_zoo', 'mmol C m-3 d-1', & 
+      'Total Respiration of all zooplankton', output=output_instantaneous) 
    return 
 
 99 call self%fatal_error('Mesozoo', 'Error reading namelist ulg_Mesozoo') 
@@ -186,28 +168,27 @@
    _DECLARE_ARGUMENTS_DO_
 
       real(rk) ::  BAC,CDI,CEM,CFL,DCL,DCS,DIC,DNL,DNS,DOX,MIC,NDI,NEM,NFL,NHS,PHO,POC,PON,SID
-      real(rk) ::  par,temp
+      real(rk) ::  temp
       real(rk) ::  MES
-      real(rk) ::   bac_to_ZOO,phy_to_ZOO,POC_to_ZOO,Totalrespiration_ZOO
-      real(rk) ::   bac_to_ZOOIntegrated,phy_to_ZOOIntegrated,POC_to_ZOOIntegrated,Totalrespiration_zooIntegrated
-      real(rk) ::   C_ZOOEgest	  ! mmol C m-3, Zooplankton POM egestion in carbon
-      real(rk) ::   C_ZOOIntake	  ! mmol C m-3, Zooplankton carbon intake
-      real(rk) ::   C_ZOOMessyfeeding	  ! mmol C m-3, Zooplankton messy feeding to the DOM in carbon
-      real(rk) ::   C_ZOOMort	  ! mmol C m-3, Zooplankton mortality flux in carbon
-      real(rk) ::   C_ZOOResp	  ! flux, Zooplankton respiration
-      real(rk) ::   FluxPrey_carbon	  ! mmol C m-3, Flux of ingested preys in carbon 
-      real(rk) ::   FluxPrey_nitrogen	  ! mmol N m-3, Flux of consummed preys in nitrogen
-      real(rk) ::   grazing_carbonMesoZoo	  ! mmol C m-3, Grazing in carbon by mesozooplankaton
-      real(rk) ::   grazing_nitrogenZoo	  ! mmol N m-3, Grazing in nitrogen all zooplankaton
-      real(rk) ::   NCrfoodZooref	  ! mol N mol C-1, Food threshold elemental ratio
-      real(rk) ::   N_ZOOEgest	  ! mmol N m-3, Zooplankton POM egestion in nitrogen
-      real(rk) ::   N_ZOOExcr	  ! mmol N m-3, Zooplankton excretion of ammonium
-      real(rk) ::   N_ZOOIntake	  ! mmol N m-3, Zooplnkton nitrogen intake
-      real(rk) ::   N_ZOOMessyfeeding	  ! mmol N m-3, Zooplankton messy feeding to the DOM in nitrogen
-      real(rk) ::   N_ZOOMort	  ! mmol N m-3, Zooplankton mortality flux in nitrogen
-      real(rk) ::   NCrfoodMesoZoo	  ! mmol N mmol C-1, N/C ratio in food of mesozooplankton
+      real(rk) ::   Egestion_C	  ! mmol C m-3, Zooplankton POM egestion in carbon
+      real(rk) ::   Egestion_N	  ! mmol N m-3, Zooplankton POM egestion in nitrogen
+      real(rk) ::   Excretion	  ! mmol N m-3, Zooplankton excretion of ammonium
+      real(rk) ::   Grazing_C	  ! mmol C m-3, Grazing in carbon by microzooplankaton
+      real(rk) ::   Grazing_N	  ! mmol N m-3, Grazing in nitrogen all zooplankaton
+      real(rk) ::   Growth	  ! mmol C m-3 d-1, Phytoplankton growth
+      real(rk) ::   Intake_C	  ! mmol C m-3, Zooplankton carbon intake
+      real(rk) ::   Intake_N	  ! mmol N m-3, Zooplnkton nitrogen intake
+      real(rk) ::   Messy_feeding_C	  ! mmol C m-3, Zooplankton messy feeding to the DOM in carbon
+      real(rk) ::   Messy_feeding_N	  ! mmol N m-3, Zooplankton messy feeding to the DOM in nitrogen
+      real(rk) ::   Mortality_C	  ! mmol C m-3, Phytoplankton mortality flux
+      real(rk) ::   Mortality_N	  ! mmol N m-3, Phytoplankton mortality flux
+      real(rk) ::   Prey_C	  ! mmol C m-3, Flux of ingested preys in carbon 
+      real(rk) ::   Prey_N	  ! mmol N m-3, Flux of consummed preys in nitrogen
+      real(rk) ::   Ratio_N_C	  ! mol N mol C-1, N/C ratio in small flagellates
+      real(rk) ::   Ratio_N_C_thr	  ! mol N mol C-1, Food threshold elemental ratio
+      real(rk) ::   Respiration_C	  ! mmol C m-3, Zooplankton respiration flux
       real(rk) ::   tf	  ! -, Temperature factor
-      real(rk) ::   ZOOGrowth	  ! mmol C m-3, Zooplankton growth flux
+
    _LOOP_BEGIN_
 
    ! Retrieve current (local) state variable values.
@@ -233,94 +214,89 @@
    _GET_(self%id_sid,SID)       ! Detrital silicate concentration
 
    ! Retrieve current environmental conditions.
-    _GET_(self%id_par,par)              ! local photosynthetically active radiation
     _GET_(self%id_temp,temp)            ! local temperature
     
-    tf = Q10Factor(temp,Q10Zoo)
+    tf = Q10Factor(temp,self%q10_zoo)
     
    ! Flux of consummed preys in carbon 
-    FluxPrey_carbon = self%Capt_eff_MesoZoo_Flagellates*CFL + self%Capt_eff_MesoZoo_Emiliana*CEM + self%Capt_eff_MesoZoo_Diatoms*CDI + self%Capt_eff_MesoZoo_MicroZoo*MIC+ self%Capt_eff_MesoZoo_MesoZoo*MES + self%Capt_eff_MesoZoo_POM*POC + self%Capt_eff_MesoZoo_BAC*BAC
+    Prey_C = self%eff_mes_fla*CFL + self%eff_mes_emi*CEM + self%eff_mes_dia*CDI + self%eff_mes_mic*MIC+ self%eff_mes_mes*MES + self%eff_mes_pom*POC + self%eff_mes_bac*BAC
     
    ! Flux of consummed preys in nitrogen 
-    FluxPrey_nitrogen = self%Capt_eff_MesoZoo_Flagellates*NFL + self%Capt_eff_MesoZoo_Emiliana*NEM + self%Capt_eff_MesoZoo_Diatoms*NDI + self%Capt_eff_MesoZoo_MicroZoo*MIC*self%NCrMicroZoo + self%Capt_eff_MesoZoo_MesoZoo*MES*self%NCrMesoZoo+self%Capt_eff_MesoZoo_POM*PON + self%Capt_eff_MesoZoo_BAC*BAC*self%NCrBac
+    Prey_N = self%eff_mes_fla*NFL + self%eff_mes_emi*NEM + self%eff_mes_dia*NDI + self%eff_mes_mic*MIC*self%r_n_c_mic + self%eff_mes_mes*MES*self%r_n_c_mes+self%eff_mes_pom*PON + self%eff_mes_bac*BAC*self%r_n_c_bac
     
    ! N:C molar ratio of the consumed food 
-    NCrfoodMesoZoo=FluxPrey_nitrogen/FluxPrey_carbon
+    Ratio_N_C=Prey_N/Prey_C
     
    ! Grazing rate in carbon 
-    grazing_carbonMesoZoo = tf*self%MaxgrazingrateMesoZoo*Michaelis(FluxPrey_carbon,Half_Saturation_MesoZoo)*MES
+    Grazing_C = tf*self%gmax_mes*Michaelis(Prey_C,self%ks_prey_mec)*MES
     
    ! Grazing rate of zooplankton on nitrogen 
-    grazing_nitrogenZoo = grazing_carbonMesoZoo*NCrfoodMesoZoo
+    Grazing_N = Grazing_C*Ratio_N_C
     
    ! Ingestion rate of zooplankton  
-    C_ZOOIntake = grazing_carbonMesoZoo*(1. - self%Messy_feeding_MesoZoo)
-    N_ZOOIntake = grazing_nitrogenZoo*(1. - self%Messy_feeding_MesoZoo)
+    Intake_C = Grazing_C*(1.0 - self%mess_prey_mes)
+    Intake_N = Grazing_N*(1.0 - self%mess_prey_mes)
     
    !Zooplankton messy feeding  
-    C_ZOOMessyfeeding = grazing_carbonMesoZoo*self%Messy_feeding_MesoZoo
-    N_ZOOMessyfeeding = grazing_nitrogenZoo*self%Messy_feeding_MesoZoo
+    Messy_feeding_C = Grazing_C*self%mess_prey_mes
+    Messy_feeding_N = Grazing_N*self%mess_prey_mes
     
    ! Food threshold elemental ratio 
-    NCrfoodZooref = self%Ass_Eff_OnCarbon*self%efficiency_growth_MesoZoo/self%Ass_Eff_OnNitrogen*self%NCrMesoZoo
+    Ratio_N_C_thr = self%eff_ass_zoo_c*self%eff_gr_mes_c/self%eff_ass_zoo_n*self%r_n_c_mes
     
    ! Growth and extrection as a function of N:C ratio of food 
-    if (NCrfoodMesoZoo < NCrfoodZooref) then 
-      ZOOGrowth = self%Ass_Eff_OnNitrogen*N_ZOOIntake/self%NCrMesoZoo
-      N_ZOOExcr = 0.0
+    if (Ratio_N_C < Ratio_N_C_thr) then 
+      Growth = self%eff_ass_zoo_n*Intake_N/self%r_n_c_mes
+      Excretion = 0.0
     else 
-      ZOOGrowth = self%Ass_Eff_OnCarbon*self%efficiency_growth_MesoZoo*C_ZOOIntake
-      N_ZOOExcr = C_ZOOIntake*(self%Ass_Eff_OnNitrogen*NCrfoodMesoZoo-self%Ass_Eff_OnCarbon*self%efficiency_growth_MesoZoo*self%NCrMesoZoo)
+      Growth = self%eff_ass_zoo_c*self%eff_gr_mes_c*Intake_C
+      Excretion = Intake_C*(self%eff_ass_zoo_n*Ratio_N_C-self%eff_ass_zoo_c*self%eff_gr_mes_c*self%r_n_c_mes)
     endif    
     
    ! Zooplankton respiration 
-    C_ZOOResp = self%Ass_Eff_OnCarbon*C_ZOOIntake-ZOOGrowth
+    Respiration_C = self%eff_ass_zoo_c*Intake_C-Growth
     
    ! Zooplankton egestion 
-    C_ZOOEgest = ZOOEgestion(Ass_Eff_OnCarbon,C_ZOOIntake)
-    N_ZOOEgest = ZOOEgestion(Ass_Eff_OnNitrogen,N_ZOOIntake)
-    
-   phy_to_ZOO = phy_to_ZOO + grazing_carbonMesoZoo/FluxPrey_carbon*self%Capt_eff_MesoZoo_Flagellates*CFL+ grazing_carbonMesoZoo/FluxPrey_carbon*self%Capt_eff_MesoZoo_Emiliana *CEM+ grazing_carbonMesoZoo/FluxPrey_carbon*self%Capt_eff_MesoZoo_Diatoms *CDI
-   bac_to_ZOO = grazing_carbonMesoZoo/FluxPrey_carbon*self%Capt_eff_MesoZoo_BAC * BAC
-   POC_to_ZOO = grazing_carbonMesoZoo/FluxPrey_carbon*self%Capt_eff_MesoZoo_POM * POC
+    Egestion_C = ZOOEgestion(self%eff_ass_zoo_c,Intake_C)
+    Egestion_N = ZOOEgestion(self%eff_ass_zoo_n,Intake_N)
 
    ! Zooplankton mortality rate  
-    C_ZOOMort = Mortality_consument(HalfSatMort_MesoZoo,NLin_Mort_MesoZoo,expmortMesoZoo,DOXsatmort,Mortanoxic,tf,MES,DOX)
-    N_ZOOMort  = C_ZOOMort * self%NCrMesoZoo
+    Mortality_C = Mortality_consument(self%ks_mort_mes,self%momax_mes,self%moexp_mes,self%doxsatmort,self%mo_anox_pred,tf,MES,DOX)
+    Mortality_N  = Mortality_C * self%r_n_c_mes
     
    ! Zoooplankton C increases by intake of preys (growth minus messy feeding) and decreases by egestion (where is it?), respiration, mortality 
 
-   _ADD_SOURCE_(self%id_mes, ZOOGrowth - C_ZOOMort) 
+   _ADD_SOURCE_(self%id_mes, Growth - Mortality_C) 
     
    ! Particulate detritus pool if formed from non-assimilated grazed food and dead zooplatkton 
    ! Dissolved orgaqnic matter is formed by messy feeding taking into account labile/semi-labile partitioning; Ammonium is excreyed by zooplankton
    ! Grazing on phytoplankton, detritus and bacteria; When eating diatoms, zooplankton, ejects silicate as silicious_detritus
 
-   _ADD_SOURCE_(self%id_poc, C_ZOOEgest + C_ZOOMort - grazing_carbonMesoZoo/FluxPrey_carbon*self%Capt_eff_MesoZoo_POM*POC) 
-   _ADD_SOURCE_(self%id_pon, N_ZOOEgest + N_ZOOMort - grazing_carbonMesoZoo/FluxPrey_carbon*self%Capt_eff_MesoZoo_POM*PON) 
-   _ADD_SOURCE_(self%id_dcl, self%labilefraction*C_ZOOMessyfeeding) 
-   _ADD_SOURCE_(self%id_dnl, self%labilefraction*N_ZOOMessyfeeding)
-   _ADD_SOURCE_(self%id_dcs, (1.0 - self%labilefraction)*C_ZOOMessyfeeding) 
-   _ADD_SOURCE_(self%id_dns, (1.0 - self%labilefraction)*N_ZOOMessyfeeding)
-   _ADD_SOURCE_(self%id_nhs, N_ZOOExcr) 
-   _ADD_SOURCE_(self%id_pho, N_ZOOExcr*self%PNRedfield)
-   _ADD_SOURCE_(self%id_cfl, -grazing_carbonMesoZoo/FluxPrey_carbon*self%Capt_eff_MesoZoo_Flagellates*CFL)
-   _ADD_SOURCE_(self%id_cem, -grazing_carbonMesoZoo/FluxPrey_carbon*self%Capt_eff_MesoZoo_Emiliana*CEM)
-   _ADD_SOURCE_(self%id_cdi, -grazing_carbonMesoZoo/FluxPrey_carbon*self%Capt_eff_MesoZoo_Diatoms*CDI)
-   _ADD_SOURCE_(self%id_nfl, -grazing_carbonMesoZoo/FluxPrey_carbon*self%Capt_eff_MesoZoo_Flagellates*NFL) 
-   _ADD_SOURCE_(self%id_nem, -grazing_carbonMesoZoo/FluxPrey_carbon*self%Capt_eff_MesoZoo_Emiliana*NEM) 
-   _ADD_SOURCE_(self%id_ndi, -grazing_carbonMesoZoo/FluxPrey_carbon*self%Capt_eff_MesoZoo_Diatoms*NDI)
-   _ADD_SOURCE_(self%id_sid, grazing_carbonMesoZoo/FluxPrey_carbon*self%Capt_eff_MesoZoo_Diatoms*NDI*self%SiNrDiatoms)
-   _ADD_SOURCE_(self%id_mic, -grazing_carbonMesoZoo/FluxPrey_carbon*self%Capt_eff_MesoZoo_MicroZoo*MIC)
-   _ADD_SOURCE_(self%id_bac, -grazing_carbonMesoZoo/FluxPrey_carbon*self%Capt_eff_MesoZoo_BAC*BAC)  
-   _ADD_SOURCE_(self%id_dox, -self%OCr*C_ZOOResp) 
-   _ADD_SOURCE_(self%id_dic, C_ZOOResp) 
+   _ADD_SOURCE_(self%id_poc, Egestion_C + Mortality_C - Grazing_C/Prey_C*self%eff_mes_pom*POC) 
+   _ADD_SOURCE_(self%id_pon, Egestion_N + Mortality_N - Grazing_C/Prey_C*self%eff_mes_pom*PON) 
+   _ADD_SOURCE_(self%id_dcl, self%f_dl_dom*Messy_feeding_C) 
+   _ADD_SOURCE_(self%id_dnl, self%f_dl_dom*Messy_feeding_N)
+   _ADD_SOURCE_(self%id_dcs, (1.0 - self%f_dl_dom)*Messy_feeding_C) 
+   _ADD_SOURCE_(self%id_dns, (1.0 - self%f_dl_dom)*Messy_feeding_N)
+   _ADD_SOURCE_(self%id_nhs, Excretion) 
+   _ADD_SOURCE_(self%id_pho, Excretion*self%r_p_n_redfield)
+   _ADD_SOURCE_(self%id_cfl, -Grazing_C/Prey_C*self%eff_mes_fla*CFL)
+   _ADD_SOURCE_(self%id_cem, -Grazing_C/Prey_C*self%eff_mes_emi*CEM)
+   _ADD_SOURCE_(self%id_cdi, -Grazing_C/Prey_C*self%eff_mes_dia*CDI)
+   _ADD_SOURCE_(self%id_nfl, -Grazing_C/Prey_C*self%eff_mes_fla*NFL) 
+   _ADD_SOURCE_(self%id_nem, -Grazing_C/Prey_C*self%eff_mes_emi*NEM) 
+   _ADD_SOURCE_(self%id_ndi, -Grazing_C/Prey_C*self%eff_mes_dia*NDI)
+   _ADD_SOURCE_(self%id_sid, Grazing_C/Prey_C*self%eff_mes_dia*NDI*self%r_si_n_dia)
+   _ADD_SOURCE_(self%id_mic, -Grazing_C/Prey_C*self%eff_mes_mic*MIC)
+   _ADD_SOURCE_(self%id_bac, -Grazing_C/Prey_C*self%eff_mes_bac*BAC)  
+   _ADD_SOURCE_(self%id_dox, -self%r_o2_c_resp*Respiration_C) 
+   _ADD_SOURCE_(self%id_dic, Respiration_C) 
 
 
-   _SET_DIAGNOSTIC_(self%id_Totalrespiration_ZOO, C_ZOOResp)
-   _SET_DIAGNOSTIC_(self%id_phy_to_ZOO, phy_to_ZOO)
-   _SET_DIAGNOSTIC_(self%id_bac_to_ZOO, bac_to_ZOO)
-   _SET_DIAGNOSTIC_(self%id_POC_to_ZOO, POC_to_ZOO)
+   _SET_DIAGNOSTIC_(self%id_respiration_zoo, Respiration_C)
+   _SET_DIAGNOSTIC_(self%id_zoo_on_phy, Grazing_C/Prey_C*self%eff_mes_fla*CFL+ Grazing_C/Prey_C*self%eff_mes_emi *CEM+ Grazing_C/Prey_C*self%eff_mes_dia *CDI)
+   _SET_DIAGNOSTIC_(self%id_zoo_on_bac, Grazing_C/Prey_C*self%eff_mes_bac * BAC)
+   _SET_DIAGNOSTIC_(self%id_zoo_on_poc, Grazing_C/Prey_C*self%eff_mes_pom * POC)
 
    _LOOP_END_
 
