@@ -30,9 +30,10 @@
 !growth, respiration and excretion so as to maintain their internal ratio.
 !--------------------------------------------------------------------*
 
-   module fabm_ulg_Mesozoo 
+   module fabm_ulg_mesozoo 
  
    use fabm_types 
+   use fabm_ulg_bamhbi_split_utilities
  
    implicit none 
  
@@ -40,7 +41,7 @@
    private 
  
 ! PUBLIC DERIVED TYPES: 
-   type,extends(type_base_model),public :: type_ulg_Mesozoo 
+   type,extends(type_base_model),public :: type_ulg_mesozoo 
       type (type_state_variable_id)         :: id_mes
       type (type_state_variable_id)         :: id_bac,id_cdi,id_cem,id_cfl,id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_mic,id_ndi,id_nem,id_nfl,id_nhs,id_pho,id_poc,id_pon,id_sid
       type (type_dependency_id)             :: id_temp 
@@ -62,7 +63,6 @@
       procedure :: do_bottom 
       procedure :: check_surface_state 
       procedure :: check_bottom_state 
-      procedure :: get_light_extinction 
    end type
 
    real(rk), parameter :: secs_pr_day = 86400.0_rk
@@ -72,7 +72,7 @@
    ! Initialise the Mesozoo model
 
    subroutine initialize(self,configunit)
-   class (type_ulg_Mesozoo), intent(inout), target :: self
+   class (type_ulg_mesozoo), intent(inout), target :: self
    integer,                        intent(in)          :: configunit
 
 
@@ -103,13 +103,13 @@
    call self%get_parameter(self%eff_mes_mic, 'eff_mes_mic', '-', 'Capture efficiency of MES on MIC', default=1.0_rk) 
    call self%get_parameter(self%eff_mes_pom, 'eff_mes_pom', '-', 'Capture efficiency of MES on POM', default=0.8_rk) 
    call self%get_parameter(self%f_dl_dom, 'f_dl_dom', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
-   call self%get_parameter(self%gmax_mes, 'gmax_mes', 'd-1', 'Maximum grazing rate of MES', default=1.2_rk) 
+   call self%get_parameter(self%gmax_mes, 'gmax_mes', 'd-1', 'Maximum grazing rate of MES', default=1.2_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%ks_mort_mes, 'ks_mort_mes', 'mmolC m-3', '', default=1.0_rk) 
    call self%get_parameter(self%ks_prey_mec, 'ks_prey_mec', 'mmolC m-3', 'Half-saturation constant for MEC grazing', default=5.0_rk) 
    call self%get_parameter(self%mess_prey_mes, 'mess_prey_mes', '-', 'Messy feeding fraction of MES grazing ', default=0.23_rk) 
-   call self%get_parameter(self%mo_anox_pred, 'mo_anox_pred', 'd-1', 'Mortality rate in anoxia', default=0.25_rk) 
-   call self%get_parameter(self%moexp_mes, 'moexp_mes', '(?)', 'Order of the non-linearity of mortality rate for MES', default=2.0_rk) 
-   call self%get_parameter(self%momax_mes, 'momax_mes', 'd-1', 'Maximum mortality rate of MES', default=0.3_rk) 
+   call self%get_parameter(self%mo_anox_pred, 'mo_anox_pred', 'd-1', 'Mortality rate in anoxia', default=0.25_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%moexp_mes, 'moexp_mes', '-', 'Order of the non-linearity of mortality rate for MES', default=2.0_rk) 
+   call self%get_parameter(self%momax_mes, 'momax_mes', 'd-1', 'Maximum mortality rate of MES', default=0.3_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%q10_zoo, 'q10_zoo', '-', 'Temperature factor Soetart et al., 2001', default=2.0_rk) 
    call self%get_parameter(self%r_n_c_bac, 'r_n_c_bac', 'molN molC-1', 'N:C', default=0.196_rk) 
    call self%get_parameter(self%r_n_c_mes, 'r_n_c_mes', 'molN molC-1', 'N:C molar ratio in MES', default=0.21_rk) 
@@ -119,9 +119,8 @@
 
    ! Register state variables 
 
-   call self%register_state_variable(self%id_mes, 'MES'  & 
-         , 'mmol C m-3', 'Mesozooplakton biomass' & 
-         minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
+   call self%register_state_variable(self%id_mes, 'MES', 'mmol C m-3', 'Mesozooplakton biomass', minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
+
    call self%register_state_dependency(self%id_bac, 'Bacterial biomass', 'mmol C m-3') 
    call self%register_state_dependency(self%id_cdi, 'Diatom biomass in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_cem, 'Small flagellate biomass in carbon', 'mmol C m-3') 
@@ -157,14 +156,14 @@
       'Total Respiration of all zooplankton', output=output_instantaneous) 
    return 
 
-99 call self%fatal_error('Mesozoo', 'Error reading namelist ulg_Mesozoo') 
+99 call self%fatal_error('Mesozoo', 'Error reading namelist ulg_mesozoo') 
 
    end subroutine initialize 
 
 
    ! Right hand sides of Mesozoo model
    subroutine do(self,_ARGUMENTS_DO_)
-   class (type_ulg_Mesozoo), intent(in) :: self
+   class (type_ulg_mesozoo), intent(in) :: self
    _DECLARE_ARGUMENTS_DO_
 
       real(rk) ::  BAC,CDI,CEM,CFL,DCL,DCS,DIC,DNL,DNS,DOX,MIC,NDI,NEM,NFL,NHS,PHO,POC,PON,SID
@@ -196,7 +195,7 @@
    _GET_(self%id_bac,BAC)       ! Bacterial biomass
    _GET_(self%id_cdi,CDI)       ! Diatom biomass in carbon
    _GET_(self%id_cem,CEM)       ! Small flagellate biomass in carbon
-   _GET_(self%id_cfl,CFL)       ! Small flagellate biomass in carbon
+   _GET_(self%id_cfl,CFL)       ! Large flagellate biomass in carbon
    _GET_(self%id_dcl,DCL)       ! Labile detritus concentration in carbon
    _GET_(self%id_dcs,DCS)       ! Semi-labile detritus concentration in carbon
    _GET_(self%id_dic,DIC)       ! Dissolved inorganic carbon concentration
@@ -303,4 +302,4 @@
    end subroutine do
 
 
-   end module fabm_ulg_Mesozoo 
+   end module fabm_ulg_mesozoo 

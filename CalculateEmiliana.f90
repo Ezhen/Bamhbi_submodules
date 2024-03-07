@@ -19,9 +19,10 @@
 !
 !--------------------------------------------------------------------*
 
-   module fabm_ulg_Emiliana 
+   module fabm_ulg_emiliana 
  
    use fabm_types 
+   use fabm_ulg_bamhbi_split_utilities
  
    implicit none 
  
@@ -29,7 +30,7 @@
    private 
  
 ! PUBLIC DERIVED TYPES: 
-   type,extends(type_base_model),public :: type_ulg_Emiliana 
+   type,extends(type_base_model),public :: type_ulg_emiliana 
       type (type_state_variable_id)         :: id_cem,id_nem
       type (type_state_variable_id)         :: id_cfl,id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_nfl,id_nhs,id_nos,id_pho,id_poc,id_pon
       type (type_dependency_id)             :: id_par,id_temp 
@@ -37,12 +38,13 @@
 
 !     Model parameters 
       real(rk)     :: exc_extra_doc, f_dl_dom, f_dl_phy_ex, f_dl_phy_mo
-      real(rk)     :: f_leak_phy, f_pp_resp_emi, ki_nhs_phy, ks_nhs_emi
-      real(rk)     :: ks_nos_emi, ks_po4_emi, mo_emi, mumax_emi
-      real(rk)     :: pi_emi, q10_phy, r_o2_c_resp, r_o2_nhs_nitr
-      real(rk)     :: r_p_n_redfield, respb_emi, rmax_chl_n_emi
-      real(rk)     :: rmax_n_c_emi, rmin_chl_n_emi, rmin_n_c_emi
-      real(rk)     :: umax_nhs_emi, umax_nos_emi, umax_po4_emi
+      real(rk)     :: f_leak_phy, f_pp_resp_emi, k_d, ki_nhs_phy
+      real(rk)     :: ks_nhs_emi, ks_nos_emi, ks_po4_emi, mo_emi
+      real(rk)     :: mumax_emi, pi_emi, q10_phy, r_o2_c_resp
+      real(rk)     :: r_o2_nhs_nitr, r_p_n_redfield, respb_emi
+      real(rk)     :: rmax_chl_n_emi, rmax_n_c_emi, rmin_chl_n_emi
+      real(rk)     :: rmin_n_c_emi, umax_nhs_emi, umax_nos_emi
+      real(rk)     :: umax_po4_emi, w_emi
 
       contains 
 
@@ -61,22 +63,22 @@
    ! Initialise the Emiliana model
 
    subroutine initialize(self,configunit)
-   class (type_ulg_Emiliana), intent(inout), target :: self
+   class (type_ulg_emiliana), intent(inout), target :: self
    integer,                        intent(in)          :: configunit
 
 
 
    namelist /ulg_Emiliana/ exc_extra_doc, 	 & 
                       f_dl_dom, f_dl_phy_ex, f_dl_phy_mo, 	 & 
-                      f_leak_phy, f_pp_resp_emi, ki_nhs_phy, 	 & 
-                      ks_nhs_emi, ks_nos_emi, ks_po4_emi, 	 & 
-                      mo_emi, mumax_emi, pi_emi, q10_phy, 	 & 
-                      r_o2_c_resp, r_o2_nhs_nitr, 	 & 
+                      f_leak_phy, f_pp_resp_emi, k_d, 	 & 
+                      ki_nhs_phy, ks_nhs_emi, ks_nos_emi, 	 & 
+                      ks_po4_emi, mo_emi, mumax_emi, pi_emi, 	 & 
+                      q10_phy, r_o2_c_resp, r_o2_nhs_nitr, 	 & 
                       r_p_n_redfield, respb_emi, 	 & 
                       rmax_chl_n_emi, rmax_n_c_emi, 	 & 
                       rmin_chl_n_emi, rmin_n_c_emi, 	 & 
                       umax_nhs_emi, umax_nos_emi, 	 & 
-                      umax_po4_emi
+                      umax_po4_emi, w_emi
 
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
@@ -87,34 +89,33 @@
    call self%get_parameter(self%f_dl_phy_mo, 'f_dl_phy_mo', '-', 'DOM fraction of phytoplankton mortality', default=0.34_rk) 
    call self%get_parameter(self%f_leak_phy, 'f_leak_phy', '-', 'Phytoplankton leakage fraction', default=0.02_rk) 
    call self%get_parameter(self%f_pp_resp_emi, 'f_pp_resp_emi', '-', 'Part of primary production used for respiration by EM ', default=0.1_rk) 
+   call self%get_parameter(self%k_d, 'k_d', 'm-1', 'Background light attanuation coefficient', default=0.03_rk) 
    call self%get_parameter(self%ki_nhs_phy, 'ki_nhs_phy', 'mmolN m-3', 'Inhib. constant of NHS for NOS uptake by PHY', default=0.5_rk) 
    call self%get_parameter(self%ks_nhs_emi, 'ks_nhs_emi', 'mmolN m-3', 'Half-saturation constant for NHS uptake by EM', default=0.05_rk) 
    call self%get_parameter(self%ks_nos_emi, 'ks_nos_emi', 'mmolN m-3', 'Half-saturation constant for NOS uptake by EM', default=0.05_rk) 
    call self%get_parameter(self%ks_po4_emi, 'ks_po4_emi', 'mmolP m-3', 'Half-saturation constant for PO4 uptake by EM', default=0.02_rk) 
-   call self%get_parameter(self%mo_emi, 'mo_emi', 'd-1', 'Mortality rate of EM', default=0.03_rk) 
-   call self%get_parameter(self%mumax_emi, 'mumax_emi', 'd-1', 'Maximum specific growth rate of EM', default=2.5_rk) 
+   call self%get_parameter(self%mo_emi, 'mo_emi', 'd-1', 'Mortality rate of EM', default=0.03_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%mumax_emi, 'mumax_emi', 'd-1', 'Maximum specific growth rate of EM', default=2.5_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%pi_emi, 'pi_emi', 'm2 W-1 d-1', 'Initial slope of photosynthesis-light curve for EM', default=0.3_rk) 
    call self%get_parameter(self%q10_phy, 'q10_phy', '-', 'Temperature factor', default=2.0_rk) 
    call self%get_parameter(self%r_o2_c_resp, 'r_o2_c_resp', 'molO2 molC-1', 'O2:C ratio of respiration process', default=1.0_rk) 
    call self%get_parameter(self%r_o2_nhs_nitr, 'r_o2_nhs_nitr', 'molO2 molNS-1', 'O2:NHS ratio in NHS oxidation in nitrification', default=2.0_rk) 
    call self%get_parameter(self%r_p_n_redfield, 'r_p_n_redfield', 'molP molN-1', 'N:P Redfield ratio in PHY', default=0.0625_rk) 
-   call self%get_parameter(self%respb_emi, 'respb_emi', 'd-1', 'Basal respiration rate of EM', default=0.009_rk) 
+   call self%get_parameter(self%respb_emi, 'respb_emi', 'd-1', 'Basal respiration rate of EM', default=0.009_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%rmax_chl_n_emi, 'rmax_chl_n_emi', 'g Chla molN-1', 'Maximum Chl:N ratio in EM', default=2.0_rk) 
    call self%get_parameter(self%rmax_n_c_emi, 'rmax_n_c_emi', 'molN molC-1', 'Maximum N:C ratio in EM', default=0.2_rk) 
    call self%get_parameter(self%rmin_chl_n_emi, 'rmin_chl_n_emi', 'g Chla molN-1', 'Minimum Chl:N ratio in EM', default=1.0_rk) 
    call self%get_parameter(self%rmin_n_c_emi, 'rmin_n_c_emi', 'molN molC-1', 'Minimum N:C ratio in EM', default=0.05_rk) 
-   call self%get_parameter(self%umax_nhs_emi, 'umax_nhs_emi', 'molN molC-1 d-1', 'Maximal NHS uptake rate by EM', default=1.5_rk) 
-   call self%get_parameter(self%umax_nos_emi, 'umax_nos_emi', 'molN molC-1 d-1', 'Maximal NOS uptake rate by EM', default=1.5_rk) 
-   call self%get_parameter(self%umax_po4_emi, 'umax_po4_emi', 'molP molC-1 d-1', 'Maximal PO4 uptake rate by EM', default=0.09375_rk) 
+   call self%get_parameter(self%umax_nhs_emi, 'umax_nhs_emi', 'molN molC-1 d-1', 'Maximal NHS uptake rate by EM', default=1.5_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%umax_nos_emi, 'umax_nos_emi', 'molN molC-1 d-1', 'Maximal NOS uptake rate by EM', default=1.5_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%umax_po4_emi, 'umax_po4_emi', 'molP molC-1 d-1', 'Maximal PO4 uptake rate by EM', default=0.09375_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%w_emi, 'w_emi', 'm d-1', 'Sinking velocity of EM', default=-1.5_rk) 
 
    ! Register state variables 
 
-   call self%register_state_variable(self%id_cem, 'CEM'  & 
-         , 'mmol C m-3', 'Small flagellate biomass in carbon' & 
-         minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
-   call self%register_state_variable(self%id_nem, 'NEM'  & 
-         , 'mmol N m-3', 'Small flagellate biomass in nitrogen' & 
-         minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
+   call self%register_state_variable(self%id_cem, 'CEM', 'mmol C m-3', 'Small flagellate biomass in carbon', minimum=0.0e-7_rk, vertical_movement=self%w_emi) 
+   call self%register_state_variable(self%id_nem, 'NEM', 'mmol N m-3', 'Small flagellate biomass in nitrogen', minimum=0.0e-7_rk, vertical_movement=self%w_emi) 
+
    call self%register_state_dependency(self%id_cfl, 'Small flagellate biomass in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_dcl, 'Labile detritus concentration in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_dcs, 'Semi-labile detritus concentration in carbon', 'mmol C m-3') 
@@ -147,14 +148,14 @@
       'Total Respiration of Emiliana', output=output_instantaneous) 
    return 
 
-99 call self%fatal_error('Emiliana', 'Error reading namelist ulg_Emiliana') 
+99 call self%fatal_error('Emiliana', 'Error reading namelist ulg_emiliana') 
 
    end subroutine initialize 
 
 
    ! Right hand sides of Emiliana model
    subroutine do(self,_ARGUMENTS_DO_)
-   class (type_ulg_Emiliana), intent(in) :: self
+   class (type_ulg_emiliana), intent(in) :: self
    _DECLARE_ARGUMENTS_DO_
 
       real(rk) ::  CFL,DCL,DCS,DIC,DNL,DNS,DOX,NFL,NHS,NOS,PHO,POC,PON
@@ -187,7 +188,7 @@
    ! Retrieve current (local) state variable values.
    _GET_(self%id_cem,CEM)       ! Small flagellate biomass in carbon
    _GET_(self%id_nem,NEM)       ! Small flagellate biomass in nitrogen
-   _GET_(self%id_cfl,CFL)       ! Small flagellate biomass in carbon
+   _GET_(self%id_cfl,CFL)       ! Large flagellate biomass in carbon
    _GET_(self%id_dcl,DCL)       ! Labile detritus concentration in carbon
    _GET_(self%id_dcs,DCS)       ! Semi-labile detritus concentration in carbon
    _GET_(self%id_dic,DIC)       ! Dissolved inorganic carbon concentration
@@ -292,5 +293,23 @@
 
    end subroutine do
 
+   subroutine get_light_extinction(self,_ARGUMENTS_GET_EXTINCTION_)
 
-   end module fabm_ulg_Emiliana 
+! Temporary light extintion function (from Jorn's)
+   class (type_ulg_emiliana), intent(in) :: self
+   _DECLARE_ARGUMENTS_GET_EXTINCTION_
+
+   real(rk)                     :: nem
+
+   _LOOP_BEGIN_
+
+   _GET_(self%id_nem,NEM)
+
+   ! Self-shading with explicit contribution from small flagellates
+   _SET_EXTINCTION_(self%k_d*nem)
+
+   _LOOP_END_
+
+   end subroutine get_light_extinction
+
+   end module fabm_ulg_emiliana 

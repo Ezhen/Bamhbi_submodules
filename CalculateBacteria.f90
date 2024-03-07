@@ -31,9 +31,10 @@
 ! DOM when the C/N ratio of DOM is high.
 !######################################################################
 
-   module fabm_ulg_Bacteria 
+   module fabm_ulg_bacteria 
  
    use fabm_types 
+   use fabm_ulg_bamhbi_split_utilities
  
    implicit none 
  
@@ -41,7 +42,7 @@
    private 
  
 ! PUBLIC DERIVED TYPES: 
-   type,extends(type_base_model),public :: type_ulg_Bacteria 
+   type,extends(type_base_model),public :: type_ulg_bacteria 
       type (type_state_variable_id)         :: id_bac
       type (type_state_variable_id)         :: id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_nhs,id_nos,id_odu,id_pho
       type (type_dependency_id)             :: id_temp 
@@ -62,7 +63,6 @@
       procedure :: do_bottom 
       procedure :: check_surface_state 
       procedure :: check_bottom_state 
-      procedure :: get_light_extinction 
    end type
 
    real(rk), parameter :: secs_pr_day = 86400.0_rk
@@ -72,7 +72,7 @@
    ! Initialise the Bacteria model
 
    subroutine initialize(self,configunit)
-   class (type_ulg_Bacteria), intent(inout), target :: self
+   class (type_ulg_bacteria), intent(inout), target :: self
    integer,                        intent(in)          :: configunit
 
 
@@ -104,8 +104,45 @@
    call self%get_parameter(self%ks_odu_iron, 'ks_odu_iron', 'mmolFe m-3', 'Half-sat. constant for iron lim. in solid ODU formation', default=100.0_rk) 
    call self%get_parameter(self%ks_oxic_o2, 'ks_oxic_o2', 'mmolO2 m-3', 'Half-sat. constant for O2 lim. in oxic min.', default=3.0_rk) 
    call self%get_parameter(self%ks_po4_bac, 'ks_po4_bac', 'mmolP m-3', 'Half-saturation constant for PO4 uptake by BAC', default=0.031_rk) 
-   call self%get_parameter(self%mo_bac, 'mo_bac', 'd-1', 'Bacteria natural mortality', default=0.05_rk) 
-   call self%get_parameter(self%mumax_bac, 'mumax_bac', 'd-1', 'Maximum labile DOC or NHS uptake by BAC', default=0.000154 (?)_rk) 
+   call self%get_parameter(self%mo_bac, 'mo_bac', 'd-1', 'Bacteria natural mortality', default=0.05_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%mumax_bac, 'mumax_bac', 'd-1', 'Maximum labile DOC or NHS uptake by BAC', default=0.000154_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%q10_bac, 'q10_bac', '-', 'Temperature factor for BAC', default=2.0_rk) 
+   call self%get_parameter(self%r_n_c_bac, 'r_n_c_bac', 'molN molC-1', 'N:C', default=0.196_rk) 
+   call self%get_parameter(self%r_n_c_denit, 'r_n_c_denit', 'molN molC-1', 'N:C ratio of denitrification', default=0.8_rk) 
+   call self%get_parameter(self%r_o2_c_resp, 'r_o2_c_resp', 'molO2 molC-1', 'O2:C ratio of respiration process', default=1.0_rk) 
+   call self%get_parameter(self%r_odu_c_anox, 'r_odu_c_anox', 'molODU molC-1', 'ODU:C ratio in anoxic remineralization', default=1.0_rk) 
+   call self%get_parameter(self%r_p_n_redfield, 'r_p_n_redfield', 'molP molN-1', 'N:P Redfield ratio in PHY', default=0.0625_rk) 
+
+
+   namelist /ulg_Bacteria/ eff_gr_bac_c, 	 & 
+                      f_dl_dom, f_solid_odu, i1_curve, 	 & 
+                      i2_curve, iron, ki_anox_nos, ki_anox_o2, 	 & 
+                      ki_denit_o2, ks_denitr_nos, ks_dls_bac, 	 & 
+                      ks_nhs_bac, ks_odu_iron, ks_oxic_o2, 	 & 
+                      ks_po4_bac, mo_bac, mumax_bac, q10_bac, 	 & 
+                      r_n_c_bac, r_n_c_denit, r_o2_c_resp, 	 & 
+                      r_odu_c_anox, r_p_n_redfield
+
+   ! Store parameter values in our own derived type 
+   ! NB: all rates must be provided in values per day, 
+   ! and are converted here to values per second. 
+   call self%get_parameter(self%eff_gr_bac_c, 'eff_gr_bac_c', '-', 'BAC gross growth efficiency on C', default=0.17_rk) 
+   call self%get_parameter(self%f_dl_dom, 'f_dl_dom', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
+   call self%get_parameter(self%f_solid_odu, 'f_solid_odu', '-', 'Percentage of solid ODU formation', default=0.2_rk) 
+   call self%get_parameter(self%i1_curve, 'i1_curve', '-', 'Parameter of the curve simulating the iron concentration', default=25000.0_rk) 
+   call self%get_parameter(self%i2_curve, 'i2_curve', '-', 'Parameter of the curve simulating the iron c', default=50.0_rk) 
+   call self%get_parameter(self%iron, 'iron', 'mmolFe m-3', 'Concentration of iron in surface water', default=10.0_rk) 
+   call self%get_parameter(self%ki_anox_nos, 'ki_anox_nos', 'mmolN m-3', 'Half-sat. constant for NOS inhibition in anoxic remineralization', default=0.0005_rk) 
+   call self%get_parameter(self%ki_anox_o2, 'ki_anox_o2', 'mmolO2 m-3', 'Half-sat. constant for O2 inhibition in anoxic remineralization', default=0.0005_rk) 
+   call self%get_parameter(self%ki_denit_o2, 'ki_denit_o2', 'mmolO2 m-3', 'Half-sat. constant for O2 inhibition in denitrification', default=0.5_rk) 
+   call self%get_parameter(self%ks_denitr_nos, 'ks_denitr_nos', 'mmolN m-3', 'Half-sat. constant for NOS lim. in denitrif.', default=0.3_rk) 
+   call self%get_parameter(self%ks_dls_bac, 'ks_dls_bac', 'mmolC m-3', 'Half-sat. constant for DLC uptake by BAC', default=25.0_rk) 
+   call self%get_parameter(self%ks_nhs_bac, 'ks_nhs_bac', 'mmolN m-3', 'Half-sat. constant for NHS uptake by BAC', default=0.5_rk) 
+   call self%get_parameter(self%ks_odu_iron, 'ks_odu_iron', 'mmolFe m-3', 'Half-sat. constant for iron lim. in solid ODU formation', default=100.0_rk) 
+   call self%get_parameter(self%ks_oxic_o2, 'ks_oxic_o2', 'mmolO2 m-3', 'Half-sat. constant for O2 lim. in oxic min.', default=3.0_rk) 
+   call self%get_parameter(self%ks_po4_bac, 'ks_po4_bac', 'mmolP m-3', 'Half-saturation constant for PO4 uptake by BAC', default=0.031_rk) 
+   call self%get_parameter(self%mo_bac, 'mo_bac', 'd-1', 'Bacteria natural mortality', default=0.05_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%mumax_bac, 'mumax_bac', 'd-1', 'Maximum labile DOC or NHS uptake by BAC', default=0.000154_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%q10_bac, 'q10_bac', '-', 'Temperature factor for BAC', default=2.0_rk) 
    call self%get_parameter(self%r_n_c_bac, 'r_n_c_bac', 'molN molC-1', 'N:C', default=0.196_rk) 
    call self%get_parameter(self%r_n_c_denit, 'r_n_c_denit', 'molN molC-1', 'N:C ratio of denitrification', default=0.8_rk) 
@@ -115,9 +152,8 @@
 
    ! Register state variables 
 
-   call self%register_state_variable(self%id_bac, 'BAC'  & 
-         , 'mmol C m-3', 'Bacterial biomass' & 
-         minimum=0.0e-7_rk)
+   call self%register_state_variable(self%id_bac, 'BAC', 'mmol C m-3', 'Bacterial biomass',minimum=0.0e-7_rk)
+
    call self%register_state_dependency(self%id_dcl, 'Labile detritus concentration in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_dcs, 'Semi-labile detritus concentration in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_dic, 'Dissolved inorganic carbon concentration', 'mmol C m-3') 
@@ -146,14 +182,14 @@
       'Uptake of labile DOC by bacteria', output=output_instantaneous) 
    return 
 
-99 call self%fatal_error('Bacteria', 'Error reading namelist ulg_Bacteria') 
+99 call self%fatal_error('Bacteria', 'Error reading namelist ulg_bacteria') 
 
    end subroutine initialize 
 
 
    ! Right hand sides of Bacteria model
    subroutine do(self,_ARGUMENTS_DO_)
-   class (type_ulg_Bacteria), intent(in) :: self
+   class (type_ulg_bacteria), intent(in) :: self
    _DECLARE_ARGUMENTS_DO_
 
       real(rk) ::  DCL,DCS,DIC,DNL,DNS,DOX,NHS,NOS,ODU,PHO
@@ -268,4 +304,4 @@
    end subroutine do
 
 
-   end module fabm_ulg_Bacteria 
+   end module fabm_ulg_bacteria 

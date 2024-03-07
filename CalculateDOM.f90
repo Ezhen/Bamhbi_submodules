@@ -30,9 +30,10 @@
 ! and detrital turnover>
 !--------------------------------------------------------------------
 
-   module fabm_ulg_DOM 
+   module fabm_ulg_dom 
  
    use fabm_types 
+   use fabm_ulg_bamhbi_split_utilities
  
    implicit none 
  
@@ -40,14 +41,14 @@
    private 
  
 ! PUBLIC DERIVED TYPES: 
-   type,extends(type_base_model),public :: type_ulg_DOM 
+   type,extends(type_base_model),public :: type_ulg_dom
       type (type_state_variable_id)         :: id_dcl,id_dcs,id_dnl,id_dns,id_poc,id_pon
       type (type_state_variable_id)         :: id_bac,id_dox
       type (type_dependency_id)             :: id_temp 
 
 !     Model parameters 
-      real(rk)     :: f_dl_dom, hmax_dsl, hmax_poc, hmax_pon, ks_dsc_bac
-      real(rk)     :: ks_hydr_o2, q10_che
+      real(rk)     :: f_dl_dom, hmax_dsl, hmax_poc, hmax_pon, k_d
+      real(rk)     :: ks_dsc_bac, ks_hydr_o2, q10_che, w_dom, w_pom
 
       contains 
 
@@ -66,46 +67,39 @@
    ! Initialise the DOM model
 
    subroutine initialize(self,configunit)
-   class (type_ulg_DOM), intent(inout), target :: self
+   class (type_ulg_dom), intent(inout), target :: self
    integer,                        intent(in)          :: configunit
 
 
 
    namelist /ulg_DOM/ f_dl_dom, 	 & 
-                      hmax_dsl, hmax_poc, hmax_pon, 	 & 
-                      ks_dsc_bac, ks_hydr_o2, q10_che
+                      hmax_dsl, hmax_poc, hmax_pon, k_d, 	 & 
+                      ks_dsc_bac, ks_hydr_o2, q10_che, w_dom, 	 & 
+                      w_pom
 
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
    call self%get_parameter(self%f_dl_dom, 'f_dl_dom', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
-   call self%get_parameter(self%hmax_dsl, 'hmax_dsl', 'd-1', 'Maximum DSL hydrolysis', default=4.0_rk) 
-   call self%get_parameter(self%hmax_poc, 'hmax_poc', 'd-1', 'POC hydrolysis rate', default=0.04_rk) 
-   call self%get_parameter(self%hmax_pon, 'hmax_pon', 'd-1', 'PON hydrolysis rate', default=0.055_rk) 
+   call self%get_parameter(self%hmax_dsl, 'hmax_dsl', 'd-1', 'Maximum DSL hydrolysis', default=4.0_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%hmax_poc, 'hmax_poc', 'd-1', 'POC hydrolysis rate', default=0.04_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%hmax_pon, 'hmax_pon', 'd-1', 'PON hydrolysis rate', default=0.055_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%k_d, 'k_d', 'm-1', 'Background light attanuation coefficient', default=0.03_rk) 
    call self%get_parameter(self%ks_dsc_bac, 'ks_dsc_bac', 'mmolC m-3', 'Half-sat. constant for DSC uptake by BAC', default=417.0_rk) 
    call self%get_parameter(self%ks_hydr_o2, 'ks_hydr_o2', 'mmolO2 m-3', 'Half-saturation constant for oxic hydrolysis rate', default=2.7_rk) 
    call self%get_parameter(self%q10_che, 'q10_che', '-', 'Temperature factor for chemical processes', default=2.0_rk) 
+   call self%get_parameter(self%w_dom, 'w_dom', 'm d-1', 'Sinking velocity of dissolved detritus', default=-1.0_rk) 
+   call self%get_parameter(self%w_pom, 'w_pom', 'm d-1', 'Sinking velocity of particulate detritus', default=-2.0_rk) 
 
    ! Register state variables 
 
-   call self%register_state_variable(self%id_dcl, 'DCL'  & 
-         , 'mmol C m-3', 'Labile detritus concentration in carbon' & 
-         minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
-   call self%register_state_variable(self%id_dcs, 'DCS'  & 
-         , 'mmol C m-3', 'Semi-labile detritus concentration in carbon' & 
-         minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
-   call self%register_state_variable(self%id_dnl, 'DNL'  & 
-         , 'mmol N m-3', 'Labile detritus concentration in nitrogen' & 
-         minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
-   call self%register_state_variable(self%id_dns, 'DNS'  & 
-         , 'mmol C m-3', 'Semi-labile detritus concentration in nitrogen' & 
-         minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
-   call self%register_state_variable(self%id_poc, 'POC'  & 
-         , 'mmol C m-3', 'Particulate organic carbon concentration' & 
-         minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
-   call self%register_state_variable(self%id_pon, 'PON'  & 
-         , 'mmol N m-3', 'Particulate organic nitrogen concentration' & 
-         minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
+   call self%register_state_variable(self%id_dcl, 'DCL', 'mmol C m-3', 'Labile detritus concentration in carbon',minimum=0.0e-7_rk, vertical_movement=self%w_dom) 
+   call self%register_state_variable(self%id_dcs, 'DCS', 'mmol C m-3', 'Semi-labile detritus concentration in carbon',minimum=0.0e-7_rk, vertical_movement=self%w_dom) 
+   call self%register_state_variable(self%id_dnl, 'DNL', 'mmol N m-3', 'Labile detritus concentration in nitrogen',minimum=0.0e-7_rk, vertical_movement=self%w_dom) 
+   call self%register_state_variable(self%id_dns, 'DNS', 'mmol C m-3', 'Semi-labile detritus concentration in nitrogen',minimum=0.0e-7_rk, vertical_movement=self%w_dom) 
+   call self%register_state_variable(self%id_poc, 'POC', 'mmol C m-3', 'Particulate organic carbon concentration',minimum=0.0e-7_rk, vertical_movement=self%w_pom) 
+   call self%register_state_variable(self%id_pon, 'PON', 'mmol N m-3', 'Particulate organic nitrogen concentration',minimum=0.0e-7_rk, vertical_movement=self%w_pom) 
+
    call self%register_state_dependency(self%id_bac, 'Bacterial biomass', 'mmol C m-3') 
    call self%register_state_dependency(self%id_dox, 'Dissolved oxygen concentration', 'mmol O2 m-3') 
 
@@ -114,14 +108,14 @@
 
    return 
 
-99 call self%fatal_error('DOM', 'Error reading namelist ulg_DOM') 
+99 call self%fatal_error('DOM', 'Error reading namelist ulg_dom') 
 
    end subroutine initialize 
 
 
    ! Right hand sides of DOM model
    subroutine do(self,_ARGUMENTS_DO_)
-   class (type_ulg_DOM), intent(in) :: self
+   class (type_ulg_dom), intent(in) :: self
    _DECLARE_ARGUMENTS_DO_
 
       real(rk) ::  BAC,DOX
@@ -173,4 +167,27 @@
    end subroutine do
 
 
-   end module fabm_ulg_DOM 
+
+   subroutine get_light_extinction(self,_ARGUMENTS_GET_EXTINCTION_)
+
+! Temporary light extintion function (from Jorn's)
+   class (type_ulg_dom), intent(in) :: self
+   _DECLARE_ARGUMENTS_GET_EXTINCTION_
+
+   real(rk)                     :: dnl, dns, pon
+
+   _LOOP_BEGIN_
+
+   _GET_(self%id_dnl,DNL)
+   _GET_(self%id_dns,DNS)
+   _GET_(self%id_pon,PON)
+
+   ! Self-shading with explicit contribution from background detritus concentration
+   _SET_EXTINCTION_(self%k_d*(dnl+dns+pon))
+
+   _LOOP_END_
+
+   end subroutine get_light_extinction
+
+
+   end module fabm_ulg_dom

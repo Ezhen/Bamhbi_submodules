@@ -20,9 +20,10 @@
 !
 !--------------------------------------------------------------------*
 
-   module fabm_ulg_Flagellates 
+   module fabm_ulg_flagellates 
  
    use fabm_types 
+   use fabm_ulg_bamhbi_split_utilities
  
    implicit none 
  
@@ -30,7 +31,7 @@
    private 
  
 ! PUBLIC DERIVED TYPES: 
-   type,extends(type_base_model),public :: type_ulg_Flagellates 
+   type,extends(type_base_model),public :: type_ulg_flagellates 
       type (type_state_variable_id)         :: id_cfl,id_nfl
       type (type_state_variable_id)         :: id_cem,id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_nem,id_nhs,id_nos,id_pho,id_poc,id_pon
       type (type_dependency_id)             :: id_par,id_temp 
@@ -38,12 +39,13 @@
 
 !     Model parameters 
       real(rk)     :: exc_extra_doc, f_dl_dom, f_dl_phy_ex, f_dl_phy_mo
-      real(rk)     :: f_leak_phy, f_pp_resp_fla, ki_nhs_phy, ks_nhs_fla
-      real(rk)     :: ks_nos_fla, ks_po4_fla, mo_fla, mumax_fla
-      real(rk)     :: pi_fla, q10_phy, r_o2_c_resp, r_o2_nhs_nitr
-      real(rk)     :: r_p_n_redfield, respb_fla, rmax_chl_n_fla
-      real(rk)     :: rmax_n_c_fla, rmin_chl_n_fla, rmin_n_c_fla
-      real(rk)     :: umax_nhs_fla, umax_nos_fla, umax_po4_fla
+      real(rk)     :: f_leak_phy, f_pp_resp_fla, k_d, ki_nhs_phy
+      real(rk)     :: ks_nhs_fla, ks_nos_fla, ks_po4_fla, mo_fla
+      real(rk)     :: mumax_fla, pi_fla, q10_phy, r_o2_c_resp
+      real(rk)     :: r_o2_nhs_nitr, r_p_n_redfield, respb_fla
+      real(rk)     :: rmax_chl_n_fla, rmax_n_c_fla, rmin_chl_n_fla
+      real(rk)     :: rmin_n_c_fla, umax_nhs_fla, umax_nos_fla
+      real(rk)     :: umax_po4_fla, w_fla
 
       contains 
 
@@ -62,22 +64,22 @@
    ! Initialise the Flagellates model
 
    subroutine initialize(self,configunit)
-   class (type_ulg_Flagellates), intent(inout), target :: self
+   class (type_ulg_flagellates), intent(inout), target :: self
    integer,                        intent(in)          :: configunit
 
 
 
    namelist /ulg_Flagellates/ exc_extra_doc, 	 & 
                       f_dl_dom, f_dl_phy_ex, f_dl_phy_mo, 	 & 
-                      f_leak_phy, f_pp_resp_fla, ki_nhs_phy, 	 & 
-                      ks_nhs_fla, ks_nos_fla, ks_po4_fla, 	 & 
-                      mo_fla, mumax_fla, pi_fla, q10_phy, 	 & 
-                      r_o2_c_resp, r_o2_nhs_nitr, 	 & 
+                      f_leak_phy, f_pp_resp_fla, k_d, 	 & 
+                      ki_nhs_phy, ks_nhs_fla, ks_nos_fla, 	 & 
+                      ks_po4_fla, mo_fla, mumax_fla, pi_fla, 	 & 
+                      q10_phy, r_o2_c_resp, r_o2_nhs_nitr, 	 & 
                       r_p_n_redfield, respb_fla, 	 & 
                       rmax_chl_n_fla, rmax_n_c_fla, 	 & 
                       rmin_chl_n_fla, rmin_n_c_fla, 	 & 
                       umax_nhs_fla, umax_nos_fla, 	 & 
-                      umax_po4_fla
+                      umax_po4_fla, w_fla
 
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
@@ -88,34 +90,33 @@
    call self%get_parameter(self%f_dl_phy_mo, 'f_dl_phy_mo', '-', 'DOM fraction of phytoplankton mortality', default=0.34_rk) 
    call self%get_parameter(self%f_leak_phy, 'f_leak_phy', '-', 'Phytoplankton leakage fraction', default=0.02_rk) 
    call self%get_parameter(self%f_pp_resp_fla, 'f_pp_resp_fla', '-', 'Part of primary production used for respiration by FL', default=0.1_rk) 
+   call self%get_parameter(self%k_d, 'k_d', 'm-1', 'Background light attanuation coefficient', default=0.03_rk) 
    call self%get_parameter(self%ki_nhs_phy, 'ki_nhs_phy', 'mmolN m-3', 'Inhib. constant of NHS for NOS uptake by PHY', default=0.5_rk) 
    call self%get_parameter(self%ks_nhs_fla, 'ks_nhs_fla', 'mmolN m-3', 'Half-saturation constant for NHS uptake by FL', default=3.0_rk) 
    call self%get_parameter(self%ks_nos_fla, 'ks_nos_fla', 'mmolN m-3', 'Half-saturation constant for NOS uptake by FL', default=3.0_rk) 
    call self%get_parameter(self%ks_po4_fla, 'ks_po4_fla', 'mmolP m-3', 'Half-saturation constant for PO4 uptake by FL', default=0.2_rk) 
-   call self%get_parameter(self%mo_fla, 'mo_fla', 'd-1', 'Mortality rate of FL', default=0.03_rk) 
-   call self%get_parameter(self%mumax_fla, 'mumax_fla', 'd-1', 'Maximum specific growth rate of FL', default=1.0_rk) 
+   call self%get_parameter(self%mo_fla, 'mo_fla', 'd-1', 'Mortality rate of FL', default=0.03_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%mumax_fla, 'mumax_fla', 'd-1', 'Maximum specific growth rate of FL', default=1.0_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%pi_fla, 'pi_fla', 'm2 W-1 d-1', 'Initial slope of photosynthesis-light curve for FL', default=0.2153_rk) 
    call self%get_parameter(self%q10_phy, 'q10_phy', '-', 'Temperature factor', default=2.0_rk) 
    call self%get_parameter(self%r_o2_c_resp, 'r_o2_c_resp', 'molO2 molC-1', 'O2:C ratio of respiration process', default=1.0_rk) 
    call self%get_parameter(self%r_o2_nhs_nitr, 'r_o2_nhs_nitr', 'molO2 molNS-1', 'O2:NHS ratio in NHS oxidation in nitrification', default=2.0_rk) 
    call self%get_parameter(self%r_p_n_redfield, 'r_p_n_redfield', 'molP molN-1', 'N:P Redfield ratio in PHY', default=0.0625_rk) 
-   call self%get_parameter(self%respb_fla, 'respb_fla', 'd-1', 'Basal respiration rate of FL', default=0.009_rk) 
+   call self%get_parameter(self%respb_fla, 'respb_fla', 'd-1', 'Basal respiration rate of FL', default=0.009_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%rmax_chl_n_fla, 'rmax_chl_n_fla', 'g Chla molN-1', 'Maximum Chl:N ratio in FL', default=2.0_rk) 
    call self%get_parameter(self%rmax_n_c_fla, 'rmax_n_c_fla', 'mol N molC-1', 'Maximum N:C ratio in FL', default=0.2_rk) 
    call self%get_parameter(self%rmin_chl_n_fla, 'rmin_chl_n_fla', 'g Chla molN-1', 'Minimum Chl:N ratio in FL', default=1.0_rk) 
    call self%get_parameter(self%rmin_n_c_fla, 'rmin_n_c_fla', 'molN molC-1', 'Minimum N:C ratio in FL', default=0.05_rk) 
-   call self%get_parameter(self%umax_nhs_fla, 'umax_nhs_fla', 'molN molC-1 d-1', 'Maximal NHS uptake rate by FL', default=0.5_rk) 
-   call self%get_parameter(self%umax_nos_fla, 'umax_nos_fla', 'molN molC-1 d-1', 'Maximal NOS uptake rate by FL', default=0.50_rk) 
-   call self%get_parameter(self%umax_po4_fla, 'umax_po4_fla', 'molP molC-1 d-1', 'Maximal PO4 uptake rate by FL', default=0.03125_rk) 
+   call self%get_parameter(self%umax_nhs_fla, 'umax_nhs_fla', 'molN molC-1 d-1', 'Maximal NHS uptake rate by FL', default=0.5_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%umax_nos_fla, 'umax_nos_fla', 'molN molC-1 d-1', 'Maximal NOS uptake rate by FL', default=0.50_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%umax_po4_fla, 'umax_po4_fla', 'molP molC-1 d-1', 'Maximal PO4 uptake rate by FL', default=0.03125_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%w_fla, 'w_fla', 'm d-1', 'Sinking velocity of FL', default=-2.0_rk) 
 
    ! Register state variables 
 
-   call self%register_state_variable(self%id_cfl, 'CFL'  & 
-         , 'mmol C m-3', 'Small flagellate biomass in carbon' & 
-         minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
-   call self%register_state_variable(self%id_nfl, 'NFL'  & 
-         , 'mmol N m-3', 'Large flagellate biomass in nitrogen' & 
-         minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
+   call self%register_state_variable(self%id_cfl, 'CFL', 'mmol C m-3', 'Small flagellate biomass in carbon', minimum=0.0e-7_rk, vertical_movement=self%w_fla) 
+   call self%register_state_variable(self%id_nfl, 'NFL', 'mmol N m-3', 'Large flagellate biomass in nitrogen', minimum=0.0e-7_rk, vertical_movement=self%w_fla) 
+
    call self%register_state_dependency(self%id_cem, 'Small flagellate biomass in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_dcl, 'Labile detritus concentration in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_dcs, 'Semi-labile detritus concentration in carbon', 'mmol C m-3') 
@@ -148,14 +149,14 @@
       'Total Respiration of Flagellates', output=output_instantaneous) 
    return 
 
-99 call self%fatal_error('Flagellates', 'Error reading namelist ulg_Flagellates') 
+99 call self%fatal_error('Flagellates', 'Error reading namelist ulg_flagellates') 
 
    end subroutine initialize 
 
 
    ! Right hand sides of Flagellates model
    subroutine do(self,_ARGUMENTS_DO_)
-   class (type_ulg_Flagellates), intent(in) :: self
+   class (type_ulg_flagellates), intent(in) :: self
    _DECLARE_ARGUMENTS_DO_
 
       real(rk) ::  CEM,DCL,DCS,DIC,DNL,DNS,DOX,NEM,NHS,NOS,PHO,POC,PON
@@ -184,7 +185,7 @@
    _LOOP_BEGIN_
 
    ! Retrieve current (local) state variable values.
-   _GET_(self%id_cfl,CFL)       ! Small flagellate biomass in carbon
+   _GET_(self%id_cfl,CFL)       ! Large flagellate biomass in carbon
    _GET_(self%id_nfl,NFL)       ! Large flagellate biomass in nitrogen
    _GET_(self%id_cem,CEM)       ! Small flagellate biomass in carbon
    _GET_(self%id_dcl,DCL)       ! Labile detritus concentration in carbon
@@ -290,5 +291,23 @@
 
    end subroutine do
 
+   subroutine get_light_extinction(self,_ARGUMENTS_GET_EXTINCTION_)
 
-   end module fabm_ulg_Flagellates 
+! Temporary light extintion function (from Jorn's)
+   class (type_ulg_flagellates), intent(in) :: self
+   _DECLARE_ARGUMENTS_GET_EXTINCTION_
+
+   real(rk)                     :: nfl
+
+   _LOOP_BEGIN_
+
+   _GET_(self%id_nfl,NFL)
+
+   ! Self-shading with explicit contribution from large flagellates
+   _SET_EXTINCTION_(self%k_d*nfl)
+
+   _LOOP_END_
+
+   end subroutine get_light_extinction
+
+   end module fabm_ulg_flagellates 

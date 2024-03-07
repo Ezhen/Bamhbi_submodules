@@ -19,9 +19,10 @@
 ! Contains the pelagic submodel, as used in Soetaert et al., 2001.
 !######################################################################
 
-   module fabm_ulg_Diatoms 
+   module fabm_ulg_diatoms 
  
    use fabm_types 
+   use fabm_ulg_bamhbi_split_utilities
  
    implicit none 
  
@@ -29,7 +30,7 @@
    private 
  
 ! PUBLIC DERIVED TYPES: 
-   type,extends(type_base_model),public :: type_ulg_Diatoms 
+   type,extends(type_base_model),public :: type_ulg_diatoms 
       type (type_state_variable_id)         :: id_cdi,id_ndi,id_sid,id_sio
       type (type_state_variable_id)         :: id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_nhs,id_nos,id_pho,id_poc,id_pon
       type (type_dependency_id)             :: id_par,id_temp 
@@ -37,13 +38,14 @@
 
 !     Model parameters 
       real(rk)     :: exc_extra_doc, f_dl_dom, f_dl_phy_ex, f_dl_phy_mo
-      real(rk)     :: f_leak_phy, f_pp_resp_dia, hmax_sid, ki_nhs_phy
-      real(rk)     :: ks_nhs_dia, ks_nos_dia, ks_po4_dia, ks_sio_dia
-      real(rk)     :: mo_dia, mumax_dia, pi_dia, q10_dia, q10_si_diss
-      real(rk)     :: r_o2_c_resp, r_o2_nhs_nitr, r_p_n_redfield
-      real(rk)     :: r_si_n_dia, respb_dia, rmax_chl_n_dia, rmax_n_c_dia
-      real(rk)     :: rmin_chl_n_dia, rmin_n_c_dia, umax_nhs_dia
-      real(rk)     :: umax_nos_dia, umax_po4_dia, umax_si_dia
+      real(rk)     :: f_leak_phy, f_pp_resp_dia, hmax_sid, k_d
+      real(rk)     :: ki_nhs_phy, ks_nhs_dia, ks_nos_dia, ks_po4_dia
+      real(rk)     :: ks_sio_dia, mo_dia, mumax_dia, pi_dia, q10_dia
+      real(rk)     :: q10_si_diss, r_o2_c_resp, r_o2_nhs_nitr
+      real(rk)     :: r_p_n_redfield, r_si_n_dia, respb_dia, rmax_chl_n_dia
+      real(rk)     :: rmax_n_c_dia, rmin_chl_n_dia, rmin_n_c_dia
+      real(rk)     :: umax_nhs_dia, umax_nos_dia, umax_po4_dia
+      real(rk)     :: umax_si_dia, w_dia, w_sid
 
       contains 
 
@@ -62,15 +64,14 @@
    ! Initialise the Diatoms model
 
    subroutine initialize(self,configunit)
-   class (type_ulg_Diatoms), intent(inout), target :: self
+   class (type_ulg_diatoms), intent(inout), target :: self
    integer,                        intent(in)          :: configunit
-
 
 
    namelist /ulg_Diatoms/ exc_extra_doc, 	 & 
                       f_dl_dom, f_dl_phy_ex, f_dl_phy_mo, 	 & 
                       f_leak_phy, f_pp_resp_dia, hmax_sid, 	 & 
-                      ki_nhs_phy, ks_nhs_dia, ks_nos_dia, 	 & 
+                      k_d, ki_nhs_phy, ks_nhs_dia, ks_nos_dia, 	 & 
                       ks_po4_dia, ks_sio_dia, mo_dia, 	 & 
                       mumax_dia, pi_dia, q10_dia, q10_si_diss, 	 & 
                       r_o2_c_resp, r_o2_nhs_nitr, 	 & 
@@ -78,7 +79,7 @@
                       rmax_chl_n_dia, rmax_n_c_dia, 	 & 
                       rmin_chl_n_dia, rmin_n_c_dia, 	 & 
                       umax_nhs_dia, umax_nos_dia, 	 & 
-                      umax_po4_dia, umax_si_dia
+                      umax_po4_dia, umax_si_dia, w_dia, w_sid
 
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
@@ -89,14 +90,15 @@
    call self%get_parameter(self%f_dl_phy_mo, 'f_dl_phy_mo', '-', 'DOM fraction of phytoplankton mortality', default=0.34_rk) 
    call self%get_parameter(self%f_leak_phy, 'f_leak_phy', '-', 'Phytoplankton leakage fraction', default=0.02_rk) 
    call self%get_parameter(self%f_pp_resp_dia, 'f_pp_resp_dia', '-', 'Part of primary production used for respiration by DI', default=0.1_rk) 
-   call self%get_parameter(self%hmax_sid, 'hmax_sid', 'd-1', 'Rate of dissolution of silicious detritus', default=0.08_rk) 
+   call self%get_parameter(self%hmax_sid, 'hmax_sid', 'd-1', 'Rate of dissolution of silicious detritus', default=0.08_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%k_d, 'k_d', 'm-1', 'Background light attanuation coefficient', default=0.03_rk) 
    call self%get_parameter(self%ki_nhs_phy, 'ki_nhs_phy', 'mmolN m-3', 'Inhib. constant of NHS for NOS uptake by PHY', default=0.5_rk) 
    call self%get_parameter(self%ks_nhs_dia, 'ks_nhs_dia', 'mmolN m-3', 'Half-saturation constant for NHS uptake by DI', default=1.0_rk) 
    call self%get_parameter(self%ks_nos_dia, 'ks_nos_dia', 'mmolN m-3', 'Half-saturation constant for NOS uptake by DI', default=1.0_rk) 
    call self%get_parameter(self%ks_po4_dia, 'ks_po4_dia', 'mmolP m-3', 'Half-saturation constant for PO4 uptake by DI', default=0.1_rk) 
    call self%get_parameter(self%ks_sio_dia, 'ks_sio_dia', 'mmolSi m-3', 'Half-saturation constant for SiOs uptake by DI', default=3.5_rk) 
-   call self%get_parameter(self%mo_dia, 'mo_dia', 'd-1', 'Mortality rate of DI', default=0.03_rk) 
-   call self%get_parameter(self%mumax_dia, 'mumax_dia', 'd-1', 'Maximum specific growth rate of DI', default=3.5_rk) 
+   call self%get_parameter(self%mo_dia, 'mo_dia', 'd-1', 'Mortality rate of DI', default=0.03_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%mumax_dia, 'mumax_dia', 'd-1', 'Maximum specific growth rate of DI', default=3.5_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%pi_dia, 'pi_dia', 'm2 W-1 d-1', 'Initial slope of photosynthesis-light curve for DI', default=0.3312_rk) 
    call self%get_parameter(self%q10_dia, 'q10_dia', '-', 'Temperature factor for DI', default=1.8_rk) 
    call self%get_parameter(self%q10_si_diss, 'q10_si_diss', '-', 'Temperature factor for chemical processes', default=3.3_rk) 
@@ -104,30 +106,24 @@
    call self%get_parameter(self%r_o2_nhs_nitr, 'r_o2_nhs_nitr', 'molO2 molNS-1', 'O2:NHS ratio in NHS oxidation in nitrification', default=2.0_rk) 
    call self%get_parameter(self%r_p_n_redfield, 'r_p_n_redfield', 'molP molN-1', 'N:P Redfield ratio in PHY', default=0.0625_rk) 
    call self%get_parameter(self%r_si_n_dia, 'r_si_n_dia', 'molSi molN-1', 'Si:N ratio in DI', default=0.83_rk) 
-   call self%get_parameter(self%respb_dia, 'respb_dia', 'd-1', 'Basal respiration rate of DI', default=0.009_rk) 
+   call self%get_parameter(self%respb_dia, 'respb_dia', 'd-1', 'Basal respiration rate of DI', default=0.009_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%rmax_chl_n_dia, 'rmax_chl_n_dia', 'g Chla molN-1', 'Maximum Chl:N ratio in DI', default=2.0_rk) 
    call self%get_parameter(self%rmax_n_c_dia, 'rmax_n_c_dia', 'molN molC-1', 'Maximum N:C ratio in DI', default=0.2_rk) 
    call self%get_parameter(self%rmin_chl_n_dia, 'rmin_chl_n_dia', 'g Chla molN-1', 'Minimum Chl:N ratio in DI', default=1.0_rk) 
    call self%get_parameter(self%rmin_n_c_dia, 'rmin_n_c_dia', 'molN molC-1', 'Minimum N:C ratio in DI', default=0.05_rk) 
-   call self%get_parameter(self%umax_nhs_dia, 'umax_nhs_dia', 'molN molC-1 d-1', 'Maximal NHS uptake rate by DI', default=1.0_rk) 
-   call self%get_parameter(self%umax_nos_dia, 'umax_nos_dia', 'molN molC-1 d-1', 'Maximal NOS uptake rate by DI', default=1.0_rk) 
-   call self%get_parameter(self%umax_po4_dia, 'umax_po4_dia', 'molP molC-1 d-1', 'Maximal PO4 uptake rate by DI', default=0.0625_rk) 
-   call self%get_parameter(self%umax_si_dia, 'umax_si_dia', 'molSi molC-1 d-1', 'Maximal SiOs uptake rate by DI', default=0.5_rk) 
+   call self%get_parameter(self%umax_nhs_dia, 'umax_nhs_dia', 'molN molC-1 d-1', 'Maximal NHS uptake rate by DI', default=1.0_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%umax_nos_dia, 'umax_nos_dia', 'molN molC-1 d-1', 'Maximal NOS uptake rate by DI', default=1.0_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%umax_po4_dia, 'umax_po4_dia', 'molP molC-1 d-1', 'Maximal PO4 uptake rate by DI', default=0.0625_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%umax_si_dia, 'umax_si_dia', 'molSi molC-1 d-1', 'Maximal SiOs uptake rate by DI', default=0.5_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%w_dia, 'w_dia', 'm d-1', 'Sinking velocity of DI', default=-1.0_rk) 
+   call self%get_parameter(self%w_sid, 'w_sid', 'm d-1', 'Sinking velocity of silicious detritus', default=-2.0_rk) 
 
    ! Register state variables 
+   call self%register_state_variable(self%id_cdi, 'CDI', 'mmol C m-3', 'Diatom biomass in carbon', minimum=0.0e-7_rk, vertical_movement=self%w_dia) 
+   call self%register_state_variable(self%id_ndi, 'NDI', 'mmol N m-3', 'Diatom biomass in nitrogen', minimum=0.0e-7_rk, vertical_movement=self%w_dia) 
+   call self%register_state_variable(self%id_sid, 'SID', 'mmol Si m-3', 'Detrital silicate concentration', minimum=0.0e-7_rk, vertical_movement=self%w_sid) 
+   call self%register_state_variable(self%id_sio, 'SIO', 'mmol Si m-3', 'Silicilic acid concentration', minimum=0.0e-7_rk)
 
-   call self%register_state_variable(self%id_cdi, 'CDI'  & 
-         , 'mmol C m-3', 'Diatom biomass in carbon' & 
-         minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
-   call self%register_state_variable(self%id_ndi, 'NDI'  & 
-         , 'mmol N m-3', 'Diatom biomass in nitrogen' & 
-         minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
-   call self%register_state_variable(self%id_sid, 'SID'  & 
-         , 'mmol Si m-3', 'Detrital silicate concentration' & 
-         minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
-   call self%register_state_variable(self%id_sio, 'SIO'  & 
-         , 'mmol Si m-3', 'Silicilic acid concentration' & 
-         minimum=0.0e-7_rk)
    call self%register_state_dependency(self%id_dcl, 'Labile detritus concentration in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_dcs, 'Semi-labile detritus concentration in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_dic, 'Dissolved inorganic carbon concentration', 'mmol C m-3') 
@@ -160,14 +156,14 @@
       'Total Respiration of Diatoms', output=output_instantaneous) 
    return 
 
-99 call self%fatal_error('Diatoms', 'Error reading namelist ulg_Diatoms') 
+99 call self%fatal_error('Diatoms', 'Error reading namelist ulg_diatoms') 
 
    end subroutine initialize 
 
 
    ! Right hand sides of Diatoms model
    subroutine do(self,_ARGUMENTS_DO_)
-   class (type_ulg_Diatoms), intent(in) :: self
+   class (type_ulg_diatoms), intent(in) :: self
    _DECLARE_ARGUMENTS_DO_
 
       real(rk) ::  DCL,DCS,DIC,DNL,DNS,DOX,NHS,NOS,PHO,POC,PON
@@ -319,5 +315,21 @@
 
    end subroutine do
 
+! Temporary light extintion function (from Jorn's)
+   class (type_ulg_diatoms), intent(in) :: self
+   _DECLARE_ARGUMENTS_GET_EXTINCTION_
 
-   end module fabm_ulg_Diatoms 
+   real(rk)                     :: ndi
+
+   _LOOP_BEGIN_
+
+   _GET_(self%id_ndi,NDI)
+
+   ! Self-shading with explicit contribution from diatoms
+   _SET_EXTINCTION_(self%k_d*ndi)
+
+   _LOOP_END_
+
+   end subroutine get_light_extinction
+
+   end module fabm_ulg_diatoms 

@@ -25,9 +25,10 @@
 ! Translation into FABM : Evgeny Ivanov
 !######################################################################
 
-   module fabm_ulg_Chemical 
+   module fabm_ulg_chemical 
  
    use fabm_types 
+   use fabm_ulg_bamhbi_split_utilities
  
    implicit none 
  
@@ -35,7 +36,7 @@
    private 
  
 ! PUBLIC DERIVED TYPES: 
-   type,extends(type_base_model),public :: type_ulg_Chemical 
+   type,extends(type_base_model),public :: type_ulg_chemical 
       type (type_state_variable_id)         :: id_dox,id_nhs,id_nos,id_odu
       type (type_dependency_id)             :: id_temp 
       type (type_diagnostic_variable_id)    :: id_anammox,id_nitrification,id_oxidation_nitrate,id_oxidation_oxygen
@@ -53,7 +54,6 @@
       procedure :: do_bottom 
       procedure :: check_surface_state 
       procedure :: check_bottom_state 
-      procedure :: get_light_extinction 
    end type
 
    real(rk), parameter :: secs_pr_day = 86400.0_rk
@@ -63,7 +63,7 @@
    ! Initialise the Chemical model
 
    subroutine initialize(self,configunit)
-   class (type_ulg_Chemical), intent(inout), target :: self
+   class (type_ulg_chemical), intent(inout), target :: self
    integer,                        intent(in)          :: configunit
 
 
@@ -90,25 +90,17 @@
    call self%get_parameter(self%r_nos_odu_oxid, 'r_nos_odu_oxid', 'molNOS molODU-1', 'NOS:ODU ratio in ODU oxidation', default=0.8_rk) 
    call self%get_parameter(self%r_o2_nhs_nitr, 'r_o2_nhs_nitr', 'molO2 molNS-1', 'O2:NHS ratio in NHS oxidation in nitrification', default=2.0_rk) 
    call self%get_parameter(self%r_o2_odu_oxid, 'r_o2_odu_oxid', 'molO2 molODU-1', 'O2:ODU ratio in ODU oxidation', default=1.0_rk) 
-   call self%get_parameter(self%rox_nhs_nos, 'rox_nhs_nos', 'd-1', 'Maximum NHS oxidation rate by NOS', default=0.05_rk) 
-   call self%get_parameter(self%rox_nhs_o2, 'rox_nhs_o2', 'd-1', 'Maximum NHS oxidation rate of NHS by O2', default=0.03_rk) 
-   call self%get_parameter(self%rox_odu_nos, 'rox_odu_nos', 'd-1', 'Maximum ODU oxidation rate by NOS', default=0.05_rk) 
-   call self%get_parameter(self%rox_odu_o2, 'rox_odu_o2', 'd-1', 'Maximum ODU oxidation rate by O2', default=0.1_rk) 
+   call self%get_parameter(self%rox_nhs_nos, 'rox_nhs_nos', 'd-1', 'Maximum NHS oxidation rate by NOS', default=0.05_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%rox_nhs_o2, 'rox_nhs_o2', 'd-1', 'Maximum NHS oxidation rate of NHS by O2', default=0.03_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%rox_odu_nos, 'rox_odu_nos', 'd-1', 'Maximum ODU oxidation rate by NOS', default=0.05_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%rox_odu_o2, 'rox_odu_o2', 'd-1', 'Maximum ODU oxidation rate by O2', default=0.1_rk, scale_factor=one_pr_day)
 
    ! Register state variables 
 
-   call self%register_state_variable(self%id_dox, 'DOX'  & 
-         , 'mmol O2 m-3', 'Dissolved oxygen concentration' & 
-         minimum=0.0e-7_rk)
-   call self%register_state_variable(self%id_nhs, 'NHS'  & 
-         , 'mmol N m-3', 'Ammonium concentration' & 
-         minimum=0.0e-7_rk)
-   call self%register_state_variable(self%id_nos, 'NOS'  & 
-         , 'mmol N m-3', 'Nitrate concentration' & 
-         minimum=0.0e-7_rk)
-   call self%register_state_variable(self%id_odu, 'ODU'  & 
-         , 'mmol ODU m-3', 'Oxygen demand unit concentration' & 
-         minimum=0.0e-7_rk)
+   call self%register_state_variable(self%id_dox, 'DOX', 'mmol O2 m-3', 'Dissolved oxygen concentration', minimum=0.0e-7_rk)
+   call self%register_state_variable(self%id_nhs, 'NHS', 'mmol N m-3', 'Ammonium concentration',minimum=0.0e-7_rk)
+   call self%register_state_variable(self%id_nos, 'NOS', 'mmol N m-3', 'Nitrate concentration', minimum=0.0e-7_rk)
+   call self%register_state_variable(self%id_odu, 'ODU', 'mmol ODU m-3', 'Oxygen demand unit concentration', minimum=0.0e-7_rk)
 
     ! Register environmental dependencies 
    call self%register_dependency(self%id_temp, standard_variables%temperature) 
@@ -125,14 +117,14 @@
       'Oxydation by oxygen', output=output_instantaneous) 
    return 
 
-99 call self%fatal_error('Chemical', 'Error reading namelist ulg_Chemical') 
+99 call self%fatal_error('Chemical', 'Error reading namelist ulg_chemical') 
 
    end subroutine initialize 
 
 
    ! Right hand sides of Chemical model
    subroutine do(self,_ARGUMENTS_DO_)
-   class (type_ulg_Chemical), intent(in) :: self
+   class (type_ulg_chemical), intent(in) :: self
    _DECLARE_ARGUMENTS_DO_
 
       real(rk) ::  temp
@@ -184,4 +176,4 @@
    end subroutine do
 
 
-   end module fabm_ulg_Chemical 
+   end module fabm_ulg_chemical 

@@ -28,9 +28,10 @@
 ! growth, respiration and excretion so as to maintain their internal ratio.
 !--------------------------------------------------------------------*
 
-   module fabm_ulg_MicroZoo 
+   module fabm_ulg_microzoo 
  
    use fabm_types 
+   use fabm_ulg_bamhbi_split_utilities
  
    implicit none 
  
@@ -38,7 +39,7 @@
    private 
  
 ! PUBLIC DERIVED TYPES: 
-   type,extends(type_base_model),public :: type_ulg_MicroZoo 
+   type,extends(type_base_model),public :: type_ulg_microzoo 
       type (type_state_variable_id)         :: id_mic
       type (type_state_variable_id)         :: id_bac,id_cdi,id_cem,id_cfl,id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_ndi,id_nem,id_nfl,id_nhs,id_pho,id_poc,id_pon,id_sid
       type (type_dependency_id)             :: id_temp 
@@ -51,7 +52,7 @@
       real(rk)     :: f_dl_dom, gmax_mic, ks_mort_mic, ks_prey_mic
       real(rk)     :: mess_prey_mic, mo_anox_pred, moexp_mic, momax_mic
       real(rk)     :: q10_zoo, r_n_c_bac, r_n_c_mic, r_o2_c_resp
-      real(rk)     :: r_p_n_redfield, r_si_n_dia
+      real(rk)     :: r_p_n_redfield, r_si_n_dia, w_dia
 
       contains 
 
@@ -60,7 +61,6 @@
       procedure :: do_bottom 
       procedure :: check_surface_state 
       procedure :: check_bottom_state 
-      procedure :: get_light_extinction 
    end type
 
    real(rk), parameter :: secs_pr_day = 86400.0_rk
@@ -70,7 +70,7 @@
    ! Initialise the MicroZoo model
 
    subroutine initialize(self,configunit)
-   class (type_ulg_MicroZoo), intent(inout), target :: self
+   class (type_ulg_microzoo), intent(inout), target :: self
    integer,                        intent(in)          :: configunit
 
 
@@ -84,7 +84,7 @@
                       mess_prey_mic, mo_anox_pred, moexp_mic, 	 & 
                       momax_mic, q10_zoo, r_n_c_bac, 	 & 
                       r_n_c_mic, r_o2_c_resp, r_p_n_redfield, 	 & 
-                      r_si_n_dia
+                      r_si_n_dia, w_dia
 
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
@@ -101,25 +101,25 @@
    call self%get_parameter(self%eff_mic_mic, 'eff_mic_mic', '-', 'Capture efficiency of MIC on MIC', default=0.0_rk) 
    call self%get_parameter(self%eff_mic_pom, 'eff_mic_pom', '-', 'Capture efficiency of MIC on POM', default=0.0_rk) 
    call self%get_parameter(self%f_dl_dom, 'f_dl_dom', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
-   call self%get_parameter(self%gmax_mic, 'gmax_mic', 'd-1', 'Maximum grazing rate of MIC', default=3.6_rk) 
+   call self%get_parameter(self%gmax_mic, 'gmax_mic', 'd-1', 'Maximum grazing rate of MIC', default=3.6_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%ks_mort_mic, 'ks_mort_mic', 'mmolC m-3', '', default=1.0_rk) 
    call self%get_parameter(self%ks_prey_mic, 'ks_prey_mic', 'mmolC m-3', 'Half-saturation constant for MIC grazing', default=5.0_rk) 
    call self%get_parameter(self%mess_prey_mic, 'mess_prey_mic', '-', 'Messy feeding fraction of MIC grazing', default=0.23_rk) 
-   call self%get_parameter(self%mo_anox_pred, 'mo_anox_pred', 'd-1', 'Mortality rate in anoxia', default=0.25_rk) 
-   call self%get_parameter(self%moexp_mic, 'moexp_mic', '(?)', 'Order of the non-linearity of mortality rate for MIC', default=2.0_rk) 
-   call self%get_parameter(self%momax_mic, 'momax_mic', 'd-1', 'Maximum mortality rate of MIC', default=0.3_rk) 
+   call self%get_parameter(self%mo_anox_pred, 'mo_anox_pred', 'd-1', 'Mortality rate in anoxia', default=0.25_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%moexp_mic, 'moexp_mic', '-', 'Order of the non-linearity of mortality rate for MIC', default=2.0_rk) 
+   call self%get_parameter(self%momax_mic, 'momax_mic', 'd-1', 'Maximum mortality rate of MIC', default=0.3_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%q10_zoo, 'q10_zoo', '-', 'Temperature factor Soetart et al., 2001', default=2.0_rk) 
    call self%get_parameter(self%r_n_c_bac, 'r_n_c_bac', 'molN molC-1', 'N:C', default=0.196_rk) 
    call self%get_parameter(self%r_n_c_mic, 'r_n_c_mic', 'molN molC-1', 'N:C molar ratio in MIC', default=0.18_rk) 
    call self%get_parameter(self%r_o2_c_resp, 'r_o2_c_resp', 'molO2 molC-1', 'O2:C ratio of respiration process', default=1.0_rk) 
    call self%get_parameter(self%r_p_n_redfield, 'r_p_n_redfield', 'molP molN-1', 'N:P Redfield ratio in PHY', default=0.0625_rk) 
    call self%get_parameter(self%r_si_n_dia, 'r_si_n_dia', 'molSi molN-1', 'Si:N ratio in DI', default=0.83_rk) 
+   call self%get_parameter(self%w_dia, 'w_dia', 'm d-1', 'Sinking velocity of DI', default=-1.0_rk) 
 
    ! Register state variables 
 
-   call self%register_state_variable(self%id_mic, 'MIC'  & 
-         , 'mmol C m-3', 'Microzooplakton biomass' & 
-         minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
+   call self%register_state_variable(self%id_mic, 'MIC', 'mmol C m-3', 'Microzooplakton biomass', minimum=0.0e-7_rk, vertical_movement=self%2.0_rk) 
+
    call self%register_state_dependency(self%id_bac, 'Bacterial biomass', 'mmol C m-3') 
    call self%register_state_dependency(self%id_cdi, 'Diatom biomass in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_cem, 'Small flagellate biomass in carbon', 'mmol C m-3') 
@@ -152,14 +152,14 @@
       'Zooplankton grazing on POC', output=output_instantaneous) 
    return 
 
-99 call self%fatal_error('MicroZoo', 'Error reading namelist ulg_MicroZoo') 
+99 call self%fatal_error('MicroZoo', 'Error reading namelist ulg_microzoo') 
 
    end subroutine initialize 
 
 
    ! Right hand sides of MicroZoo model
    subroutine do(self,_ARGUMENTS_DO_)
-   class (type_ulg_MicroZoo), intent(in) :: self
+   class (type_ulg_microzoo), intent(in) :: self
    _DECLARE_ARGUMENTS_DO_
 
       real(rk) ::  BAC,CDI,CEM,CFL,DCL,DCS,DIC,DNL,DNS,DOX,NDI,NEM,NFL,NHS,PHO,POC,PON,SID
@@ -191,7 +191,7 @@
    _GET_(self%id_bac,BAC)       ! Bacterial biomass
    _GET_(self%id_cdi,CDI)       ! Diatom biomass in carbon
    _GET_(self%id_cem,CEM)       ! Small flagellate biomass in carbon
-   _GET_(self%id_cfl,CFL)       ! Small flagellate biomass in carbon
+   _GET_(self%id_cfl,CFL)       ! Large flagellate biomass in carbon
    _GET_(self%id_dcl,DCL)       ! Labile detritus concentration in carbon
    _GET_(self%id_dcs,DCS)       ! Semi-labile detritus concentration in carbon
    _GET_(self%id_dic,DIC)       ! Dissolved inorganic carbon concentration
@@ -297,4 +297,4 @@
    end subroutine do
 
 
-   end module fabm_ulg_MicroZoo 
+   end module fabm_ulg_microzoo 

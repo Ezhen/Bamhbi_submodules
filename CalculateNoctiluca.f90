@@ -16,9 +16,10 @@
 ! This part has to be improved on the model of the zooplankton
 !--------------------------------------------------------------------*
 
-   module fabm_ulg_Noctiluca 
+   module fabm_ulg_noctiluca 
  
    use fabm_types 
+   use fabm_ulg_bamhbi_split_utilities
  
    implicit none 
  
@@ -26,7 +27,7 @@
    private 
  
 ! PUBLIC DERIVED TYPES: 
-   type,extends(type_base_model),public :: type_ulg_Noctiluca 
+   type,extends(type_base_model),public :: type_ulg_noctiluca 
       type (type_state_variable_id)         :: id_noc
       type (type_state_variable_id)         :: id_cdi,id_cem,id_cfl,id_dic,id_dox,id_mes,id_mic,id_ndi,id_nem,id_nfl,id_nhs,id_pho,id_poc,id_pon,id_sid
       type (type_dependency_id)             :: id_temp 
@@ -47,7 +48,6 @@
       procedure :: do_bottom 
       procedure :: check_surface_state 
       procedure :: check_bottom_state 
-      procedure :: get_light_extinction 
    end type
 
    real(rk), parameter :: secs_pr_day = 86400.0_rk
@@ -57,7 +57,7 @@
    ! Initialise the Noctiluca model
 
    subroutine initialize(self,configunit)
-   class (type_ulg_Noctiluca), intent(inout), target :: self
+   class (type_ulg_noctiluca), intent(inout), target :: self
    integer,                        intent(in)          :: configunit
 
 
@@ -83,23 +83,22 @@
    call self%get_parameter(self%eff_noc_mes, 'eff_noc_mes', '-', 'Capture efficiency of NOC on MES', default=0.0_rk) 
    call self%get_parameter(self%eff_noc_mic, 'eff_noc_mic', '-', 'Capture efficiency of NOC on MIC', default=1.0_rk) 
    call self%get_parameter(self%eff_noc_pom, 'eff_noc_pom', '-', 'Capture efficiency of NOC on POM', default=1.0_rk) 
-   call self%get_parameter(self%gmax_noc, 'gmax_noc', 'd-1', 'Maximum grazing rate of NOC', default=0.06_rk) 
+   call self%get_parameter(self%gmax_noc, 'gmax_noc', 'd-1', 'Maximum grazing rate of NOC', default=0.06_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%ks_mort_noc, 'ks_mort_noc', 'mmolC m-3', '', default=0.0_rk) 
-   call self%get_parameter(self%mo_anox_pred, 'mo_anox_pred', 'd-1', 'Mortality rate in anoxia', default=0.25_rk) 
-   call self%get_parameter(self%momax_noc, 'momax_noc', '(?) d-1', 'Maximum mortality rate of NOC', default=0.06_rk) 
+   call self%get_parameter(self%mo_anox_pred, 'mo_anox_pred', 'd-1', 'Mortality rate in anoxia', default=0.25_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%momax_noc, 'momax_noc', 'd-1', 'Maximum mortality rate of NOC', default=0.06_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%q10_zoo, 'q10_zoo', '-', 'Temperature factor Soetart et al., 2001', default=2.0_rk) 
    call self%get_parameter(self%r_n_c_noc, 'r_n_c_noc', 'molN molC-1', 'N:C molar ratio in NOC', default=0.21_rk) 
    call self%get_parameter(self%r_o2_c_resp, 'r_o2_c_resp', 'molO2 molC-1', 'O2:C ratio of respiration process', default=1.0_rk) 
    call self%get_parameter(self%r_p_n_redfield, 'r_p_n_redfield', 'molP molN-1', 'N:P Redfield ratio in PHY', default=0.0625_rk) 
    call self%get_parameter(self%r_si_n_dia, 'r_si_n_dia', 'molSi molN-1', 'Si:N ratio in DI', default=0.83_rk) 
-   call self%get_parameter(self%respb_noc, 'respb_noc', 'd-1', 'Basal respiration rate of NOC', default=0.0001_rk) 
+   call self%get_parameter(self%respb_noc, 'respb_noc', 'd-1', 'Basal respiration rate of NOC', default=0.0001_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%t_g_noc, 't_g_noc', 'mmolC m-3', 'Feeding threshold for NOC grazing', default=?_rk) 
 
    ! Register state variables 
 
-   call self%register_state_variable(self%id_noc, 'NOC'  & 
-         , 'mmol C m-3', 'Gelatinous carnivorous biomass' & 
-         minimum=0.0e-7_rk)
+   call self%register_state_variable(self%id_noc, 'NOC', 'mmol C m-3', 'Gelatinous carnivorous biomass', minimum=0.0e-7_rk)
+
    call self%register_state_dependency(self%id_cdi, 'Diatom biomass in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_cem, 'Small flagellate biomass in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_cfl, 'Small flagellate biomass in carbon', 'mmol C m-3') 
@@ -125,14 +124,14 @@
       'Total Respiration of Gelatinous', output=output_instantaneous) 
    return 
 
-99 call self%fatal_error('Noctiluca', 'Error reading namelist ulg_Noctiluca') 
+99 call self%fatal_error('Noctiluca', 'Error reading namelist ulg_noctiluca') 
 
    end subroutine initialize 
 
 
    ! Right hand sides of Noctiluca model
    subroutine do(self,_ARGUMENTS_DO_)
-   class (type_ulg_Noctiluca), intent(in) :: self
+   class (type_ulg_noctiluca), intent(in) :: self
    _DECLARE_ARGUMENTS_DO_
 
       real(rk) ::  CDI,CEM,CFL,DIC,DOX,MES,MIC,NDI,NEM,NFL,NHS,PHO,POC,PON,SID
@@ -158,7 +157,7 @@
    _GET_(self%id_noc,NOC)       ! Gelatinous carnivorous biomass
    _GET_(self%id_cdi,CDI)       ! Diatom biomass in carbon
    _GET_(self%id_cem,CEM)       ! Small flagellate biomass in carbon
-   _GET_(self%id_cfl,CFL)       ! Small flagellate biomass in carbon
+   _GET_(self%id_cfl,CFL)       ! Large flagellate biomass in carbon
    _GET_(self%id_dic,DIC)       ! Dissolved inorganic carbon concentration
    _GET_(self%id_dox,DOX)       ! Dissolved oxygen concentration
    _GET_(self%id_mes,MES)       ! Mesozooplakton biomass
@@ -244,4 +243,4 @@
    end subroutine do
 
 
-   end module fabm_ulg_Noctiluca 
+   end module fabm_ulg_noctiluca 
