@@ -53,6 +53,8 @@ instances:
   diatoms:
     model: ulg_diatoms
     parameters:
+      dr_fla: 5.8e-06		# default = 5.8e-06 mol d-1	(also in Flagellates)
+      dr_sid: 5.5e-06		# default = 5.5e-06 mol d-1	
       exc_extra_doc: 0.05	# default = 0.05 	(also in Emiliana,Flagellates)
       f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo)
       f_dl_phy_ex: 0.65		# default = 0.65 	(also in Emiliana,Flagellates)
@@ -94,6 +96,8 @@ instances:
   dom:
     model: ulg_dom
     parameters:
+      dr_dom: 5.5e-06		# default = 5.5e-06 mol d-1	
+      dr_pom: 5.6e-06		# default = 5.6e-06 mol d-1	
       f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo)
       hmax_dsl: 4.0		# default = 4.0 d-1	
       hmax_poc: 0.04		# default = 0.04 d-1	
@@ -114,6 +118,7 @@ instances:
   emiliana:
     model: ulg_emiliana
     parameters:
+      dr_emi: 5.7e-06		# default = 5.7e-06 mol d-1	
       exc_extra_doc: 0.05	# default = 0.05 	(also in Diatoms,Flagellates)
       f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,DOM,Flagellates,Mesozoo,MicroZoo)
       f_dl_phy_ex: 0.65		# default = 0.65 	(also in Diatoms,Flagellates)
@@ -147,6 +152,7 @@ instances:
   flagellates:
     model: ulg_flagellates
     parameters:
+      dr_fla: 5.8e-06		# default = 5.8e-06 mol d-1	(also in Diatoms)
       exc_extra_doc: 0.05	# default = 0.05 	(also in Diatoms,Emiliana)
       f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,DOM,Emiliana,Mesozoo,MicroZoo)
       f_dl_phy_ex: 0.65		# default = 0.65 	(also in Diatoms,Emiliana)
