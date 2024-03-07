@@ -84,7 +84,7 @@
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
-   call self%get_parameter(self%dr_fla, 'dr_fla', 'mol d-1', 'Deposition rate of FL', default=5.8e-06_rk) 
+   call self%get_parameter(self%dr_fla, 'dr_fla', 'mol d-1', 'Deposition rate of FL', default=5.8e-06_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%exc_extra_doc, 'exc_extra_doc', '-', 'Extra-photosynthetic DOC excretion', default=0.05_rk) 
    call self%get_parameter(self%f_dl_dom, 'f_dl_dom', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
    call self%get_parameter(self%f_dl_phy_ex, 'f_dl_phy_ex', '-', 'Labile fraction phytoxcreted DOC', default=0.65_rk) 

@@ -81,8 +81,8 @@
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
-   call self%get_parameter(self%dr_dom, 'dr_dom', 'mol d-1', 'Deposition rate of dissolved detritus', default=5.5e-06_rk) 
-   call self%get_parameter(self%dr_pom, 'dr_pom', 'mol d-1', 'Deposition rate of particulate detritus', default=5.6e-06_rk) 
+   call self%get_parameter(self%dr_dom, 'dr_dom', 'mol d-1', 'Deposition rate of dissolved detritus', default=5.5e-06_rk, scale_factor=one_pr_day)
+   call self%get_parameter(self%dr_pom, 'dr_pom', 'mol d-1', 'Deposition rate of particulate detritus', default=5.6e-06_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%f_dl_dom, 'f_dl_dom', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
    call self%get_parameter(self%hmax_dsl, 'hmax_dsl', 'd-1', 'Maximum DSL hydrolysis', default=4.0_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%hmax_poc, 'hmax_poc', 'd-1', 'POC hydrolysis rate', default=0.04_rk, scale_factor=one_pr_day)
