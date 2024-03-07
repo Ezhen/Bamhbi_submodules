@@ -1,0 +1,268 @@
+instances:
+  bacteria:
+  parameters:
+    eff_gr_bac_c: 0.17		# default = 0.17 	
+    f_dl_dom: 0.7		# default = 0.7 	(also in Diatoms,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo)
+    f_solid_odu: 0.2		# default = 0.2 	
+    i1_curve: 25000.0		# default = 25000.0 	
+    i2_curve: 50.0		# default = 50.0 	
+    iron: 10.0			# default = 10.0 mmolFe m-3	
+    ki_anox_nos: 0.0005		# default = 0.0005 mmolN m-3	
+    ki_anox_o2: 0.0005		# default = 0.0005 mmolO2 m-3	
+    ki_denit_o2: 0.5		# default = 0.5 mmolO2 m-3	
+    ks_denitr_nos: 0.3		# default = 0.3 mmolN m-3	
+    ks_dls_bac: 25.0		# default = 25.0 mmolC m-3	
+    ks_nhs_bac: 0.5		# default = 0.5 mmolN m-3	
+    ks_odu_iron: 100.0		# default = 100.0 mmolFe m-3	
+    ks_oxic_o2: 3.0		# default = 3.0 mmolO2 m-3	
+    ks_po4_bac: 0.031		# default = 0.031 mmolP m-3	
+    mo_bac: 0.05		# default = 0.05 d-1	
+    mumax_bac: 0.000154 (?)	# default = 0.000154 (?) d-1	
+    q10_bac: 2.0		# default = 2.0 	
+    r_n_c_bac: 0.196		# default = 0.196 molN molC-1	(also in Mesozoo,MicroZoo)
+    r_n_c_denit: 0.8		# default = 0.8 molN molC-1	
+    r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
+    r_odu_c_anox: 1.0		# default = 1.0 molODU molC-1	
+    r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
+  initialization:
+    CFL: 3.0			# mmol C m-3, Small flagellate biomass in carbon
+  chemical:
+  parameters:
+    ki_nhs_o2: 8.0		# default = 8.0 mmolO2 m-3	
+    ki_nhs_odu: 0.5		# default = 0.5 mmolO2 m-3	
+    ki_odu_o2: 5.0		# default = 5.0 mmolO2 m-3	
+    ks_nhs_o2: 3.0		# default = 3.0 mmolO2 m-3	
+    ks_odu_nos: 2.0		# default = 2.0 mmolN m-3	
+    ks_odu_o2: 1.0		# default = 1.0 mmolO2 m-3	
+    q10_che: 2.0		# default = 2.0 	(also in DOM)
+    r_nos_nhs_oxid: 0.6		# default = 0.6 molNOS molNHS-1	
+    r_nos_odu_oxid: 0.8		# default = 0.8 molNOS molODU-1	
+    r_o2_nhs_nitr: 2.0		# default = 2.0 molO2 molNS-1	(also in Diatoms,Emiliana,Flagellates)
+    r_o2_odu_oxid: 1.0		# default = 1.0 molO2 molODU-1	
+    rox_nhs_nos: 0.05		# default = 0.05 d-1	
+    rox_nhs_o2: 0.03		# default = 0.03 d-1	
+    rox_odu_nos: 0.05		# default = 0.05 d-1	
+    rox_odu_o2: 0.1		# default = 0.1 d-1	
+  initialization:
+    CFL: 3.0			# mmol C m-3, Small flagellate biomass in carbon
+    NFL: 3.0			# mmol N m-3, Large flagellate biomass in nitrogen
+    CEM: 3.0			# mmol C m-3, Small flagellate biomass in carbon
+    NEM: 0.5			# mmol N m-3, Small flagellate biomass in nitrogen
+  diatoms:
+  parameters:
+    exc_extra_doc: 0.05		# default = 0.05 	(also in Emiliana,Flagellates)
+    f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo)
+    f_dl_phy_ex: 0.65		# default = 0.65 	(also in Emiliana,Flagellates)
+    f_dl_phy_mo: 0.34		# default = 0.34 	(also in Emiliana,Flagellates)
+    f_leak_phy: 0.02		# default = 0.02 	(also in Emiliana,Flagellates)
+    f_pp_resp_dia: 0.1		# default = 0.1 	
+    hmax_sid: 0.08		# default = 0.08 d-1	
+    ki_nhs_phy: 0.5		# default = 0.5 mmolN m-3	(also in Emiliana,Flagellates)
+    ks_nhs_dia: 1.0		# default = 1.0 mmolN m-3	
+    ks_nos_dia: 1.0		# default = 1.0 mmolN m-3	
+    ks_po4_dia: 0.1		# default = 0.1 mmolP m-3	
+    ks_sio_dia: 3.5		# default = 3.5 mmolSi m-3	
+    mo_dia: 0.03		# default = 0.03 d-1	
+    mumax_dia: 3.5		# default = 3.5 d-1	
+    pi_dia: 0.3312		# default = 0.3312 m2 W-1 d-1	
+    q10_dia: 1.8		# default = 1.8 	
+    q10_si_diss: 3.3		# default = 3.3 	
+    r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
+    r_o2_nhs_nitr: 2.0		# default = 2.0 molO2 molNS-1	(also in Chemical,Emiliana,Flagellates)
+    r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
+    r_si_n_dia: 0.83		# default = 0.83 molSi molN-1	(also in Mesozoo,MicroZoo,Noctiluca)
+    respb_dia: 0.009		# default = 0.009 d-1	
+    rmax_chl_n_dia: 2.0		# default = 2.0 g Chla molN-1	
+    rmax_n_c_dia: 0.2		# default = 0.2 molN molC-1	
+    rmin_chl_n_dia: 1.0		# default = 1.0 g Chla molN-1	
+    rmin_n_c_dia: 0.05		# default = 0.05 molN molC-1	
+    umax_nhs_dia: 1.0		# default = 1.0 molN molC-1 d-1	
+    umax_nos_dia: 1.0		# default = 1.0 molN molC-1 d-1	
+    umax_po4_dia: 0.0625	# default = 0.0625 molP molC-1 d-1	
+    umax_si_dia: 0.5		# default = 0.5 molSi molC-1 d-1	
+  initialization:
+    CFL: 3.0			# mmol C m-3, Small flagellate biomass in carbon
+    NFL: 3.0			# mmol N m-3, Large flagellate biomass in nitrogen
+    CEM: 3.0			# mmol C m-3, Small flagellate biomass in carbon
+    NEM: 0.5			# mmol N m-3, Small flagellate biomass in nitrogen
+  dom:
+  parameters:
+    f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo)
+    hmax_dsl: 4.0		# default = 4.0 d-1	
+    hmax_poc: 0.04		# default = 0.04 d-1	
+    hmax_pon: 0.055		# default = 0.055 d-1	
+    ks_dsc_bac: 417.0		# default = 417.0 mmolC m-3	
+    ks_hydr_o2: 2.7		# default = 2.7 mmolO2 m-3	
+    q10_che: 2.0		# default = 2.0 	(also in Chemical)
+  initialization:
+    CFL: 3.0			# mmol C m-3, Small flagellate biomass in carbon
+    NFL: 3.0			# mmol N m-3, Large flagellate biomass in nitrogen
+    CEM: 3.0			# mmol C m-3, Small flagellate biomass in carbon
+    NEM: 0.5			# mmol N m-3, Small flagellate biomass in nitrogen
+    CDI: 0.5			# mmol C m-3, Diatom biomass in carbon
+    NDI: 0.5			# mmol N m-3, Diatom biomass in nitrogen
+  emiliana:
+  parameters:
+    exc_extra_doc: 0.05		# default = 0.05 	(also in Diatoms,Flagellates)
+    f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,DOM,Flagellates,Mesozoo,MicroZoo)
+    f_dl_phy_ex: 0.65		# default = 0.65 	(also in Diatoms,Flagellates)
+    f_dl_phy_mo: 0.34		# default = 0.34 	(also in Diatoms,Flagellates)
+    f_leak_phy: 0.02		# default = 0.02 	(also in Diatoms,Flagellates)
+    f_pp_resp_emi: 0.1		# default = 0.1 	
+    ki_nhs_phy: 0.5		# default = 0.5 mmolN m-3	(also in Diatoms,Flagellates)
+    ks_nhs_emi: 0.05		# default = 0.05 mmolN m-3	
+    ks_nos_emi: 0.05		# default = 0.05 mmolN m-3	
+    ks_po4_emi: 0.02		# default = 0.02 mmolP m-3	
+    mo_emi: 0.03		# default = 0.03 d-1	
+    mumax_emi: 2.5		# default = 2.5 d-1	
+    pi_emi: 0.3			# default = 0.3 m2 W-1 d-1	
+    q10_phy: 2.0		# default = 2.0 	(also in Flagellates)
+    r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
+    r_o2_nhs_nitr: 2.0		# default = 2.0 molO2 molNS-1	(also in Chemical,Diatoms,Flagellates)
+    r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Diatoms,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
+    respb_emi: 0.009		# default = 0.009 d-1	
+    rmax_chl_n_emi: 2.0		# default = 2.0 g Chla molN-1	
+    rmax_n_c_emi: 0.2		# default = 0.2 molN molC-1	
+    rmin_chl_n_emi: 1.0		# default = 1.0 g Chla molN-1	
+    rmin_n_c_emi: 0.05		# default = 0.05 molN molC-1	
+    umax_nhs_emi: 1.5		# default = 1.5 molN molC-1 d-1	
+    umax_nos_emi: 1.5		# default = 1.5 molN molC-1 d-1	
+    umax_po4_emi: 0.09375	# default = 0.09375 molP molC-1 d-1	
+  initialization:
+    CFL: 3.0			# mmol C m-3, Small flagellate biomass in carbon
+    NFL: 3.0			# mmol N m-3, Large flagellate biomass in nitrogen
+  flagellates:
+  parameters:
+    exc_extra_doc: 0.05		# default = 0.05 	(also in Diatoms,Emiliana)
+    f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,DOM,Emiliana,Mesozoo,MicroZoo)
+    f_dl_phy_ex: 0.65		# default = 0.65 	(also in Diatoms,Emiliana)
+    f_dl_phy_mo: 0.34		# default = 0.34 	(also in Diatoms,Emiliana)
+    f_leak_phy: 0.02		# default = 0.02 	(also in Diatoms,Emiliana)
+    f_pp_resp_fla: 0.1		# default = 0.1 	
+    ki_nhs_phy: 0.5		# default = 0.5 mmolN m-3	(also in Diatoms,Emiliana)
+    ks_nhs_fla: 3.0		# default = 3.0 mmolN m-3	
+    ks_nos_fla: 3.0		# default = 3.0 mmolN m-3	
+    ks_po4_fla: 0.2		# default = 0.2 mmolP m-3	
+    mo_fla: 0.03		# default = 0.03 d-1	
+    mumax_fla: 1.0		# default = 1.0 d-1	
+    pi_fla: 0.2153		# default = 0.2153 m2 W-1 d-1	
+    q10_phy: 2.0		# default = 2.0 	(also in Emiliana)
+    r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Emiliana,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
+    r_o2_nhs_nitr: 2.0		# default = 2.0 molO2 molNS-1	(also in Chemical,Diatoms,Emiliana)
+    r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Diatoms,Emiliana,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
+    respb_fla: 0.009		# default = 0.009 d-1	
+    rmax_chl_n_fla: 2.0		# default = 2.0 g Chla molN-1	
+    rmax_n_c_fla: 0.2		# default = 0.2 mol N molC-1	
+    rmin_chl_n_fla: 1.0		# default = 1.0 g Chla molN-1	
+    rmin_n_c_fla: 0.05		# default = 0.05 molN molC-1	
+    umax_nhs_fla: 0.5		# default = 0.5 molN molC-1 d-1	
+    umax_nos_fla: 0.50		# default = 0.50 molN molC-1 d-1	
+    umax_po4_fla: 0.03125	# default = 0.03125 molP molC-1 d-1	
+  initialization:
+    CFL: 3.0			# mmol C m-3, Small flagellate biomass in carbon
+    NFL: 3.0			# mmol N m-3, Large flagellate biomass in nitrogen
+  mesozoo:
+  parameters:
+    doxsatmort: 7.8125		# default = 7.8125 mmolO2 m-3 (?)	(also in MicroZoo,Gelatinous,Noctiluca)
+    eff_ass_zoo_c: 0.64		# default = 0.64 	(also in MicroZoo)
+    eff_ass_zoo_n: 0.77		# default = 0.77 	(also in MicroZoo)
+    eff_gr_mes_c: 0.8		# default = 0.8 	
+    eff_mes_bac: 0.0		# default = 0.0 	
+    eff_mes_dia: 1.0		# default = 1.0 	
+    eff_mes_emi: 0.4		# default = 0.4 	
+    eff_mes_fla: 0.4		# default = 0.4 	
+    eff_mes_mes: 0.0		# default = 0.0 	
+    eff_mes_mic: 1.0		# default = 1.0 	
+    eff_mes_pom: 0.8		# default = 0.8 	
+    f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,DOM,Emiliana,Flagellates,MicroZoo)
+    gmax_mes: 1.2		# default = 1.2 d-1	
+    ks_mort_mes: 1.0		# default = 1.0 mmolC m-3	
+    ks_prey_mec: 5.0		# default = 5.0 mmolC m-3	
+    mess_prey_mes: 0.23		# default = 0.23 	
+    mo_anox_pred: 0.25		# default = 0.25 d-1	(also in MicroZoo,Gelatinous,Noctiluca)
+    moexp_mes: 2.0		# default = 2.0 (?)	
+    momax_mes: 0.3		# default = 0.3 d-1	
+    q10_zoo: 2.0		# default = 2.0 	(also in MicroZoo,Noctiluca)
+    r_n_c_bac: 0.196		# default = 0.196 molN molC-1	(also in Bacteria,MicroZoo)
+    r_n_c_mes: 0.21		# default = 0.21 molN molC-1	
+    r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Emiliana,Flagellates,MicroZoo,Gelatinous,Noctiluca)
+    r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Diatoms,Emiliana,Flagellates,MicroZoo,Gelatinous,Noctiluca)
+    r_si_n_dia: 0.83		# default = 0.83 molSi molN-1	(also in Diatoms,MicroZoo,Noctiluca)
+  initialization:
+    CFL: 3.0			# mmol C m-3, Small flagellate biomass in carbon
+  microzoo:
+  parameters:
+    doxsatmort: 7.8125		# default = 7.8125 mmolO2 m-3 (?)	(also in Mesozoo,Gelatinous,Noctiluca)
+    eff_ass_zoo_c: 0.64		# default = 0.64 	(also in Mesozoo)
+    eff_ass_zoo_n: 0.77		# default = 0.77 	(also in Mesozoo)
+    eff_gr_mic_c: 0.8		# default = 0.8 	
+    eff_mic_bac: 0.7		# default = 0.7 	
+    eff_mic_dia: 0.0		# default = 0.0 	
+    eff_mic_emi: 1.0		# default = 1.0 	
+    eff_mic_fla: 0.0		# default = 0.0 	
+    eff_mic_mes: 0.0		# default = 0.0 	
+    eff_mic_mic: 0.0		# default = 0.0 	
+    eff_mic_pom: 0.0		# default = 0.0 	
+    f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,DOM,Emiliana,Flagellates,Mesozoo)
+    gmax_mic: 3.6		# default = 3.6 d-1	
+    ks_mort_mic: 1.0		# default = 1.0 mmolC m-3	
+    ks_prey_mic: 5.0		# default = 5.0 mmolC m-3	
+    mess_prey_mic: 0.23		# default = 0.23 	
+    mo_anox_pred: 0.25		# default = 0.25 d-1	(also in Mesozoo,Gelatinous,Noctiluca)
+    moexp_mic: 2.0		# default = 2.0 (?)	
+    momax_mic: 0.3		# default = 0.3 d-1	
+    q10_zoo: 2.0		# default = 2.0 	(also in Mesozoo,Noctiluca)
+    r_n_c_bac: 0.196		# default = 0.196 molN molC-1	(also in Bacteria,Mesozoo)
+    r_n_c_mic: 0.18		# default = 0.18 molN molC-1	
+    r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Emiliana,Flagellates,Mesozoo,Gelatinous,Noctiluca)
+    r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Diatoms,Emiliana,Flagellates,Mesozoo,Gelatinous,Noctiluca)
+    r_si_n_dia: 0.83		# default = 0.83 molSi molN-1	(also in Diatoms,Mesozoo,Noctiluca)
+  initialization:
+    CFL: 3.0			# mmol C m-3, Small flagellate biomass in carbon
+  gelatinous:
+  parameters:
+    doxsatmort: 7.8125		# default = 7.8125 mmolO2 m-3 (?)	(also in Mesozoo,MicroZoo,Noctiluca)
+    eff_ass_gel_prey: 0.75	# default = 0.75 	
+    eff_gel_dia: 0.0		# default = 0.0 	
+    eff_gel_emi: 0.0		# default = 0.0 	
+    eff_gel_fla: 0.0		# default = 0.0 	
+    eff_gel_mes: 1.0		# default = 1.0 	
+    eff_gel_mic: 0.0		# default = 0.0 	
+    eff_gel_pom: 0.0		# default = 0.0 	
+    eff_gr_gel_c: 0.2		# default = 0.2 	
+    gmax_gel: 0.3		# default = 0.3 d-1	
+    ks_mort_gel: 0.0		# default = 0.0 mmolC m-3	
+    mo_anox_pred: 0.25		# default = 0.25 d-1	(also in Mesozoo,MicroZoo,Noctiluca)
+    momax_gel: 0.009		# default = 0.009 (?) d-1	
+    q10_gel: 3.5		# default = 3.5 	
+    r_n_c_gel: 0.25		# default = 0.25 molN molC-1	
+    r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo,Noctiluca)
+    r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo,Noctiluca)
+    respb_gel: 0.0001		# default = 0.0001 d-1	
+    t_g_gel: 0			# default = 0 mmolC m-3	
+  initialization:
+    CFL: 3.0			# mmol C m-3, Small flagellate biomass in carbon
+  noctiluca:
+  parameters:
+    doxsatmort: 7.8125		# default = 7.8125 mmolO2 m-3 (?)	(also in Mesozoo,MicroZoo,Gelatinous)
+    eff_ass_noc_prey: 0.75	# default = 0.75 	
+    eff_gr_noc_c: 0.2		# default = 0.2 	
+    eff_noc_emi: 1.0		# default = 1.0 	
+    eff_noc_fla: 0.5		# default = 0.5 	
+    eff_noc_fla: 0.5		# default = 0.5 	
+    eff_noc_mes: 0.0		# default = 0.0 	
+    eff_noc_mic: 1.0		# default = 1.0 	
+    eff_noc_pom: 1.0		# default = 1.0 	
+    gmax_noc: 0.06		# default = 0.06 d-1	
+    ks_mort_noc: 0.0		# default = 0.0 mmolC m-3	
+    mo_anox_pred: 0.25		# default = 0.25 d-1	(also in Mesozoo,MicroZoo,Gelatinous)
+    momax_noc: 0.06		# default = 0.06 (?) d-1	
+    q10_zoo: 2.0		# default = 2.0 	(also in Mesozoo,MicroZoo)
+    r_n_c_noc: 0.21		# default = 0.21 molN molC-1	
+    r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous)
+    r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous)
+    r_si_n_dia: 0.83		# default = 0.83 molSi molN-1	(also in Diatoms,Mesozoo,MicroZoo)
+    respb_noc: 0.0001		# default = 0.0001 d-1	
+    t_g_noc: ?			# default = ? mmolC m-3	
+  initialization:
+    CFL: 3.0			# mmol C m-3, Small flagellate biomass in carbon
