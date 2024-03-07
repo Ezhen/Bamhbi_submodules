@@ -169,6 +169,12 @@ w_dom				-1.0		m d-1			Sinking velocity of dissolved detritus					speed	w_dom
 w_pom				-2.0		m d-1			Sinking velocity of particulate detritus				speed	w_pom
 w_sid				-2.0		m d-1			Sinking velocity of silicious detritus					speed	w_sid
 k_d				0.03		m-1			Background light attanuation coefficient				light	k_d
+dr_sid				5.5e-06		mol d-1			Deposition rate of silicious detritus					depos	dr_sid
+dr_dom				5.5e-06		mol d-1			Deposition rate of dissolved detritus					depos	dr_dom
+dr_pom				5.6e-06		mol d-1			Deposition rate of particulate detritus					depos	dr_pom
+dr_emi				5.7e-06		mol d-1			Deposition rate of EM							depos	dr_emi
+dr_fla				5.8e-06		mol d-1			Deposition rate of FL							depos	dr_fla
+dr_dia				5.9e-06		mol d-1			Deposition rate of DI							depos	dr_fla
 
 ksoxnhsnos			0.3		mmolN m-3		Half-sat. constant for NOS lim. in NHS oxidation by NOS			obsol	ks_nhs_nos
 Q10PhyFlagellates		1.8		-			Temperature factor for FL						obsol	q10_fla
