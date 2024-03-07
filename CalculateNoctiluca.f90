@@ -44,10 +44,7 @@
       contains 
 
       procedure :: initialize 
-      procedure :: do 
-      procedure :: do_bottom 
-      procedure :: check_surface_state 
-      procedure :: check_bottom_state 
+      procedure :: do
    end type
 
    real(rk), parameter :: secs_pr_day = 86400.0_rk
