@@ -47,8 +47,9 @@
       type (type_dependency_id)             :: id_temp 
 
 !     Model parameters 
-      real(rk)     :: f_dl_dom, hmax_dsl, hmax_poc, hmax_pon, k_d
-      real(rk)     :: ks_dsc_bac, ks_hydr_o2, q10_che, w_dom, w_pom
+      real(rk)     :: dr_dom, dr_pom, f_dl_dom, hmax_dsl, hmax_poc
+      real(rk)     :: hmax_pon, k_d, ks_dsc_bac, ks_hydr_o2, q10_che
+      real(rk)     :: w_dom, w_pom
 
       contains 
 
@@ -72,14 +73,16 @@
 
 
 
-   namelist /ulg_DOM/ f_dl_dom, 	 & 
-                      hmax_dsl, hmax_poc, hmax_pon, k_d, 	 & 
-                      ks_dsc_bac, ks_hydr_o2, q10_che, w_dom, 	 & 
-                      w_pom
+   namelist /ulg_DOM/ dr_dom, 	 & 
+                      dr_pom, f_dl_dom, hmax_dsl, hmax_poc, 	 & 
+                      hmax_pon, k_d, ks_dsc_bac, ks_hydr_o2, 	 & 
+                      q10_che, w_dom, w_pom
 
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
+   call self%get_parameter(self%dr_dom, 'dr_dom', 'mol d-1', 'Deposition rate of dissolved detritus', default=5.5e-06_rk) 
+   call self%get_parameter(self%dr_pom, 'dr_pom', 'mol d-1', 'Deposition rate of particulate detritus', default=5.6e-06_rk) 
    call self%get_parameter(self%f_dl_dom, 'f_dl_dom', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
    call self%get_parameter(self%hmax_dsl, 'hmax_dsl', 'd-1', 'Maximum DSL hydrolysis', default=4.0_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%hmax_poc, 'hmax_poc', 'd-1', 'POC hydrolysis rate', default=0.04_rk, scale_factor=one_pr_day)
@@ -166,6 +169,32 @@
 
    end subroutine do
 
+
+   subroutine do_bottom(self,_ARGUMENTS_DO_BOTTOM_)
+   class (type_ulg_dom), intent(in) :: self
+   _DECLARE_ARGUMENTS_DO_BOTTOM_
+
+   real(rk),save :: dcl,dcs,dnl,dns,poc,pon
+
+   _HORIZONTAL_LOOP_BEGIN_
+ 
+   _GET_(self%id_dcl,dcl) 
+   _GET_(self%id_dnl,dnl) 
+   _GET_(self%id_dcs,dcs) 
+   _GET_(self%id_dns,dns)  
+   _GET_(self%id_poc,poc) 
+   _GET_(self%id_pon,pon)
+
+   _ADD_BOTTOM_FLUX_(self%id_dcl,-self%dr_dom*dcl*dcl)
+   _ADD_BOTTOM_FLUX_(self%id_dnl,-self%dr_dom*dnl*dnl)   
+   _ADD_BOTTOM_FLUX_(self%id_dcs,-self%dr_dom*dcs*dcs)
+   _ADD_BOTTOM_FLUX_(self%id_dns,-self%dr_dom*dns*dns)
+   _ADD_BOTTOM_FLUX_(self%id_poc,-self%dr_pom*poc*poc)
+   _ADD_BOTTOM_FLUX_(self%id_pon,-self%dr_pom*pon*pon)      
+
+   _HORIZONTAL_LOOP_END_
+
+   end subroutine do_bottom
 
 
    subroutine get_light_extinction(self,_ARGUMENTS_GET_EXTINCTION_)

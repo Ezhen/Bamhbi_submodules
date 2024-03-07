@@ -37,15 +37,16 @@
       type (type_diagnostic_variable_id)    :: id_uptake_c_dia,id_uptake_n_dia,id_npp,id_reduction_nitrate_phy,id_uptake_sio_dia,id_respiration_dia
 
 !     Model parameters 
-      real(rk)     :: exc_extra_doc, f_dl_dom, f_dl_phy_ex, f_dl_phy_mo
-      real(rk)     :: f_leak_phy, f_pp_resp_dia, hmax_sid, k_d
-      real(rk)     :: ki_nhs_phy, ks_nhs_dia, ks_nos_dia, ks_po4_dia
-      real(rk)     :: ks_sio_dia, mo_dia, mumax_dia, pi_dia, q10_dia
-      real(rk)     :: q10_si_diss, r_o2_c_resp, r_o2_nhs_nitr
-      real(rk)     :: r_p_n_redfield, r_si_n_dia, respb_dia, rmax_chl_n_dia
-      real(rk)     :: rmax_n_c_dia, rmin_chl_n_dia, rmin_n_c_dia
-      real(rk)     :: umax_nhs_dia, umax_nos_dia, umax_po4_dia
-      real(rk)     :: umax_si_dia, w_dia, w_sid
+      real(rk)     :: dr_fla, dr_sid, exc_extra_doc, f_dl_dom
+      real(rk)     :: f_dl_phy_ex, f_dl_phy_mo, f_leak_phy, f_pp_resp_dia
+      real(rk)     :: hmax_sid, k_d, ki_nhs_phy, ks_nhs_dia, ks_nos_dia
+      real(rk)     :: ks_po4_dia, ks_sio_dia, mo_dia, mumax_dia
+      real(rk)     :: pi_dia, q10_dia, q10_si_diss, r_o2_c_resp
+      real(rk)     :: r_o2_nhs_nitr, r_p_n_redfield, r_si_n_dia
+      real(rk)     :: respb_dia, rmax_chl_n_dia, rmax_n_c_dia
+      real(rk)     :: rmin_chl_n_dia, rmin_n_c_dia, umax_nhs_dia
+      real(rk)     :: umax_nos_dia, umax_po4_dia, umax_si_dia
+      real(rk)     :: w_dia, w_sid
 
       contains 
 
@@ -68,10 +69,11 @@
    integer,                        intent(in)          :: configunit
 
 
-   namelist /ulg_Diatoms/ exc_extra_doc, 	 & 
-                      f_dl_dom, f_dl_phy_ex, f_dl_phy_mo, 	 & 
-                      f_leak_phy, f_pp_resp_dia, hmax_sid, 	 & 
-                      k_d, ki_nhs_phy, ks_nhs_dia, ks_nos_dia, 	 & 
+   namelist /ulg_Diatoms/ dr_fla, 	 & 
+                      dr_sid, exc_extra_doc, f_dl_dom, 	 & 
+                      f_dl_phy_ex, f_dl_phy_mo, f_leak_phy, 	 & 
+                      f_pp_resp_dia, hmax_sid, k_d, 	 & 
+                      ki_nhs_phy, ks_nhs_dia, ks_nos_dia, 	 & 
                       ks_po4_dia, ks_sio_dia, mo_dia, 	 & 
                       mumax_dia, pi_dia, q10_dia, q10_si_diss, 	 & 
                       r_o2_c_resp, r_o2_nhs_nitr, 	 & 
@@ -84,6 +86,8 @@
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
+   call self%get_parameter(self%dr_fla, 'dr_fla', 'mol d-1', 'Deposition rate of FL', default=5.8e-06_rk) 
+   call self%get_parameter(self%dr_sid, 'dr_sid', 'mol d-1', 'Deposition rate of silicious detritus', default=5.5e-06_rk) 
    call self%get_parameter(self%exc_extra_doc, 'exc_extra_doc', '-', 'Extra-photosynthetic DOC excretion', default=0.05_rk) 
    call self%get_parameter(self%f_dl_dom, 'f_dl_dom', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
    call self%get_parameter(self%f_dl_phy_ex, 'f_dl_phy_ex', '-', 'Labile fraction phytoxcreted DOC', default=0.65_rk) 
@@ -315,6 +319,31 @@
 
    end subroutine do
 
+
+   subroutine do_bottom(self,_ARGUMENTS_DO_BOTTOM_)
+   class (type_ulg_diatoms), intent(in) :: self
+   _DECLARE_ARGUMENTS_DO_BOTTOM_
+
+   real(rk),save :: cdi, ndi, sid
+
+   _HORIZONTAL_LOOP_BEGIN_
+
+   _GET_(self%id_cdi,cdi)   
+   _GET_(self%id_ndi,ndi) 
+   _GET_(self%id_sid,sid)    
+
+   _ADD_BOTTOM_FLUX_(self%id_cdi,-self%dr_dia*cdi*cdi)   
+   _ADD_BOTTOM_FLUX_(self%id_ndi,-self%dr_dia*ndi*ndi)
+   _ADD_BOTTOM_FLUX_(self%id_sid,-self%dr_sid*sid*sid)   
+
+   _HORIZONTAL_LOOP_END_
+
+   end subroutine do_bottom
+
+
+
+   subroutine get_light_extinction(self,_ARGUMENTS_GET_EXTINCTION_)
+
 ! Temporary light extintion function (from Jorn's)
    class (type_ulg_diatoms), intent(in) :: self
    _DECLARE_ARGUMENTS_GET_EXTINCTION_
@@ -323,7 +352,7 @@
 
    _LOOP_BEGIN_
 
-   _GET_(self%id_ndi,NDI)
+   _GET_(self%id_ndi,ndi)
 
    ! Self-shading with explicit contribution from diatoms
    _SET_EXTINCTION_(self%k_d*ndi)
@@ -331,5 +360,6 @@
    _LOOP_END_
 
    end subroutine get_light_extinction
+
 
    end module fabm_ulg_diatoms 

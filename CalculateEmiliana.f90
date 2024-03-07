@@ -37,10 +37,10 @@
       type (type_diagnostic_variable_id)    :: id_uptake_c_emi,id_uptake_n_emi,id_npp,id_reduction_nitrate_phy,id_respiration_emi
 
 !     Model parameters 
-      real(rk)     :: exc_extra_doc, f_dl_dom, f_dl_phy_ex, f_dl_phy_mo
-      real(rk)     :: f_leak_phy, f_pp_resp_emi, k_d, ki_nhs_phy
-      real(rk)     :: ks_nhs_emi, ks_nos_emi, ks_po4_emi, mo_emi
-      real(rk)     :: mumax_emi, pi_emi, q10_phy, r_o2_c_resp
+      real(rk)     :: dr_emi, exc_extra_doc, f_dl_dom, f_dl_phy_ex
+      real(rk)     :: f_dl_phy_mo, f_leak_phy, f_pp_resp_emi, k_d
+      real(rk)     :: ki_nhs_phy, ks_nhs_emi, ks_nos_emi, ks_po4_emi
+      real(rk)     :: mo_emi, mumax_emi, pi_emi, q10_phy, r_o2_c_resp
       real(rk)     :: r_o2_nhs_nitr, r_p_n_redfield, respb_emi
       real(rk)     :: rmax_chl_n_emi, rmax_n_c_emi, rmin_chl_n_emi
       real(rk)     :: rmin_n_c_emi, umax_nhs_emi, umax_nos_emi
@@ -68,10 +68,10 @@
 
 
 
-   namelist /ulg_Emiliana/ exc_extra_doc, 	 & 
-                      f_dl_dom, f_dl_phy_ex, f_dl_phy_mo, 	 & 
-                      f_leak_phy, f_pp_resp_emi, k_d, 	 & 
-                      ki_nhs_phy, ks_nhs_emi, ks_nos_emi, 	 & 
+   namelist /ulg_Emiliana/ dr_emi, 	 & 
+                      exc_extra_doc, f_dl_dom, f_dl_phy_ex, 	 & 
+                      f_dl_phy_mo, f_leak_phy, f_pp_resp_emi, 	 & 
+                      k_d, ki_nhs_phy, ks_nhs_emi, ks_nos_emi, 	 & 
                       ks_po4_emi, mo_emi, mumax_emi, pi_emi, 	 & 
                       q10_phy, r_o2_c_resp, r_o2_nhs_nitr, 	 & 
                       r_p_n_redfield, respb_emi, 	 & 
@@ -83,6 +83,7 @@
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
+   call self%get_parameter(self%dr_emi, 'dr_emi', 'mol d-1', 'Deposition rate of EM', default=5.7e-06_rk) 
    call self%get_parameter(self%exc_extra_doc, 'exc_extra_doc', '-', 'Extra-photosynthetic DOC excretion', default=0.05_rk) 
    call self%get_parameter(self%f_dl_dom, 'f_dl_dom', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
    call self%get_parameter(self%f_dl_phy_ex, 'f_dl_phy_ex', '-', 'Labile fraction phytoxcreted DOC', default=0.65_rk) 
@@ -293,6 +294,26 @@
 
    end subroutine do
 
+
+   subroutine do_bottom(self,_ARGUMENTS_DO_BOTTOM_)
+   class (type_ulg_emiliana), intent(in) :: self
+   _DECLARE_ARGUMENTS_DO_BOTTOM_
+
+   real(rk),save :: nem, cem
+
+   _HORIZONTAL_LOOP_BEGIN_
+ 
+   _GET_(self%id_nem,nem) 
+   _GET_(self%id_cem,cem)    
+
+   _ADD_BOTTOM_FLUX_(self%id_nem,-self%dr_emi*nem*nem)
+   _ADD_BOTTOM_FLUX_(self%id_cem,-self%dr_emi*cem*cem)   
+
+   _HORIZONTAL_LOOP_END_
+
+   end subroutine do_bottom
+
+
    subroutine get_light_extinction(self,_ARGUMENTS_GET_EXTINCTION_)
 
 ! Temporary light extintion function (from Jorn's)
@@ -303,7 +324,7 @@
 
    _LOOP_BEGIN_
 
-   _GET_(self%id_nem,NEM)
+   _GET_(self%id_nem,nem)
 
    ! Self-shading with explicit contribution from small flagellates
    _SET_EXTINCTION_(self%k_d*nem)

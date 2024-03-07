@@ -38,10 +38,10 @@
       type (type_diagnostic_variable_id)    :: id_uptake_c_fla,id_uptake_n_fla,id_npp,id_reduction_nitrate_phy,id_respiration_fla
 
 !     Model parameters 
-      real(rk)     :: exc_extra_doc, f_dl_dom, f_dl_phy_ex, f_dl_phy_mo
-      real(rk)     :: f_leak_phy, f_pp_resp_fla, k_d, ki_nhs_phy
-      real(rk)     :: ks_nhs_fla, ks_nos_fla, ks_po4_fla, mo_fla
-      real(rk)     :: mumax_fla, pi_fla, q10_phy, r_o2_c_resp
+      real(rk)     :: dr_fla, exc_extra_doc, f_dl_dom, f_dl_phy_ex
+      real(rk)     :: f_dl_phy_mo, f_leak_phy, f_pp_resp_fla, k_d
+      real(rk)     :: ki_nhs_phy, ks_nhs_fla, ks_nos_fla, ks_po4_fla
+      real(rk)     :: mo_fla, mumax_fla, pi_fla, q10_phy, r_o2_c_resp
       real(rk)     :: r_o2_nhs_nitr, r_p_n_redfield, respb_fla
       real(rk)     :: rmax_chl_n_fla, rmax_n_c_fla, rmin_chl_n_fla
       real(rk)     :: rmin_n_c_fla, umax_nhs_fla, umax_nos_fla
@@ -69,10 +69,10 @@
 
 
 
-   namelist /ulg_Flagellates/ exc_extra_doc, 	 & 
-                      f_dl_dom, f_dl_phy_ex, f_dl_phy_mo, 	 & 
-                      f_leak_phy, f_pp_resp_fla, k_d, 	 & 
-                      ki_nhs_phy, ks_nhs_fla, ks_nos_fla, 	 & 
+   namelist /ulg_Flagellates/ dr_fla, 	 & 
+                      exc_extra_doc, f_dl_dom, f_dl_phy_ex, 	 & 
+                      f_dl_phy_mo, f_leak_phy, f_pp_resp_fla, 	 & 
+                      k_d, ki_nhs_phy, ks_nhs_fla, ks_nos_fla, 	 & 
                       ks_po4_fla, mo_fla, mumax_fla, pi_fla, 	 & 
                       q10_phy, r_o2_c_resp, r_o2_nhs_nitr, 	 & 
                       r_p_n_redfield, respb_fla, 	 & 
@@ -84,6 +84,7 @@
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
+   call self%get_parameter(self%dr_fla, 'dr_fla', 'mol d-1', 'Deposition rate of FL', default=5.8e-06_rk) 
    call self%get_parameter(self%exc_extra_doc, 'exc_extra_doc', '-', 'Extra-photosynthetic DOC excretion', default=0.05_rk) 
    call self%get_parameter(self%f_dl_dom, 'f_dl_dom', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
    call self%get_parameter(self%f_dl_phy_ex, 'f_dl_phy_ex', '-', 'Labile fraction phytoxcreted DOC', default=0.65_rk) 
@@ -291,6 +292,26 @@
 
    end subroutine do
 
+
+   subroutine do_bottom(self,_ARGUMENTS_DO_BOTTOM_)
+   class (type_ulg_flagellates), intent(in) :: self
+   _DECLARE_ARGUMENTS_DO_BOTTOM_
+
+   real(rk),save :: nfl, cfl
+
+   _HORIZONTAL_LOOP_BEGIN_
+ 
+   _GET_(self%id_nfl,nfl) 
+   _GET_(self%id_cfl,cfl)    
+
+   _ADD_BOTTOM_FLUX_(self%id_nfl,-self%dr_fla*nfl*nfl)
+   _ADD_BOTTOM_FLUX_(self%id_cfl,-self%dr_fla*cfl*cfl)   
+
+   _HORIZONTAL_LOOP_END_
+
+   end subroutine do_bottom
+
+
    subroutine get_light_extinction(self,_ARGUMENTS_GET_EXTINCTION_)
 
 ! Temporary light extintion function (from Jorn's)
@@ -301,7 +322,7 @@
 
    _LOOP_BEGIN_
 
-   _GET_(self%id_nfl,NFL)
+   _GET_(self%id_nfl,nfl)
 
    ! Self-shading with explicit contribution from large flagellates
    _SET_EXTINCTION_(self%k_d*nfl)
