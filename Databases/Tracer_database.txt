@@ -1,26 +1,26 @@
-1,id_cfl,cfl,mmol C m-3,Small flagellate biomass in carbon,CalculateEmiliana,2
-2,id_nfl,nfl,mmol N m-3,Large flagellate biomass in nitrogen,CalculateEmiliana,2 
-3,id_cem,cem,mmol C m-3,Small flagellate biomass in carbon,CalculateFlagellates,2
-4,id_nem,nem,mmol N m-3,Small flagellate biomass in nitrogen,CalculateFlagellates,2 
-5,id_cdi,cdi,mmol C m-3,Diatom biomass in carbon,CalculateDiatoms,2 
-6,id_ndi,ndi,mmol N m-3,Diatom biomass in nitrogen,CalculateDiatoms,2 
-7,id_mic,mic,mmol C m-3,Microzooplakton biomass,CalculateMicroZoo,2 
-8,id_mes,mes,mmol C m-3,Mesozooplakton biomass,CalculateMesozoo,2 
-9,id_bac,bac,mmol C m-3,Bacterial biomass,CalculateBacteria,0
-10,id_dcl,dcl,mmol C m-3,Labile detritus concentration in carbon,CalculateDOM,2 
-11,id_dnl,dnl,mmol N m-3,Labile detritus concentration in nitrogen,CalculateDOM,2 
-12,id_dcs,dcs,mmol C m-3,Semi-labile detritus concentration in carbon,CalculateDOM,2 
-13,id_dns,dns,mmol C m-3,Semi-labile detritus concentration in nitrogen,CalculateDOM,2 
-14,id_nos,nos,mmol N m-3,Nitrate concentration,ChemicalDynamics,0
-15,id_nhs,nhs,mmol N m-3,Ammonium concentration,ChemicalDynamics,0 
-16,id_sio,sio,mmol Si m-3,Silicilic acid concentration,CalculateDiatoms,0
-17,id_dox,dox,mmol O2 m-3,Dissolved oxygen concentration,ChemicalDynamics,0 
-18,id_dic,dic,mmol C m-3,Dissolved inorganic carbon concentration,none,0 
-19,id_odu,odu,mmol ODU m-3,Oxygen demand unit concentration,ChemicalDynamics,0 
-20,id_poc,poc,mmol C m-3,Particulate organic carbon concentration,none,2 
-21,id_pon,pon,mmol N m-3,Particulate organic nitrogen concentration,none,2 
-22,id_sid,sid,mmol Si m-3,Detrital silicate concentration,CalculateDiatoms,2
-23,id_agg,agg,m-3,Aggregates,none,0 
-24,id_gel,gel,mmol C m-3,Gelatinous omnivorous biomass,CalculateGelatinous,0
-25,id_noc,noc,mmol C m-3,Gelatinous carnivorous biomass, CalculateNoctiluca,0
-26,id_pho,pho,mmol P m-3,Phosphorus,none,0
+1,id_cfl,cfl,mmol C m-3,Small flagellate biomass in carbon,CalculateEmiliana,2,3.0
+2,id_nfl,nfl,mmol N m-3,Large flagellate biomass in nitrogen,CalculateEmiliana,2,0.5
+3,id_cem,cem,mmol C m-3,Small flagellate biomass in carbon,CalculateFlagellates,2,3.0
+4,id_nem,nem,mmol N m-3,Large flagellate biomass in nitrogen,CalculateFlagellates,2,0.5
+5,id_cdi,cdi,mmol C m-3,Diatom biomass in carbon,CalculateDiatoms,2,3.0
+6,id_ndi,ndi,mmol N m-3,Diatom biomass in nitrogen,CalculateDiatoms,2,0.5
+7,id_mic,mic,mmol C m-3,Microzooplakton biomass,CalculateMicroZoo,2,0.1 
+8,id_mes,mes,mmol C m-3,Mesozooplakton biomass,CalculateMesozoo,2,0.1 
+9,id_bac,bac,mmol C m-3,Bacterial biomass,CalculateBacteria,0,0.1
+10,id_dcl,dcl,mmol C m-3,Labile detritus concentration in carbon,CalculateDOM,2,0.6 
+11,id_dnl,dnl,mmol N m-3,Labile detritus concentration in nitrogen,CalculateDOM,2,0.1 
+12,id_dcs,dcs,mmol C m-3,Semi-labile detritus concentration in carbon,CalculateDOM,2,0.6 
+13,id_dns,dns,mmol C m-3,Semi-labile detritus concentration in nitrogen,CalculateDOM,2,0.1 
+14,id_nos,nos,mmol N m-3,Nitrate concentration,ChemicalDynamics,0,5.0
+15,id_nhs,nhs,mmol N m-3,Ammonium concentration,ChemicalDynamics,0 ,0.5
+16,id_sio,sio,mmol Si m-3,Silicilic acid concentration,CalculateDiatoms,0,0.5
+17,id_dox,dox,mmol O2 m-3,Dissolved oxygen concentration,ChemicalDynamics,0,100.0 
+18,id_dic,dic,mmol C m-3,Dissolved inorganic carbon concentration,none,0,100.0
+19,id_odu,odu,mmol ODU m-3,Oxygen demand unit concentration,ChemicalDynamics,0,0.0001 
+20,id_poc,poc,mmol C m-3,Particulate organic carbon concentration,none,2,0.6 
+21,id_pon,pon,mmol N m-3,Particulate organic nitrogen concentration,none,2,0.1 
+22,id_sid,sid,mmol Si m-3,Detrital silicate concentration,CalculateDiatoms,2,0.1
+23,id_agg,agg,m-3,Aggregates,none,0,0.0 
+24,id_gel,gel,mmol C m-3,Gelatinous omnivorous biomass,CalculateGelatinous,0,0.1
+25,id_noc,noc,mmol C m-3,Gelatinous carnivorous biomass, CalculateNoctiluca,0,0.1
+26,id_pho,pho,mmol P m-3,Phosphorus,none,0,0.5

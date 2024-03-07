@@ -1,69 +1,69 @@
 CalculateBacteria
 BAC
 DCL, DCS, DIC, DNL, DNS, DOX, NHS, NOS, ODU, PHO
-BACExcr, BACGrowth, BACResp, bacteria_anoxrem_local, bacteria_oxygenconsumption_local, C_BACMort, denitrif, Iron, Limitation_By_Iron, NutLim, N_BACMort, tf, testratio, Uptake_DOCL_local, Uptake_DONL_local, Uptake_NHS_local, Uptake_Potential_NHS
-bacteria_anoxrem, bacteria_anoxremIntegrated, bacteria_oxygenconsumption, bacteria_oxygenconsumptionIntegrated, Bacteria_Respiration, Bacteria_RespirationIntegrated, denitrification, DenitrificationIntegrated, Uptake_DOCL, Uptake_DOCLIntegrated
-bactgrowtheff, csatamm, csatdocl, csatpo4, Halfsaturation_Iron, IronCsurf, kinanoxremdox, kinanoxremnos, kindenidox, ksdeninos, ksremindox, labilefraction, maxgrowthbac, mortbac, NCr, NCrBac, OCr, ODU_solid, ODUCr, Param1IronCurve, Param2IronCurve, PNRedfield, Q10bac
+Denitrificaiton, Excretion, Growth, Iron, Limitation_iron, Limitation_nutrient, Mortality_C, Mortality_N, Remineralization_anoxic_loc, Respiration, Respiration_loc, Uptake_DCL, Uptake_DNL, Uptake_NHS, Uptake_NHS_pot, testratio, tf
+bacteria_anoxrem, bacteria_oxygenconsumption, Bacteria_Respiration, denitrification, Uptake_DOCL
+eff_gr_bac_c, f_dl_dom, f_solid_odu, i1_curve, i2_curve, iron, ki_anox_nos, ki_anox_o2, ki_denit_o2, ks_denitr_nos, ks_dls_bac, ks_nhs_bac, ks_odu_iron, ks_oxic_o2, ks_po4_bac, mo_bac, mumax_bac, q10_bac, r_n_c_bac, r_n_c_denit, r_o2_c_resp, r_odu_c_anox, r_p_n_redfield
 -
 ChemicalDynamics
 DOX, NHS, NOS, ODU
 
-Ammonium_Oxidation_rate_by_Nitrate, inhib, lim, Nitrification_Rate, ODU_Oxidation_Rate_by_nitrate, ODU_Oxidation_Rate_by_oxygen, tf
-ANAMMOX, ANAMMOXIntegrated, Nitrification, NitrificationIntegrated, Oxidation_by_nitrate, Oxidation_by_nitrateIntegrated, Oxidation_by_oxygen, Oxidation_by_oxygenIntegrated
-kinoxnhsdox, kinoxnhsodu, kinoxodudox, ksoxnhsdox, ksoxodudox, ksoxodunos, NODUr, NOsNHsr, ONoxnhsr, OODUr, Q10chem, Roxnhs, Roxnhsnos, Roxodu, Roxodunos
+Rate_nitrification, Rate_oxidation_NHS_NOS, Rate_oxidation_ODU_NO3, Rate_oxidation_ODU_O2, tf
+ANAMMOX, Nitrification, Oxidation_by_nitrate, Oxidation_by_oxygen
+ki_nhs_o2, ki_nhs_odu, ki_odu_o2, ks_nhs_o2, ks_odu_nos, ks_odu_o2, q10_che, r_nos_nhs_oxid, r_nos_odu_oxid, r_o2_nhs_nitr, r_o2_odu_oxid, rox_nhs_nos, rox_nhs_o2, rox_odu_nos, rox_odu_o2
 -
 CalculateDiatoms
 CDI, NDI, SID, SIO
 DCL, DCS, DIC, DNL, DNS, DOX, NHS, NOS, PHO, POC, PON
-Ammonium_UpPHY, C_PHYMort, Carbon_UptakePHY, ChlCrDiatoms, DOC_extra_excr, DOC_leakage, DON_leakage, GrowthPHY, LightLimitationDiatoms, MaxSiCrDiatoms, MinSiCrDiatoms, Mu_Nitrogen, Mu_Silicate, NCrat, N_PHYMort, NCrDiatoms, Nitrate_UpPHY, Nitrogen_UpPHY, Nutrient_UpPHY, NutrientLimitationDiatoms, Phosphate_upDiatoms, PHYMort, SiCrat, SiCrDiatoms, Silicate_upDia, tf, tfsilicate, TotalRespirationPHY
-Carbon_UptakeDiatoms, Carbon_UptakeDiatomsIntegrated, Nitrogen_Uptake_Diatoms, Nitrogen_Uptake_DiatomsIntegrated, NPP, PhytoNitrateReduction, Silicate_upDiatoms, Silicate_upDiatomsIntegrated, TotalRespirationDiatoms, TotalRespirationDiatomsIntegrated
-alphaPIDiatoms, extradocphyexcr, GrowthRespDiatoms, kdis_Silicious_Detritus, kinNHsPhy, ksNHsDiatoms, ksNOsDiatoms, ksPO4Diatoms, ksSiDiatoms, labileextradocphyexcr, labilefraction, leakagephy, MaxChlNrDiatoms, MaxNCrDiatoms, MinChlNrDiatoms, MinNCrDiatoms, MortalityDiatoms, mortphydom, MuMaxDiatoms, NHsMaxUptakeDiatoms, NosMaxUptakeDiatoms, OCr, ONoxnhsr, PNRedfield, PO4MaxUptakeDiatoms, Q10PhyDiatoms, Q10SilicateDiss, QuantumYieldDiatoms, RespirationDiatoms, SiMaxUptakeDiatoms, SiNrDiatoms
+Excretion_ext, Growth, Leakage_DOC, Leakage_DON, Limitation_light, Limitation_nutrient, Mortality, Mortality_C, Mortality_N, Ratio_Chl_C, Ratio_N_C, Ratio_Si_C, Ratio_max_Si_C, Ratio_min_SiO_C, Respiration_tot, Uptake_C, Uptake_NHS, Uptake_NO3, Uptake_Nit, Uptake_PO4, Uptake_SiO, Uptake_nutrient, tf, tf_SiO_dissolution
+Carbon_UptakeDiatoms,  Nitrogen_Uptake_Diatoms,  NPP, PhytoNitrateReduction, Silicate_upDiatoms,  TotalRespirationDiatoms
+exc_extra_doc, f_dl_dom, f_dl_phy_ex, f_dl_phy_mo, f_leak_phy, f_pp_resp_dia, hmax_sid, k_d, ki_nhs_phy, ks_nhs_dia, ks_nos_dia, ks_po4_dia, ks_sio_dia, mo_dia, mumax_dia, pi_dia, q10_dia, q10_si_diss, r_o2_c_resp, r_o2_nhs_nitr, r_p_n_redfield, r_si_n_dia, respb_dia, rmax_chl_n_dia, rmax_n_c_dia, rmin_chl_n_dia, rmin_n_c_dia, umax_nhs_dia, umax_nos_dia, umax_po4_dia, umax_si_dia, w_dia, w_sid
 -
 CalculateDOM
 DCL, DCS, DNL, DNS, POC, PON
 BAC, DOX
-DOCSLHYDR, DONSLHYDR, hydroPOMLim, POCHYDR, PONHYDR, tf
+Hydrolysis_DNS_DNL, Hydrolysis_DSC_DCL, Hydrolysis_POC_DOC, Hydrolysis_PON_DON, Limitation_hydrolysis_POM, tf
 
-csatdocsl, hydPOCmax, hydPONmax, ksatOxygenHydrolysis, labilefraction, maxhydrDOCSL, Q10chem
+f_dl_dom, hmax_dsl, hmax_poc, hmax_pon, k_d, ks_dsc_bac, ks_hydr_o2, q10_che, w_dom, w_pom
 -
 CalculateEmiliana
 CEM, NEM
 CFL, DCL, DCS, DIC, DNL, DNS, DOX, NFL, NHS, NOS, PHO, POC, PON
-Ammonium_UpPHY, C_PHYMort, Carbon_UptakePHY, ChlCrEmiliana, DOC_extra_excr, DOC_leakage, DON_leakage, GrowthPHY, LightLimitationEmiliana, Mu_Nitrogen, Mu_Silicate, N_PHYMort, NCrat, NCrEmiliana, Nitrate_UpPHY, Nitrogen_UpPHY, Nutrient_UpPHY, NutrientLimitationEmiliana, Phosphate_upEmiliana, PHYMort, SiCrat, tf, TotalRespirationPHY
-Carbon_UptakeEmiliana, Carbon_UptakeEmilianaIntegrated, Nitrogen_Uptake_Emiliana, Nitrogen_Uptake_EmilianaIntegrated, NPP, NPPIntegrated, PhytoNitrateReduction, PhytoNitrateReductionIntegrated, TotalRespirationEmiliana, TotalRespirationEmilianaIntegrated
-alphaPIEmiliana, extradocphyexcr, GrowthRespEmiliana, kinNHsPhy, ksNHsEmiliana, ksNOsEmiliana, ksPO4Emiliana, labileextradocphyexcr, labilefraction, leakagephy, MaxChlNrEmiliana, MaxNCrEmiliana, MinChlNrEmiliana, MinNCrEmiliana, MortalityEmiliana, mortphydom, MuMaxEmiliana, NHsMaxUptakeEmiliana, NosMaxUptakeEmiliana, OCr, ONoxnhsr, PNRedfield, PO4MaxUptakeEmiliana, Q10Phy, QuantumYieldEmiliana, RespirationEmiliana
+Excretion_ext, Growth, Leakage_DOC, Leakage_DON, Limitation_light, Limitation_nutrient, Mortality, Mortality_C, Mortality_N, Ratio_Chl_C, Ratio_N_C, Ratio_N_C, Ratio_Si_C, Respiration_tot, Uptake_C, Uptake_NHS, Uptake_NO3, Uptake_Nit, Uptake_PO4, Uptake_nutrient, tf
+Carbon_UptakeEmiliana, Nitrogen_Uptake_Emiliana, NPP, PhytoNitrateReduction, TotalRespirationEmiliana
+exc_extra_doc, f_dl_dom, f_dl_phy_ex, f_dl_phy_mo, f_leak_phy, f_pp_resp_emi, k_d, ki_nhs_phy, ks_nhs_emi, ks_nos_emi, ks_po4_emi, mo_emi, mumax_emi, pi_emi, q10_phy, r_o2_c_resp, r_o2_nhs_nitr, r_p_n_redfield, respb_emi, rmax_chl_n_emi, rmax_n_c_emi, rmin_chl_n_emi, rmin_n_c_emi, umax_nhs_emi, umax_nos_emi, umax_po4_emi, w_emi
 -
 CalculateFlagellates
 CFL, NFL
 CEM, DCL, DCS, DIC, DNL, DNS, DOX, NEM, NHS, NOS, PHO, POC, PON
-Ammonium_UpPHY, C_PHYMort, Carbon_UptakePHY, ChlCrFlagellates, DOC_extra_excr, DOC_leakage, DON_leakage, GrowthPHY, LightLimitationFlagellates, Mu_Nitrogen, Mu_Silicate, N_PHYMort, NCrat, NCrFlagellates, Nitrate_UpPHY, Nitrogen_UpPHY, Nutrient_UpPHY, NutrientLimitationFlagellates, Phosphate_upFlagellates, PHYMort, SiCrat, tf, TotalRespirationPHY
-Carbon_UptakeFlagellates, Carbon_UptakeFlagellatesIntegrated, Nitrogen_Uptake_Flagellates, Nitrogen_Uptake_FlagellatesIntegrated, NPP, PhytoNitrateReduction, TotalRespirationFlagellates, TotalRespirationFlagellatesIntegrated
-alphaPIFlagellates, extradocphyexcr, GrowthRespFlagellates, kinNHsPhy, ksNHsFlagellates, ksNOsFlagellates, ksPO4Flagellates, labileextradocphyexcr, labilefraction, leakagephy, MaxChlNrFlagellates, MaxNCrFlagellates, MinChlNrFlagellates, MinNCrFlagellates, MortalityFlagellates, mortphydom, MuMaxFlagellates, NHsMaxUptakeFlagellates, NosMaxUptakeFlagellates, OCr, ONoxnhsr, PNRedfield, PO4MaxUptakeFlagellates, Q10Phy, QuantumYieldFlagellates, RespirationFlagellates
+Excretion_ext, Growth, Leakage_DOC, Leakage_DON, Limitation_light, Limitation_nutrient, Mortality, Mortality_C, Mortality_N, Ratio_Chl_C, Ratio_N_C, Respiration_tot, Uptake_C, Uptake_NHS, Uptake_NO3, Uptake_Nit, Uptake_PO4, Uptake_nutrient, tf
+Carbon_UptakeFlagellates, Nitrogen_Uptake_Flagellates, NPP, PhytoNitrateReduction, TotalRespirationFlagellates
+exc_extra_doc, f_dl_dom, f_dl_phy_ex, f_dl_phy_mo, f_leak_phy, f_pp_resp_fla, k_d, ki_nhs_phy, ks_nhs_fla, ks_nos_fla, ks_po4_fla, mo_fla, mumax_fla, pi_fla, q10_phy, r_o2_c_resp, r_o2_nhs_nitr, r_p_n_redfield, respb_fla, rmax_chl_n_fla, rmax_n_c_fla, rmin_chl_n_fla, rmin_n_c_fla, umax_nhs_fla, umax_nos_fla, umax_po4_fla, w_fla
 -
 CalculateMesozoo
 MES
 BAC, CDI, CEM, CFL, DCL, DCS, DIC, DNL, DNS, DOX, MIC, NDI, NEM, NFL, NHS, PHO, POC, PON, SID
-C_ZOOEgest, C_ZOOIntake, C_ZOOMessyfeeding, C_ZOOMort, C_ZOOResp, FluxPrey_carbon, FluxPrey_nitrogen, grazing_carbonMesoZoo, grazing_nitrogenZoo, NCrfoodZooref, N_ZOOEgest, N_ZOOExcr, N_ZOOIntake, N_ZOOMessyfeeding, N_ZOOMort, NCrfoodMesoZoo, tf, ZOOGrowth
-bac_to_ZOO, bac_to_ZOOIntegrated, phy_to_ZOO, phy_to_ZOOIntegrated, POC_to_ZOO, POC_to_ZOOIntegrated, Totalrespiration_ZOO, Totalrespiration_zooIntegrated
-Ass_Eff_OnCarbon, Ass_Eff_OnNitrogen, Capt_eff_MesoZoo_BAC, Capt_eff_MesoZoo_Diatoms, Capt_eff_MesoZoo_Emiliana, Capt_eff_MesoZoo_Flagellates, Capt_eff_MesoZoo_MesoZoo, Capt_eff_MesoZoo_MicroZoo, Capt_eff_MesoZoo_POM, DOXsatmort, efficiency_growth_MesoZoo, expmortMesoZoo, Half_Saturation_MesoZoo, HalfSatMort_MesoZoo, labilefraction, MaxgrazingrateMesoZoo, Messy_feeding_MesoZoo, Mortanoxic, NCrBac, NCrMesoZoo, NLin_Mort_MesoZoo, OCr, PNRedfield, Q10Zoo, SiNrDiatoms
+Egestion_C, Egestion_N, Excretion, Grazing_C, Grazing_N, Growth, Intake_C, Intake_N, Messy_feeding_C, Messy_feeding_N, Mortality_C, Mortality_N, Prey_C, Prey_N, Ratio_N_C, Ratio_N_C_thr, Respiration_C, tf
+bac_to_ZOO,  phy_to_ZOO,  POC_to_ZOO,  Totalrespiration_ZOO
+doxsatmort, eff_ass_zoo_c, eff_ass_zoo_n, eff_gr_mes_c, eff_mes_bac, eff_mes_dia, eff_mes_emi, eff_mes_fla, eff_mes_mes, eff_mes_mic, eff_mes_pom, f_dl_dom, gmax_mes, ks_mort_mes, ks_prey_mec, mess_prey_mes, mo_anox_pred, moexp_mes, momax_mes, q10_zoo, r_n_c_bac, r_n_c_mes, r_o2_c_resp, r_p_n_redfield, r_si_n_dia
 -
 CalculateMicroZoo
 MIC
 BAC, CDI, CEM, CFL, DCL, DCS, DIC, DNL, DNS, DOX, NDI, NEM, NFL, NHS, PHO, POC, PON, SID
-C_ZOOEgest, C_ZOOIntake, C_ZOOMessyfeeding, C_ZOOMort, C_ZOOResp, FluxPrey_carbon, FluxPrey_nitrogen, grazing_carbonMicroZoo, grazing_nitrogenZoo, NCrfoodZooref, N_ZOOEgest, N_ZOOExcr, N_ZOOIntake, N_ZOOMessyfeeding, N_ZOOMort, NCrfoodMicroZoo, tf, ZOOGrowth
+Egestion_C, Egestion_N, Excretion, Grazing_C, Grazing_N, Growth, Intake_C, Intake_N, Messy_feeding_C, Messy_feeding_N, Mortality_C, Mortality_N, Prey_C, Prey_N, Ratio_N_C, Ratio_N_C_thr, Respiration_C, tf
 bac_to_ZOO, phy_to_ZOO, POC_to_ZOO
-Ass_Eff_OnCarbon, Ass_Eff_OnNitrogen, Capt_eff_MicroZoo_BAC, Capt_eff_MicroZoo_Diatoms, Capt_eff_MicroZoo_Emiliana, Capt_eff_MicroZoo_Flagellates, Capt_eff_MicroZoo_MesoZoo, Capt_eff_MicroZoo_MicroZoo, Capt_eff_MicroZoo_POM, DOXsatmort, efficiency_growth_MicroZoo, expmortMicroZoo, Half_Saturation_MicroZoo, HalfSatMort_MicroZoo, labilefraction, MaxgrazingrateMicroZoo, Messy_feeding_MicroZoo, Mortanoxic, NCrMicroZoo, NLin_Mort_MicroZoo, NCrBac, OCr, PNRedfield, Q10Zoo, SiNrDiatoms
+doxsatmort, eff_ass_zoo_c, eff_ass_zoo_n, eff_gr_mic_c, eff_mic_bac, eff_mic_dia, eff_mic_emi, eff_mic_fla, eff_mic_mes, eff_mic_mic, eff_mic_pom, f_dl_dom, gmax_mic, ks_mort_mic, ks_prey_mic, mess_prey_mic, mo_anox_pred, moexp_mic, momax_mic, q10_zoo, r_n_c_bac, r_n_c_mic, r_o2_c_resp, r_p_n_redfield, r_si_n_dia, w_dia
 -
 CalculateGelatinous
 GEL
-DIC, DOX, MES, MIC, NHS, PHO, POC, PON
-C_ZOOAdjust, C_ZOOEgest, C_ZOOMort, C_ZOOResp, FluxPrey_carbon, FluxPrey_nitrogen, grazing_carbonGelatinous, grazing_nitrogen, N_ZOOAdjust, N_ZOOEgest, N_ZOOMort, NCrfoodGelatinous, NCrzootest, tf
+CDI, CEM, CFL, DIC, DOX, MES, MIC, NDI, NEM, NFL, NHS, PHO, POC, PON, SID
+Egestion_C, Egestion_N, Excretion_C_adj, Excretion_N_adj, Grazing_C, Grazing_N, Mortality_C, Mortality_N, Prey_C, Ratio_N_C, Ratio_N_C_test, Respiration_C, tf
 TotalRespiration_Gel
-Ass_Eff_Gelatinous, basal_Resp_Gelatinous, Capt_eff_Gelatinous_Diatoms, Capt_eff_Gelatinous_Emiliana, Capt_eff_Gelatinous_Flagellates, Capt_eff_Gelatinous_Mesozoo, Capt_eff_Gelatinous_Microzoo, Capt_eff_Gelatinous_POM, DOXsatmort, efficiency_growth_Gelatinous, expmortGelatinous, HalfSatMort_Gelatinous, MaxgrazingrateGelatinous, Mortanoxic, NCrGelatinous, NLin_Mort_Gelatinous, OCr, PNRedfield, Q10Gelatinous, threshold_feeding_Gelatinous
+doxsatmort, eff_ass_gel_prey, eff_gel_dia, eff_gel_emi, eff_gel_fla, eff_gel_mes, eff_gel_mic, eff_gel_pom, eff_gr_gel_c, gmax_gel, ks_mort_gel, mo_anox_pred, momax_gel, q10_gel, r_n_c_gel, r_o2_c_resp, r_p_n_redfield, r_si_n_dia, respb_gel, t_g_gel
 -
 CalculateNoctiluca
 NOC
 CDI, CEM, CFL, DIC, DOX, MES, MIC, NDI, NEM, NFL, NHS, PHO, POC, PON, SID
-C_ZOOAdjust, C_ZOOEgest, C_ZOOMort, C_ZOOResp, FluxPrey_carbon, FluxPrey_nitrogen, grazing_carbonNoctiluca, grazing_nitrogen, N_ZOOAdjust, N_ZOOEgest, N_ZOOMort, NCrfoodNoctiluca, NCrzootest, tf
-TotalRespiration_Gel, TotalRespiration_GelIntegrated
-Ass_Eff_Noctiluca, basal_Resp_Noctiluca, Capt_eff_Noctiluca_Diatoms, Capt_eff_Noctiluca_Emiliana, Capt_eff_Noctiluca_Flagellates, Capt_eff_Noctiluca_Mesozoo, Capt_eff_Noctiluca_Microzoo, Capt_eff_Noctiluca_POM, DOXsatmort, efficiency_growth_Noctiluca, expmortNoctiluca, HalfSatMort_Noctiluca, MaxgrazingrateNoctiluca, Mortanoxic, NCrNoctiluca, NLin_Mort_Noctiluca, OCr, PNRedfield, Q10Zoo, SiNrDiatoms, threshold_feeding_Noctiluca
+Egestion_C, Egestion_N, Excretion_C_adj, Excretion_N_adj, Grazing_C, Grazing_N, Mortality_C, Mortality_N, Prey_C, Ratio_N_C, Ratio_N_C_test, Respiration_C, tf
+TotalRespiration_Gel
+doxsatmort, eff_ass_noc_prey, eff_gr_noc_c, eff_noc_emi, eff_noc_fla, eff_noc_fla, eff_noc_mes, eff_noc_mic, eff_noc_pom, gmax_noc, ks_mort_noc, mo_anox_pred, momax_noc, q10_zoo, r_n_c_noc, r_o2_c_resp, r_p_n_redfield, r_si_n_dia, respb_noc, t_g_noc
