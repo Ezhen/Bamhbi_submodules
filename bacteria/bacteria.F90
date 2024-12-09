@@ -44,13 +44,13 @@
    type,extends(type_base_model),public :: type_ulg_bacteria 
       type (type_state_variable_id)         :: id_bac
       type (type_state_variable_id)         :: id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_nhs,id_nos,id_odu,id_pho
-      type (type_dependency_id)             :: id_temp,id_depth 
+      type (type_dependency_id)             :: id_temp,id_z_r
       type (type_diagnostic_variable_id)    :: id_remineralization_anoxic_bac,id_oxygen_consumption_bac,id_respiration_bac,id_denitrification,id_uptake_dcl_bac
 
 !     Model parameters 
       real(rk)     :: eff_gr_bac_c, f_dl_dom, f_solid_odu, i1_curve
       real(rk)     :: i2_curve, iron, ki_anox_nos, ki_anox_o2
-      real(rk)     :: ki_denit_o2, ks_denitr_nos, ks_dls_bac, ks_nhs_bac
+      real(rk)     :: ki_denit_o2, ks_denitr_nos, ks_dcl_bac, ks_nhs_bac
       real(rk)     :: ks_odu_iron, ks_oxic_o2, ks_po4_bac, mo_bac
       real(rk)     :: mumax_bac, q10_bac, r_n_c_bac, r_n_c_denit
       real(rk)     :: r_o2_c_resp, r_odu_c_anox, r_p_n_redfield
@@ -77,7 +77,7 @@
 !     Model parameters 
       real(rk)     :: eff_gr_bac_c, f_dl_dom, f_solid_odu, i1_curve
       real(rk)     :: i2_curve, iron, ki_anox_nos, ki_anox_o2
-      real(rk)     :: ki_denit_o2, ks_denitr_nos, ks_dls_bac, ks_nhs_bac
+      real(rk)     :: ki_denit_o2, ks_denitr_nos, ks_dcl_bac, ks_nhs_bac
       real(rk)     :: ks_odu_iron, ks_oxic_o2, ks_po4_bac, mo_bac
       real(rk)     :: mumax_bac, q10_bac, r_n_c_bac, r_n_c_denit
       real(rk)     :: r_o2_c_resp, r_odu_c_anox, r_p_n_redfield
@@ -85,7 +85,7 @@
    namelist /ulg_bacteria/ eff_gr_bac_c, 	 & 
                       f_dl_dom, f_solid_odu, i1_curve, 	 & 
                       i2_curve, iron, ki_anox_nos, ki_anox_o2, 	 & 
-                      ki_denit_o2, ks_denitr_nos, ks_dls_bac, 	 & 
+                      ki_denit_o2, ks_denitr_nos, ks_dcl_bac, 	 & 
                       ks_nhs_bac, ks_odu_iron, ks_oxic_o2, 	 & 
                       ks_po4_bac, mo_bac, mumax_bac, q10_bac, 	 & 
                       r_n_c_bac, r_n_c_denit, r_o2_c_resp, 	 & 
@@ -107,7 +107,7 @@
    call self%get_parameter(self%ki_anox_o2, 'ki_anox_o2', 'mmolO2 m-3', 'Half-sat. constant for O2 inhibition in anoxic remineralization', default=0.0005_rk) 
    call self%get_parameter(self%ki_denit_o2, 'ki_denit_o2', 'mmolO2 m-3', 'Half-sat. constant for O2 inhibition in denitrification', default=0.5_rk) 
    call self%get_parameter(self%ks_denitr_nos, 'ks_denitr_nos', 'mmolN m-3', 'Half-sat. constant for NOS lim. in denitrif.', default=0.3_rk) 
-   call self%get_parameter(self%ks_dls_bac, 'ks_dls_bac', 'mmolC m-3', 'Half-sat. constant for DLC uptake by BAC', default=25.0_rk) 
+   call self%get_parameter(self%ks_dcl_bac, 'ks_dcl_bac', 'mmolC m-3', 'Half-sat. constant for DLC uptake by BAC', default=25.0_rk) 
    call self%get_parameter(self%ks_nhs_bac, 'ks_nhs_bac', 'mmolN m-3', 'Half-sat. constant for NHS uptake by BAC', default=0.5_rk) 
    call self%get_parameter(self%ks_odu_iron, 'ks_odu_iron', 'mmolFe m-3', 'Half-sat. constant for iron lim. in solid ODU formation', default=100.0_rk) 
    call self%get_parameter(self%ks_oxic_o2, 'ks_oxic_o2', 'mmolO2 m-3', 'Half-sat. constant for O2 lim. in oxic min.', default=3.0_rk) 
@@ -139,7 +139,7 @@
 
     ! Register environmental dependencies 
    call self%register_dependency(self%id_temp, standard_variables%temperature) 
-   call self%register_dependency(self%id_depth,standard_variables%pressure)  
+   call self%register_dependency(self%id_z_r, standard_variables%depth) 
 
     ! Add to aggregate variables 
    call self%add_to_aggregate_variable(standard_variables%total_carbon, self%id_bac)
@@ -168,25 +168,25 @@
    _DECLARE_ARGUMENTS_DO_
 
       real(rk) ::  DCL,DCS,DIC,DNL,DNS,DOX,NHS,NOS,ODU,PHO
-      real(rk) ::  temp, depth
+      real(rk) ::  temp, z_r
       real(rk) ::  BAC
-      real(rk) ::   Denitrification	  ! mmol N m-3, Denitrification flux
-      real(rk) ::   Excretion	  ! mmol N m-3, Zooplankton excretion of ammonium
-      real(rk) ::   Growth	  ! mmol C m-3 d-1, Phytoplankton growth
-      real(rk) ::   Iron	  ! mmol Fe m-3, Iron concentration
-      real(rk) ::   Limitation_iron	  ! -, Limitation by Iron
-      real(rk) ::   Limitation_nutrient	  ! -, Nutrient limitation for small flagellates
-      real(rk) ::   Mortality_C	  ! mmol C m-3, Phytoplankton mortality flux
-      real(rk) ::   Mortality_N	  ! mmol N m-3, Phytoplankton mortality flux
-      real(rk) ::   Remineralization_anoxic_loc	  ! mmol ODU m-3, Bacterial anoxic remineralisation
-      real(rk) ::   Respiration	  ! mmol C m-3, Bacteria respiration flux
-      real(rk) ::   Respiration_loc	  ! mmol O2 m-3, Bacterial respiration
-      real(rk) ::   Uptake_DCL	  ! mmol C m-3, Bacteria uptake of DOC
-      real(rk) ::   Uptake_DNL	  ! mmol N m-3, Bacteria uptake of DON
-      real(rk) ::   Uptake_NHS	  ! mmol N m-3, Ammonium uptake of phytoplankton
-      real(rk) ::   Uptake_NHS_pot	  ! mmol N m-3, Bacteria potential uptake of ammonium
-      real(rk) ::   testratio	  ! mmol N m-3, Value showing if BAC growth limited by C or N
-      real(rk) ::   tf	  ! -, Temperature factor
+      real(rk) ::   Denitrification	  	! mmol N m-3, Denitrification flux
+      real(rk) ::   Excretion	  		! mmol N m-3, Excretion of ammonium
+      real(rk) ::   Growth	  		! mmol C m-3 d-1, Growth
+      real(rk) ::   Iron	  		! mmol Fe m-3, Iron concentration
+      real(rk) ::   Limitation_iron	  	! -, Limitation by Iron
+      real(rk) ::   Limitation_nutrient	  	! -, Limitation by nutrient
+      real(rk) ::   Mortality_C	  		! mmol C m-3, Mortality in C
+      real(rk) ::   Mortality_N	  		! mmol N m-3, Mortality in N
+      real(rk) ::   Remineralization_anoxic_loc	! mmol ODU m-3, Anoxic remineralisation
+      real(rk) ::   Respiration	  		! mmol C m-3, Respiration
+      real(rk) ::   Respiration_loc	  	! mmol O2 m-3, Respiration
+      real(rk) ::   Uptake_DCL	  		! mmol C m-3, Uptake of DOC
+      real(rk) ::   Uptake_DNL	  		! mmol N m-3, Uptake of DON
+      real(rk) ::   Uptake_NHS	  		! mmol N m-3, Uptake of NHs
+      real(rk) ::   Uptake_NHS_pot	 	! mmol N m-3, Uptake of NHs (potential)
+      real(rk) ::   testratio	  		! mmol N m-3, Value determining if growth limited by C or N
+      real(rk) ::   tf	  			! -, Temperature factor
 
    _LOOP_BEGIN_
 
@@ -204,22 +204,23 @@
    _GET_(self%id_pho,PHO)       ! Phosphorus
 
    ! Retrieve current environmental conditions.
-    _GET_(self%id_temp,temp)            ! local temperature
-    _GET_(self%id_depth,depth)            ! depth
+    _GET_(self%id_temp,temp)           	 ! local temperature
+    _GET_(self%id_z_r,z_r) ! depth of layer midpoints (m)
     
     tf = Q10Factor(temp,self%q10_bac) 
     
-   !Compute Iron Limitation 
-    Iron = self%iron + self%i1_curve / (self%i2_curve * sqrt(2.*3.1416)) * exp(-(depth - 275.0)**2 / (2. * self%i2_curve**2))
+   ! Compute Iron Limitation 
+!    Iron = self%iron + self%i1_curve / (self%i2_curve * sqrt(2.*3.1416)) * exp(-(z_r - 275.0)**2 / (2. * self%i2_curve**2)) #test15
+    Iron = self%iron + self%i1_curve / (self%i2_curve * sqrt(2.*3.1416)) * exp((z_r + 275.0)**2 / (2. * self%i2_curve**2))
     Limitation_iron = Michaelis(Iron,self%ks_odu_iron)
 
-    Uptake_DCL = tf * self%mumax_bac * BAC * Michaelis(DCL,self%ks_dls_bac)
+    Uptake_DCL = tf * self%mumax_bac * BAC * Michaelis(DCL,self%ks_dcl_bac)
     Uptake_DNL = Uptake_DCL * Ratio(DNL,DCL)
     Limitation_nutrient = min(Michaelis(NHS,self%ks_nhs_bac),Michaelis(PHO,self%ks_po4_bac))
     Uptake_NHS_pot = self%mumax_bac * Limitation_nutrient * BAC * self%r_n_c_bac
 
    ! Test if bacterial growth is limited by carbon (DOClabile) or nitrogen (ammonium + DONLabile) 
-    testratio = Uptake_DCL * (Uptake_DNL/Uptake_DCL - self%eff_gr_bac_c*self%r_n_c_bac)
+    testratio = Uptake_DCL * (Ratio(Uptake_DNL,Uptake_DCL) - self%eff_gr_bac_c*self%r_n_c_bac)
     
    ! Growth rate of bacteria depends on a threshold value compared with Uptake_Potential_NHS 
     if (Uptake_NHS_pot > (-testratio)) then 
