@@ -35,6 +35,7 @@
       type (type_state_variable_id)         :: id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_nhs,id_nos,id_pho,id_poc,id_pon
       type (type_dependency_id)             :: id_par,id_temp 
       type (type_diagnostic_variable_id)    :: id_uptake_c_fla,id_uptake_n_fla,id_npp,id_reduction_nitrate_phy,id_respiration_fla
+      type (type_diagnostic_variable_id)    :: id_chla
 
 !     Model parameters 
       real(rk)     :: dr_fla, exc_extra_doc, f_dl_dom, f_dl_phy_ex
@@ -51,7 +52,6 @@
       procedure :: initialize 
       procedure :: do 
       procedure :: do_bottom
-      procedure :: get_light_extinction 
    end type
 
    real(rk), parameter :: secs_pr_day = 86400.0_rk
@@ -74,18 +74,6 @@
       real(rk)     :: rmin_n_c_fla, umax_nhs_fla, umax_nos_fla
       real(rk)     :: umax_po4_fla, w_fla
 
-   namelist /ulg_flagellates/ dr_fla, 	 & 
-                      exc_extra_doc, f_dl_dom, f_dl_phy_ex, 	 & 
-                      f_dl_phy_mo, f_leak_phy, f_pp_resp_fla, 	 & 
-                      k_d, ki_nhs_phy, ks_nhs_fla, ks_nos_fla, 	 & 
-                      ks_po4_fla, mo_fla, mumax_fla, pi_fla, 	 & 
-                      q10_phy, r_o2_c_resp, r_o2_nhs_nitr, 	 & 
-                      r_p_n_redfield, respb_fla, 	 & 
-                      rmax_chl_n_fla, rmax_n_c_fla, 	 & 
-                      rmin_chl_n_fla, rmin_n_c_fla, 	 & 
-                      umax_nhs_fla, umax_nos_fla, 	 & 
-                      umax_po4_fla, w_fla
-
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
@@ -103,7 +91,7 @@
    call self%get_parameter(self%ks_po4_fla, 'ks_po4_fla', 'mmolP m-3', 'Half-saturation constant for PO4 uptake by FL', default=0.2_rk) 
    call self%get_parameter(self%mo_fla, 'mo_fla', 'd-1', 'Mortality rate of FL', default=0.03_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%mumax_fla, 'mumax_fla', 'd-1', 'Maximum specific growth rate of FL', default=1.0_rk, scale_factor=one_pr_day)
-   call self%get_parameter(self%pi_fla, 'pi_fla', 'm2 W-1 d-1', 'Initial slope of photosynthesis-light curve for FL', default=0.2153_rk) 
+   call self%get_parameter(self%pi_fla, 'pi_fla', 'm2 W-1 d-1', 'Initial slope of photosynthesis-light curve for FL', default=0.2153_rk, scale_factor=one_pr_day) 
    call self%get_parameter(self%q10_phy, 'q10_phy', '-', 'Temperature factor', default=2.0_rk) 
    call self%get_parameter(self%r_o2_c_resp, 'r_o2_c_resp', 'molO2 molC-1', 'O2:C ratio of respiration process', default=1.0_rk) 
    call self%get_parameter(self%r_o2_nhs_nitr, 'r_o2_nhs_nitr', 'molO2 molNS-1', 'O2:NHS ratio in NHS oxidation in nitrification', default=2.0_rk) 
@@ -116,7 +104,7 @@
    call self%get_parameter(self%umax_nhs_fla, 'umax_nhs_fla', 'molN molC-1 d-1', 'Maximal NHS uptake rate by FL', default=0.5_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%umax_nos_fla, 'umax_nos_fla', 'molN molC-1 d-1', 'Maximal NOS uptake rate by FL', default=0.50_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%umax_po4_fla, 'umax_po4_fla', 'molP molC-1 d-1', 'Maximal PO4 uptake rate by FL', default=0.03125_rk, scale_factor=one_pr_day)
-   call self%get_parameter(self%w_fla, 'w_fla', 'm d-1', 'Sinking velocity of FL', default=-2.0_rk) 
+   call self%get_parameter(self%w_fla, 'w_fla', 'm d-1', 'Sinking velocity of FL', default=-2.0_rk, scale_factor=one_pr_day) 
 
    ! Register state variables 
 
@@ -139,11 +127,6 @@
    call self%register_dependency(self%id_par, standard_variables%downwelling_photosynthetic_radiative_flux) 
    call self%register_dependency(self%id_temp, standard_variables%temperature) 
 
-    ! Add to aggregate variables 
-   call self%add_to_aggregate_variable(standard_variables%total_carbon, self%id_cfl)
-   call self%add_to_aggregate_variable(standard_variables%total_nitrogen, self%id_nfl)
-   call self%add_to_aggregate_variable(standard_variables%total_phosphorus, self%id_nfl, scale_factor=self%r_p_n_redfield) 
-
     ! Register diagnostic variables 
    call self%register_diagnostic_variable(self%id_uptake_c_fla, 'uptake_c_fla', 'mmol C m-3 d-1', & 
       'Carbon uptake by Flagellates', output=output_instantaneous) 
@@ -155,6 +138,16 @@
       '-', output=output_instantaneous) 
    call self%register_diagnostic_variable(self%id_respiration_fla, 'respiration_fla', 'mmol C m-3 d-1', & 
       'Total Respiration of Flagellates', output=output_instantaneous) 
+   call self%register_diagnostic_variable(self%id_chla, 'chla','mg chl a m-3', 'Chlorophyll concentration')
+
+    ! Add to aggregate variables 
+   call self%add_to_aggregate_variable(standard_variables%total_carbon, self%id_cfl)
+   call self%add_to_aggregate_variable(standard_variables%total_nitrogen, self%id_nfl)
+   call self%add_to_aggregate_variable(standard_variables%total_phosphorus, self%id_nfl, scale_factor=self%r_p_n_redfield) 
+   call self%add_to_aggregate_variable(type_bulk_standard_variable(name='total_chlorophyll',units="mg chl a m-3",aggregate_variable=.true.),self%id_chla,scale_factor=1._rk)
+
+   call self%add_to_aggregate_variable(standard_variables%attenuation_coefficient_of_photosynthetic_radiative_flux, self%id_nfl, scale_factor=self%k_d)
+
    return 
 
 99 call self%fatal_error('Flagellates', 'Error reading namelist ulg_flagellates') 
@@ -217,8 +210,6 @@
    ! Calculate ratios in phytoplankton 
     Ratio_N_C  = Ratio(NFL,CFL)
     Ratio_Chl_C = ratio_chl_c_phyt(Ratio_N_C,self%rmax_n_c_fla,self%rmin_n_c_fla,self%rmin_chl_n_fla,self%rmax_chl_n_fla)
-    
-   ! chlorophyll(i,j,k,1) = ChlCrFlagellates * CFL ! REMOVE (POSSIBLY) 
     
    ! Nitrate uptake rate 
     Uptake_NO3 = uptake_nitrate_phyt(Ratio_N_C,tf,self%rmax_n_c_fla,self%umax_nos_fla) * Michaelis(NOS,self%ks_nos_fla) * Inhibition(NHS,self%ki_nhs_phy) * CFL
@@ -293,6 +284,7 @@
    _SET_DIAGNOSTIC_(self%id_respiration_fla, Respiration_tot)
    _SET_DIAGNOSTIC_(self%id_reduction_nitrate_phy, Uptake_nutrient * Ratio(Uptake_NO3,Uptake_Nit) * self%r_o2_nhs_nitr)
    _SET_DIAGNOSTIC_(self%id_npp, Growth)
+   _SET_DIAGNOSTIC_(self%id_chla, Ratio_Chl_C*CFL)
 
    _LOOP_END_
 
@@ -316,25 +308,5 @@
    _HORIZONTAL_LOOP_END_
 
    end subroutine do_bottom
-
-
-   subroutine get_light_extinction(self,_ARGUMENTS_GET_EXTINCTION_)
-
-! Temporary light extintion function (from Jorn's)
-   class (type_ulg_flagellates), intent(in) :: self
-   _DECLARE_ARGUMENTS_GET_EXTINCTION_
-
-   real(rk)                     :: nfl
-
-   _LOOP_BEGIN_
-
-   _GET_(self%id_nfl,nfl)
-
-   ! Self-shading with explicit contribution from large flagellates
-   _SET_EXTINCTION_(self%k_d*nfl)
-
-   _LOOP_END_
-
-   end subroutine get_light_extinction
 
    end module fabm_ulg_flagellates 

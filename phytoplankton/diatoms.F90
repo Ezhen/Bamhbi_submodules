@@ -35,6 +35,7 @@
       type (type_state_variable_id)         :: id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_nhs,id_nos,id_pho,id_poc,id_pon
       type (type_dependency_id)             :: id_par,id_temp 
       type (type_diagnostic_variable_id)    :: id_uptake_c_dia,id_uptake_n_dia,id_npp,id_reduction_nitrate_phy,id_uptake_sio_dia,id_respiration_dia
+      type (type_diagnostic_variable_id)    :: id_chla
 
 !     Model parameters 
       real(rk)     :: dr_dia, dr_sid, exc_extra_doc, f_dl_dom
@@ -46,14 +47,14 @@
       real(rk)     :: respb_dia, rmax_chl_n_dia, rmax_n_c_dia
       real(rk)     :: rmin_chl_n_dia, rmin_n_c_dia, umax_nhs_dia
       real(rk)     :: umax_nos_dia, umax_po4_dia, umax_si_dia
-      real(rk)     :: w_dia, w_sid
+      real(rk)     :: w_dia_min, w_dia_max, w_sid
 
       contains 
 
       procedure :: initialize 
       procedure :: do 
+      procedure :: get_vertical_movement
       procedure :: do_bottom 
-      procedure :: get_light_extinction 
    end type
 
    real(rk), parameter :: secs_pr_day = 86400.0_rk
@@ -65,32 +66,6 @@
    subroutine initialize(self,configunit)
    class (type_ulg_diatoms), intent(inout), target :: self
    integer,                        intent(in)          :: configunit
-
-!     Model parameters 
-      real(rk)     :: dr_dia, dr_sid, exc_extra_doc, f_dl_dom
-      real(rk)     :: f_dl_phy_ex, f_dl_phy_mo, f_leak_phy, f_pp_resp_dia
-      real(rk)     :: hmax_sid, k_d, ki_nhs_phy, ks_nhs_dia, ks_nos_dia
-      real(rk)     :: ks_po4_dia, ks_sio_dia, mo_dia, mumax_dia
-      real(rk)     :: pi_dia, q10_dia, q10_si_diss, r_o2_c_resp
-      real(rk)     :: r_o2_nhs_nitr, r_p_n_redfield, r_si_n_dia
-      real(rk)     :: respb_dia, rmax_chl_n_dia, rmax_n_c_dia
-      real(rk)     :: rmin_chl_n_dia, rmin_n_c_dia, umax_nhs_dia
-      real(rk)     :: umax_nos_dia, umax_po4_dia, umax_si_dia
-      real(rk)     :: w_dia, w_sid
-
-   namelist /ulg_diatoms/ dr_dia, 	 & 
-                      dr_sid, exc_extra_doc, f_dl_dom, 	 & 
-                      f_dl_phy_ex, f_dl_phy_mo, f_leak_phy, 	 & 
-                      f_pp_resp_dia, hmax_sid, k_d, 	 & 
-                      ki_nhs_phy, ks_nhs_dia, ks_nos_dia, 	 & 
-                      ks_po4_dia, ks_sio_dia, mo_dia, 	 & 
-                      mumax_dia, pi_dia, q10_dia, q10_si_diss, 	 & 
-                      r_o2_c_resp, r_o2_nhs_nitr, 	 & 
-                      r_p_n_redfield, r_si_n_dia, respb_dia, 	 & 
-                      rmax_chl_n_dia, rmax_n_c_dia, 	 & 
-                      rmin_chl_n_dia, rmin_n_c_dia, 	 & 
-                      umax_nhs_dia, umax_nos_dia, 	 & 
-                      umax_po4_dia, umax_si_dia, w_dia, w_sid
 
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
@@ -112,7 +87,7 @@
    call self%get_parameter(self%ks_sio_dia, 'ks_sio_dia', 'mmolSi m-3', 'Half-saturation constant for SiOs uptake by DI', default=3.5_rk) 
    call self%get_parameter(self%mo_dia, 'mo_dia', 'd-1', 'Mortality rate of DI', default=0.03_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%mumax_dia, 'mumax_dia', 'd-1', 'Maximum specific growth rate of DI', default=3.5_rk, scale_factor=one_pr_day)
-   call self%get_parameter(self%pi_dia, 'pi_dia', 'm2 W-1 d-1', 'Initial slope of photosynthesis-light curve for DI', default=0.3312_rk) 
+   call self%get_parameter(self%pi_dia, 'pi_dia', 'm2 W-1 d-1', 'Initial slope of photosynthesis-light curve for DI', default=0.3312_rk, scale_factor=one_pr_day) 
    call self%get_parameter(self%q10_dia, 'q10_dia', '-', 'Temperature factor for DI', default=1.8_rk) 
    call self%get_parameter(self%q10_si_diss, 'q10_si_diss', '-', 'Temperature factor for chemical processes', default=3.3_rk) 
    call self%get_parameter(self%r_o2_c_resp, 'r_o2_c_resp', 'molO2 molC-1', 'O2:C ratio of respiration process', default=1.0_rk) 
@@ -128,12 +103,14 @@
    call self%get_parameter(self%umax_nos_dia, 'umax_nos_dia', 'molN molC-1 d-1', 'Maximal NOS uptake rate by DI', default=1.0_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%umax_po4_dia, 'umax_po4_dia', 'molP molC-1 d-1', 'Maximal PO4 uptake rate by DI', default=0.0625_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%umax_si_dia, 'umax_si_dia', 'molSi molC-1 d-1', 'Maximal SiOs uptake rate by DI', default=0.5_rk, scale_factor=one_pr_day)
-   call self%get_parameter(self%w_dia, 'w_dia', 'm d-1', 'Sinking velocity of DI', default=-1.0_rk) 
-   call self%get_parameter(self%w_sid, 'w_sid', 'm d-1', 'Sinking velocity of silicious detritus', default=-2.0_rk) 
+   !call self%get_parameter(self%w_dia, 'w_dia', 'm d-1', 'Sinking velocity of DI', default=-1.0_rk, scale_factor=one_pr_day) 
+   call self%get_parameter(self%w_dia_min, 'w_dia_min', 'm d-1', 'Sinking velocity of DI', default=-0.1_rk, scale_factor=one_pr_day) 
+   call self%get_parameter(self%w_dia_max, 'w_dia_max', 'm d-1', 'Sinking velocity of DI', default=-1.0_rk, scale_factor=one_pr_day) 
+   call self%get_parameter(self%w_sid, 'w_sid', 'm d-1', 'Sinking velocity of silicious detritus', default=-2.0_rk, scale_factor=one_pr_day) 
 
    ! Register state variables 
-   call self%register_state_variable(self%id_cdi, 'CDI', 'mmol C m-3', 'Diatom biomass in carbon', minimum=0.0e-7_rk, vertical_movement=self%w_dia) 
-   call self%register_state_variable(self%id_ndi, 'NDI', 'mmol N m-3', 'Diatom biomass in nitrogen', minimum=0.0e-7_rk, vertical_movement=self%w_dia) 
+   call self%register_state_variable(self%id_cdi, 'CDI', 'mmol C m-3', 'Diatom biomass in carbon', minimum=0.0e-7_rk) !, vertical_movement=self%w_dia) 
+   call self%register_state_variable(self%id_ndi, 'NDI', 'mmol N m-3', 'Diatom biomass in nitrogen', minimum=0.0e-7_rk) !, vertical_movement=self%w_dia) 
    call self%register_state_variable(self%id_sid, 'SID', 'mmol Si m-3', 'Detrital silicate concentration', minimum=0.0e-7_rk, vertical_movement=self%w_sid) 
    call self%register_state_variable(self%id_sio, 'SIO', 'mmol Si m-3', 'Silicilic acid concentration', minimum=0.0e-7_rk)
 
@@ -151,16 +128,7 @@
 
     ! Register environmental dependencies 
    call self%register_dependency(self%id_par, standard_variables%downwelling_photosynthetic_radiative_flux) 
-   call self%register_dependency(self%id_temp, standard_variables%temperature) 
-
-    ! Add to aggregate variables 
-   call self%add_to_aggregate_variable(standard_variables%total_carbon, self%id_cdi)
-   call self%add_to_aggregate_variable(standard_variables%total_nitrogen, self%id_ndi)
-   call self%add_to_aggregate_variable(standard_variables%total_phosphorus, self%id_ndi, scale_factor=self%r_p_n_redfield)
-   call self%add_to_aggregate_variable(standard_variables%total_silicate, self%id_ndi, scale_factor=self%r_si_n_dia)
-   call self%add_to_aggregate_variable(standard_variables%total_silicate, self%id_sio)
-   call self%add_to_aggregate_variable(standard_variables%total_silicate, self%id_sid)
-   
+   call self%register_dependency(self%id_temp, standard_variables%temperature)  
 
     ! Register diagnostic variables 
    call self%register_diagnostic_variable(self%id_uptake_c_dia, 'uptake_c_dia', 'mmol C m-3 d-1', & 
@@ -175,6 +143,19 @@
       'Uptake of silicates by diatoms', output=output_instantaneous) 
    call self%register_diagnostic_variable(self%id_respiration_dia, 'respiration_dia', 'mmol C m-3 d-1', & 
       'Total Respiration of Diatoms', output=output_instantaneous) 
+   call self%register_diagnostic_variable(self%id_chla, 'chla','mg chl a m-3', 'Chlorophyll concentration')
+
+    ! Add to aggregate variables 
+   call self%add_to_aggregate_variable(standard_variables%total_carbon, self%id_cdi)
+   call self%add_to_aggregate_variable(standard_variables%total_nitrogen, self%id_ndi)
+   call self%add_to_aggregate_variable(standard_variables%total_phosphorus, self%id_ndi, scale_factor=self%r_p_n_redfield)
+   call self%add_to_aggregate_variable(standard_variables%total_silicate, self%id_ndi, scale_factor=self%r_si_n_dia)
+   call self%add_to_aggregate_variable(standard_variables%total_silicate, self%id_sio)
+   call self%add_to_aggregate_variable(standard_variables%total_silicate, self%id_sid)
+   call self%add_to_aggregate_variable(type_bulk_standard_variable(name='total_chlorophyll',units="mg chl a m-3",aggregate_variable=.true.),self%id_chla,scale_factor=1._rk)
+
+   call self%add_to_aggregate_variable(standard_variables%attenuation_coefficient_of_photosynthetic_radiative_flux, self%id_ndi, scale_factor=self%k_d)
+
    return 
 
 99 call self%fatal_error('Diatoms', 'Error reading namelist ulg_diatoms') 
@@ -245,8 +226,6 @@
     Ratio_N_C  = Ratio(NDI,CDI)
     Ratio_Chl_C = ratio_chl_c_phyt(Ratio_N_C,self%rmax_n_c_dia,self%rmin_n_c_dia,self%rmin_chl_n_dia,self%rmax_chl_n_dia)
     
-   ! chlorophyll(i,j,k,2) = ChlCrDiatoms * CDI ! REMOVE (POSSIBLY) 
-    
    ! Nitrate uptake rate 
     Uptake_NO3 = uptake_nitrate_phyt(Ratio_N_C,tf,self%rmax_n_c_dia,self%umax_nos_dia) * Michaelis(NOS,self%ks_nos_dia) * Inhibition(NHS,self%ki_nhs_phy) * CDI
     
@@ -303,7 +282,7 @@
    ! IF CN ratio of phytoplankton higher than CNmin, than nitrogen is taken up, unless it gets excreted 
    IF (Uptake_nutrient.gt.0) THEN 
      _ADD_SOURCE_(self%id_nos, -Uptake_nutrient * Ratio(Uptake_NO3,Uptake_Nit)) 
-     _ADD_SOURCE_(self%id_dox, Uptake_nutrient * Ratio(Uptake_NO3,Uptake_Nit)*self%r_o2_nhs_nitr) 
+     _ADD_SOURCE_(self%id_dox,  Uptake_nutrient * Ratio(Uptake_NO3,Uptake_Nit)*self%r_o2_nhs_nitr) 
      _ADD_SOURCE_(self%id_nhs, -Uptake_nutrient * Ratio(Uptake_NHS,Uptake_Nit))
      _ADD_SOURCE_(self%id_pho, -Uptake_nutrient * self%r_p_n_redfield)
    ELSE 
@@ -331,10 +310,40 @@
    _SET_DIAGNOSTIC_(self%id_respiration_dia, Respiration_tot)
    _SET_DIAGNOSTIC_(self%id_npp, Growth)
    _SET_DIAGNOSTIC_(self%id_reduction_nitrate_phy, Uptake_nutrient * Ratio(Uptake_NO3,(1.0e-10+Uptake_Nit)) * self%r_o2_nhs_nitr)
+   _SET_DIAGNOSTIC_(self%id_chla, Ratio_Chl_C*CDI)
+
 
    _LOOP_END_
 
    end subroutine do
+
+
+   subroutine get_vertical_movement(self, _ARGUMENTS_GET_VERTICAL_MOVEMENT_)
+      class (type_ulg_diatoms), intent(in) :: self
+      _DECLARE_ARGUMENTS_GET_VERTICAL_MOVEMENT_
+
+      real(rk) :: Ratio_N_C, sink_rate, w_dia
+      real(rk) :: cdi, ndi
+
+      _LOOP_BEGIN_
+
+        _GET_(self%id_cdi,CDI)       ! Diatom biomass in carbon
+        _GET_(self%id_ndi,NDI)       ! Diatom biomass in nitrogen
+
+        Ratio_N_C  = Ratio(NDI,CDI)
+
+	! In BAMHBI, sinking rates are positive, and in FABM - negative. Here, we account for that.
+        sink_rate = -1.0*(self%w_dia_max-self%w_dia_min)*(self%rmax_n_c_dia+Ratio_N_C)/(self%rmin_n_c_dia-self%rmax_n_c_dia)
+        w_dia = min(max(sink_rate,-1.0*self%w_dia_min),-1.0*self%w_dia_max)
+
+        _ADD_VERTICAL_VELOCITY_(self%id_cdi, -w_dia)
+        _ADD_VERTICAL_VELOCITY_(self%id_ndi, -w_dia)
+
+      _LOOP_END_
+
+   end subroutine get_vertical_movement
+
+
 
 
    subroutine do_bottom(self,_ARGUMENTS_DO_BOTTOM_)
@@ -356,27 +365,5 @@
    _HORIZONTAL_LOOP_END_
 
    end subroutine do_bottom
-
-
-
-   subroutine get_light_extinction(self,_ARGUMENTS_GET_EXTINCTION_)
-
-! Temporary light extintion function (from Jorn's)
-   class (type_ulg_diatoms), intent(in) :: self
-   _DECLARE_ARGUMENTS_GET_EXTINCTION_
-
-   real(rk)                     :: ndi
-
-   _LOOP_BEGIN_
-
-   _GET_(self%id_ndi,ndi)
-
-   ! Self-shading with explicit contribution from diatoms
-   _SET_EXTINCTION_(self%k_d*ndi)
-
-   _LOOP_END_
-
-   end subroutine get_light_extinction
-
 
    end module fabm_ulg_diatoms 

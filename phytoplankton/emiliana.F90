@@ -35,6 +35,7 @@
       type (type_state_variable_id)         :: id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_nhs,id_nos,id_pho,id_poc,id_pon
       type (type_dependency_id)             :: id_par,id_temp 
       type (type_diagnostic_variable_id)    :: id_uptake_c_emi,id_uptake_n_emi,id_npp,id_reduction_nitrate_phy,id_respiration_emi
+      type (type_diagnostic_variable_id)    :: id_chla
 
 !     Model parameters 
       real(rk)     :: dr_emi, exc_extra_doc, f_dl_dom, f_dl_phy_ex
@@ -51,7 +52,6 @@
       procedure :: initialize 
       procedure :: do 
       procedure :: do_bottom  
-      procedure :: get_light_extinction 
    end type
 
    real(rk), parameter :: secs_pr_day = 86400.0_rk
@@ -75,18 +75,6 @@
       real(rk)     :: umax_po4_emi, w_emi
 
 
-   namelist /ulg_emiliana/ dr_emi, 	 & 
-                      exc_extra_doc, f_dl_dom, f_dl_phy_ex, 	 & 
-                      f_dl_phy_mo, f_leak_phy, f_pp_resp_emi, 	 & 
-                      k_d, ki_nhs_phy, ks_nhs_emi, ks_nos_emi, 	 & 
-                      ks_po4_emi, mo_emi, mumax_emi, pi_emi, 	 & 
-                      q10_phy, r_o2_c_resp, r_o2_nhs_nitr, 	 & 
-                      r_p_n_redfield, respb_emi, 	 & 
-                      rmax_chl_n_emi, rmax_n_c_emi, 	 & 
-                      rmin_chl_n_emi, rmin_n_c_emi, 	 & 
-                      umax_nhs_emi, umax_nos_emi, 	 & 
-                      umax_po4_emi, w_emi
-
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
@@ -104,7 +92,7 @@
    call self%get_parameter(self%ks_po4_emi, 'ks_po4_emi', 'mmolP m-3', 'Half-saturation constant for PO4 uptake by EM', default=0.02_rk) 
    call self%get_parameter(self%mo_emi, 'mo_emi', 'd-1', 'Mortality rate of EM', default=0.03_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%mumax_emi, 'mumax_emi', 'd-1', 'Maximum specific growth rate of EM', default=2.5_rk, scale_factor=one_pr_day)
-   call self%get_parameter(self%pi_emi, 'pi_emi', 'm2 W-1 d-1', 'Initial slope of photosynthesis-light curve for EM', default=0.3_rk) 
+   call self%get_parameter(self%pi_emi, 'pi_emi', 'm2 W-1 d-1', 'Initial slope of photosynthesis-light curve for EM', default=0.3_rk, scale_factor=one_pr_day) 
    call self%get_parameter(self%q10_phy, 'q10_phy', '-', 'Temperature factor', default=2.0_rk) 
    call self%get_parameter(self%r_o2_c_resp, 'r_o2_c_resp', 'molO2 molC-1', 'O2:C ratio of respiration process', default=1.0_rk) 
    call self%get_parameter(self%r_o2_nhs_nitr, 'r_o2_nhs_nitr', 'molO2 molNS-1', 'O2:NHS ratio in NHS oxidation in nitrification', default=2.0_rk) 
@@ -117,7 +105,7 @@
    call self%get_parameter(self%umax_nhs_emi, 'umax_nhs_emi', 'molN molC-1 d-1', 'Maximal NHS uptake rate by EM', default=1.5_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%umax_nos_emi, 'umax_nos_emi', 'molN molC-1 d-1', 'Maximal NOS uptake rate by EM', default=1.5_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%umax_po4_emi, 'umax_po4_emi', 'molP molC-1 d-1', 'Maximal PO4 uptake rate by EM', default=0.09375_rk, scale_factor=one_pr_day)
-   call self%get_parameter(self%w_emi, 'w_emi', 'm d-1', 'Sinking velocity of EM', default=-1.5_rk) 
+   call self%get_parameter(self%w_emi, 'w_emi', 'm d-1', 'Sinking velocity of EM', default=-1.5_rk, scale_factor=one_pr_day) 
 
    ! Register state variables 
 
@@ -140,11 +128,6 @@
    call self%register_dependency(self%id_par, standard_variables%downwelling_photosynthetic_radiative_flux) 
    call self%register_dependency(self%id_temp, standard_variables%temperature) 
 
-    ! Add to aggregate variables 
-   call self%add_to_aggregate_variable(standard_variables%total_carbon, self%id_cem)
-   call self%add_to_aggregate_variable(standard_variables%total_nitrogen, self%id_nem)
-   call self%add_to_aggregate_variable(standard_variables%total_phosphorus, self%id_nem, scale_factor=self%r_p_n_redfield)
-
     ! Register diagnostic variables 
    call self%register_diagnostic_variable(self%id_uptake_c_emi, 'uptake_c_emi', 'mmol C m-3 d-1', & 
       'Carbon uptake by Emiliana', output=output_instantaneous) 
@@ -156,6 +139,16 @@
       '-', output=output_instantaneous) 
    call self%register_diagnostic_variable(self%id_respiration_emi, 'respiration_emi', 'mmol C m-3 d-1', & 
       'Total Respiration of Emiliana', output=output_instantaneous) 
+   call self%register_diagnostic_variable(self%id_chla, 'chla','mg chl a m-3', 'Chlorophyll concentration')
+
+    ! Add to aggregate variables 
+   call self%add_to_aggregate_variable(standard_variables%total_carbon, self%id_cem)
+   call self%add_to_aggregate_variable(standard_variables%total_nitrogen, self%id_nem)
+   call self%add_to_aggregate_variable(standard_variables%total_phosphorus, self%id_nem, scale_factor=self%r_p_n_redfield)
+   call self%add_to_aggregate_variable(type_bulk_standard_variable(name='total_chlorophyll',units="mg chl a m-3",aggregate_variable=.true.),self%id_chla,scale_factor=1._rk)
+
+   call self%add_to_aggregate_variable(standard_variables%attenuation_coefficient_of_photosynthetic_radiative_flux, self%id_nem, scale_factor=self%k_d)
+
    return 
 
 99 call self%fatal_error('Emiliana', 'Error reading namelist ulg_emiliana') 
@@ -214,11 +207,10 @@
     _GET_(self%id_temp,temp)            ! local temperature
     
     tf = Q10Factor(temp,self%q10_phy)
+
    ! Calculate ratios in phytoplankton 
     Ratio_N_C  = Ratio(NEM,CEM)
     Ratio_Chl_C = ratio_chl_c_phyt(Ratio_N_C,self%rmax_n_c_emi,self%rmin_n_c_emi,self%rmin_chl_n_emi,self%rmax_chl_n_emi)
-    
-   ! Chlorophyll(i,j,k,3) = ChlCrEmiliana * CEM ! REMOVE (POSSIBLY) 
     
    ! Nitrate uptake rate 
     Uptake_NO3 = uptake_nitrate_phyt(Ratio_N_C,tf,self%rmax_n_c_emi,self%umax_nos_emi) * Michaelis(NOS,self%ks_nos_emi) * Inhibition(NHS,self%ki_nhs_phy) * CEM
@@ -295,6 +287,7 @@
    _SET_DIAGNOSTIC_(self%id_respiration_emi, Respiration_tot)
    _SET_DIAGNOSTIC_(self%id_reduction_nitrate_phy, Uptake_nutrient * Ratio(Uptake_NO3,Uptake_Nit) * self%r_o2_nhs_nitr)
    _SET_DIAGNOSTIC_(self%id_npp, Growth)
+   _SET_DIAGNOSTIC_(self%id_chla, Ratio_Chl_C*CEM)
 
    _LOOP_END_
 
@@ -318,25 +311,5 @@
    _HORIZONTAL_LOOP_END_
 
    end subroutine do_bottom
-
-
-   subroutine get_light_extinction(self,_ARGUMENTS_GET_EXTINCTION_)
-
-! Temporary light extintion function (from Jorn's)
-   class (type_ulg_emiliana), intent(in) :: self
-   _DECLARE_ARGUMENTS_GET_EXTINCTION_
-
-   real(rk)                     :: nem
-
-   _LOOP_BEGIN_
-
-   _GET_(self%id_nem,nem)
-
-   ! Self-shading with explicit contribution from small flagellates
-   _SET_EXTINCTION_(self%k_d*nem)
-
-   _LOOP_END_
-
-   end subroutine get_light_extinction
 
    end module fabm_ulg_emiliana 
