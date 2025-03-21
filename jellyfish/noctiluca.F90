@@ -65,15 +65,6 @@
       real(rk)     :: r_n_c_mic, r_n_c_noc, r_o2_c_resp, r_p_n_redfield
       real(rk)     :: r_si_n_dia, respb_noc, t_g_noc
 
-   namelist /ulg_noctiluca/ doxsatmort, 	 & 
-                      eff_ass_noc_prey, eff_gr_noc_c, 	 & 
-                      eff_noc_dia, eff_noc_emi, eff_noc_fla, 	 & 
-                      eff_noc_mes, eff_noc_mic, eff_noc_pom, 	 & 
-                      gmax_noc, ks_mort_noc, mo_anox_pred, 	 & 
-                      momax_noc, q10_zoo, r_n_c_mes, r_n_c_mic,  & 
-                      r_n_c_noc, r_o2_c_resp, r_p_n_redfield,  	 & 
-                      r_si_n_dia, respb_noc, t_g_noc
-
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
@@ -102,7 +93,7 @@
 
    ! Register state variables 
 
-   call self%register_state_variable(self%id_noc, 'NOC', 'mmol C m-3', 'Gelatinous carnivorous biomass', minimum=0.0e-7_rk)
+   call self%register_state_variable(self%id_noc, 'NOC', 'mmol C m-3', 'Noctiluca biomass', minimum=0.0e-7_rk)
 
    call self%register_state_dependency(self%id_cdi, 'CDI', 'Diatom biomass in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_cem, 'CEM', 'Small flagellate biomass in carbon', 'mmol C m-3') 
@@ -146,20 +137,20 @@
       real(rk) ::  CDI,CEM,CFL,DIC,DOX,MES,MIC,NDI,NEM,NFL,NHS,PHO,POC,PON,SID
       real(rk) ::  temp
       real(rk) ::  NOC
-      real(rk) ::   Egestion_C	  ! mmol C m-3, Zooplankton POM egestion in carbon
-      real(rk) ::   Egestion_N	  ! mmol N m-3, Zooplankton POM egestion in nitrogen
-      real(rk) ::   Excretion_C_adj	  ! mmol N m-3, Potential excretion rate necessary to keep the N/C ratio of Gelationous constant
-      real(rk) ::   Excretion_N_adj	  ! mmol C m-3, Potential additional respiration flux to keep the N/C ratio of Gelationous constant
-      real(rk) ::   Grazing_C	  ! mmol C m-3, Grazing in carbon by microzooplankaton
-      real(rk) ::   Grazing_N	  ! mmol N m-3, Grazing in nitrogen all zooplankaton
-      real(rk) ::   Mortality_C	  ! mmol C m-3, Phytoplankton mortality flux
-      real(rk) ::   Mortality_N	  ! mmol N m-3, Phytoplankton mortality flux
-      real(rk) ::   Prey_N	  ! mmol C m-3, Flux of ingested preys in nitrogen 
-      real(rk) ::   Prey_C	  ! mmol C m-3, Flux of ingested preys in carbon 
-      real(rk) ::   Ratio_N_C	  ! mol N mol C-1, N/C ratio in small flagellates
-      real(rk) ::   Ratio_N_C_test	  ! -, N/C ratio of the zooplankton before adjustment
-      real(rk) ::   Respiration_C	  ! mmol C m-3, Zooplankton respiration flux
-      real(rk) ::   tf	  ! -, Temperature factor
+      real(rk) ::   Egestion_C	  	! mmol C m-3, Zooplankton POM egestion in carbon
+      real(rk) ::   Egestion_N	  	! mmol N m-3, Zooplankton POM egestion in nitrogen
+      real(rk) ::   Excretion_C_adj	! mmol N m-3, Potential excretion rate necessary to keep the N/C ratio of Gelationous constant
+      real(rk) ::   Excretion_N_adj	! mmol C m-3, Potential additional respiration flux to keep the N/C ratio of Gelationous constant
+      real(rk) ::   Grazing_C	  	! mmol C m-3, Grazing in carbon by microzooplankaton
+      real(rk) ::   Grazing_N	  	! mmol N m-3, Grazing in nitrogen all zooplankaton
+      real(rk) ::   Mortality_C	  	! mmol C m-3, Phytoplankton mortality flux
+      real(rk) ::   Mortality_N	  	! mmol N m-3, Phytoplankton mortality flux
+      real(rk) ::   Prey_N	  	! mmol C m-3, Flux of ingested preys in nitrogen 
+      real(rk) ::   Prey_C	  	! mmol C m-3, Flux of ingested preys in carbon 
+      real(rk) ::   Ratio_N_C	  	! mol N mol C-1, N/C ratio in small flagellates
+      real(rk) ::   Ratio_N_C_test	! -, N/C ratio of the zooplankton before adjustment
+      real(rk) ::   Respiration_C	! mmol C m-3, Zooplankton respiration flux
+      real(rk) ::   tf			! -, Temperature factor
 
    _LOOP_BEGIN_
 
@@ -184,7 +175,7 @@
    ! Retrieve current environmental conditions.
     _GET_(self%id_temp,temp)            ! local temperature
     
-    tf = Q10Factor (temp,self%q10_zoo)
+    tf = Q10Factor(temp,self%q10_zoo)
     
    ! Flux of consummed preys in carbon 
     Prey_C = self%eff_noc_fla*CFL+self%eff_noc_emi*CEM+self%eff_noc_dia*CDI+self%eff_noc_mic*MIC+self%eff_noc_mes*MES+self%eff_noc_pom*POC
@@ -211,7 +202,7 @@
     Respiration_C = respiration_jelly(tf,self%eff_ass_noc_prey,self%eff_gr_noc_c,self%respb_noc,NOC,Grazing_C)
     
    ! Zooplankton mortality rate 
-    Mortality_C = mortality_consument(self%ks_mort_noc,self%momax_noc,1.0_rk,self%doxsatmort,self%mo_anox_pred,tf,NOC,DOX)
+    Mortality_C = tf * NOC * mortality_jelly(self%momax_noc,self%doxsatmort,self%mo_anox_pred,DOX)
     Mortality_N = Mortality_C * self%r_n_c_noc
     
    ! Computes the N/C fluxes necessary to conserve the N/C ratio 
@@ -221,6 +212,7 @@
       Excretion_N_adj = (Grazing_C * Ratio_N_C - Egestion_N) - (Grazing_C - Egestion_C - Respiration_C) * self%r_n_c_noc
     else 
       Excretion_N_adj = 0.0
+      Excretion_C_adj = (Grazing_C - Egestion_C - Respiration_C) - (Grazing_C * Ratio_N_C - Egestion_N) / self%r_n_c_noc
     endif 
     
    ! Carbon content increases by intake of preys and decreases by egestion, respiration, mortality and adjustement

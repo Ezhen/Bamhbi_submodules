@@ -65,15 +65,6 @@
       real(rk)     :: r_n_c_mic, r_o2_c_resp, r_p_n_redfield, r_si_n_dia
       real(rk)     :: respb_gel, t_g_gel
 
-   namelist /ulg_gelatinous/ doxsatmort, 	 & 
-                      eff_ass_gel_prey, eff_gel_dia, 	 & 
-                      eff_gel_emi, eff_gel_fla, eff_gel_mes, 	 & 
-                      eff_gel_mic, eff_gel_pom, eff_gr_gel_c, 	 & 
-                      gmax_gel, ks_mort_gel, mo_anox_pred, 	 & 
-                      momax_gel, q10_gel, r_n_c_gel, r_n_c_mes,	 & 
-                      r_n_c_mic, r_o2_c_resp, r_p_n_redfield,  	 & 
-                      r_si_n_dia, respb_gel, t_g_gel
-
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
@@ -212,7 +203,7 @@
     Respiration_C = respiration_jelly(tf,self%eff_ass_gel_prey,self%eff_gr_gel_c,self%respb_gel,GEL,Grazing_C)
     
    ! Zooplankton mortality rate 
-    Mortality_C = mortality_consument(self%ks_mort_gel,self%momax_gel,1.0_rk,self%doxsatmort,self%mo_anox_pred,tf,GEL,DOX)
+    Mortality_C = tf * GEL * mortality_jelly(self%momax_gel,self%doxsatmort,self%mo_anox_pred,DOX)
     Mortality_N = Mortality_C * self%r_n_c_gel
     
    ! Computes the N/C fluxes necessary to conserve the N/C ratio 
@@ -222,6 +213,7 @@
       Excretion_N_adj = (Grazing_C * Ratio_N_C - Egestion_N) - (Grazing_C - Egestion_C-Respiration_C) * self%r_n_c_gel
     else 
       Excretion_N_adj = 0.0
+      Excretion_C_adj = (Grazing_C - Egestion_C - Respiration_C) - (Grazing_C * Ratio_N_C - Egestion_N) / self%r_n_c_gel
     endif 
     
    ! Carbon content increases by intake of preys and decreases by egestion, respiration, mortality, adjustement 
