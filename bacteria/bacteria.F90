@@ -82,18 +82,6 @@
       real(rk)     :: mumax_bac, q10_bac, r_n_c_bac, r_n_c_denit
       real(rk)     :: r_o2_c_resp, r_odu_c_anox, r_p_n_redfield
 
-   namelist /ulg_bacteria/ eff_gr_bac_c, 	 & 
-                      f_dl_dom, f_solid_odu, i1_curve, 	 & 
-                      i2_curve, iron, ki_anox_nos, ki_anox_o2, 	 & 
-                      ki_denit_o2, ks_denitr_nos, ks_dcl_bac, 	 & 
-                      ks_nhs_bac, ks_odu_iron, ks_oxic_o2, 	 & 
-                      ks_po4_bac, mo_bac, mumax_bac, q10_bac, 	 & 
-                      r_n_c_bac, r_n_c_denit, r_o2_c_resp, 	 & 
-                      r_odu_c_anox, r_p_n_redfield
-
-   ! Read the namelist
-   if (configunit>=0) read(configunit,nml=ulg_bacteria,err=99)
-
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
@@ -210,8 +198,8 @@
     tf = Q10Factor(temp,self%q10_bac) 
     
    ! Compute Iron Limitation 
-!    Iron = self%iron + self%i1_curve / (self%i2_curve * sqrt(2.*3.1416)) * exp(-(z_r - 275.0)**2 / (2. * self%i2_curve**2)) #test15
-    Iron = self%iron + self%i1_curve / (self%i2_curve * sqrt(2.*3.1416)) * exp((z_r + 275.0)**2 / (2. * self%i2_curve**2))
+    Iron = self%iron + self%i1_curve / (self%i2_curve * sqrt(2.*3.1416)) * exp(-(z_r - 275.0)**2 / (2. * self%i2_curve**2))
+!    Iron = self%iron + self%i1_curve / (self%i2_curve * sqrt(2.*3.1416)) * exp((z_r + 275.0)**2 / (2. * self%i2_curve**2))
     Limitation_iron = Michaelis(Iron,self%ks_odu_iron)
 
     Uptake_DCL = tf * self%mumax_bac * BAC * Michaelis(DCL,self%ks_dcl_bac)
