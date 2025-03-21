@@ -82,18 +82,6 @@
       real(rk)     :: q10_zoo, r_n_c_bac, r_n_c_mes, r_n_c_mic, r_o2_c_resp
       real(rk)     :: r_p_n_redfield, r_si_n_dia
 
-
-   namelist /ulg_mesozoo/ doxsatmort, 	 & 
-                      eff_ass_zoo_c, eff_ass_zoo_n, 	 & 
-                      eff_gr_mes_c, eff_mes_bac, eff_mes_dia, 	 & 
-                      eff_mes_emi, eff_mes_fla, eff_mes_mes, 	 & 
-                      eff_mes_mic, eff_mes_pom, f_dl_dom, 	 & 
-                      gmax_mes, ks_mort_mes, ks_prey_mec, 	 & 
-                      mess_prey_mes, mo_anox_pred, moexp_mes, 	 & 
-                      momax_mes, q10_zoo, r_n_c_bac, r_n_c_mes,  & 
-                      r_n_c_mic, r_o2_c_resp, r_p_n_redfield, 	 & 
-                      r_si_n_dia
-
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
