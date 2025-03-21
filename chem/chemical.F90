@@ -74,15 +74,6 @@
       real(rk)     :: rox_odu_nos, rox_odu_o2
 
 
-
-   namelist /ulg_chemical/ ki_nhs_o2, 	 & 
-                      ki_nhs_odu, ki_odu_o2, ks_nhs_o2, 	 & 
-                      ks_odu_nos, ks_odu_o2, q10_che, 	 & 
-                      r_nos_nhs_oxid, r_nos_odu_oxid, 	 & 
-                      r_o2_nhs_nitr, r_o2_odu_oxid, 	 & 
-                      r_p_n_redfield, rox_nhs_nos, rox_nhs_o2, 	 & 
-                      rox_odu_nos, rox_odu_o2
-
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
