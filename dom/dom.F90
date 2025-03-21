@@ -56,7 +56,6 @@
       procedure :: initialize 
       procedure :: do 
       procedure :: do_bottom 
-      procedure :: get_light_extinction 
    end type
 
    real(rk), parameter :: secs_pr_day = 86400.0_rk
@@ -74,11 +73,6 @@
       real(rk)     :: hmax_pon, k_d, ks_dsc_bac, ks_hydr_o2, q10_che
       real(rk)     :: r_p_n_redfield, w_dom, w_pom
 
-   namelist /ulg_dom/ dr_dom, 	 & 
-                      dr_pom, f_dl_dom, hmax_dsl, hmax_poc, 	 & 
-                      hmax_pon, k_d, ks_dsc_bac, ks_hydr_o2, 	 & 
-                      q10_che, r_p_n_redfield, w_dom, w_pom
-
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
@@ -93,8 +87,8 @@
    call self%get_parameter(self%ks_hydr_o2, 'ks_hydr_o2', 'mmolO2 m-3', 'Half-saturation constant for oxic hydrolysis rate', default=2.7_rk) 
    call self%get_parameter(self%q10_che, 'q10_che', '-', 'Temperature factor for chemical processes', default=2.0_rk) 
    call self%get_parameter(self%r_p_n_redfield, 'r_p_n_redfield', 'molP molN-1', 'N:P Redfield ratio in PHY', default=0.0625_rk) 
-   call self%get_parameter(self%w_dom, 'w_dom', 'm d-1', 'Sinking velocity of dissolved detritus', default=-1.0_rk) 
-   call self%get_parameter(self%w_pom, 'w_pom', 'm d-1', 'Sinking velocity of particulate detritus', default=-2.0_rk) 
+   call self%get_parameter(self%w_dom, 'w_dom', 'm d-1', 'Sinking velocity of dissolved detritus', default=-1.0_rk, scale_factor=one_pr_day) 
+   call self%get_parameter(self%w_pom, 'w_pom', 'm d-1', 'Sinking velocity of particulate detritus', default=-2.0_rk, scale_factor=one_pr_day) 
 
    ! Register state variables 
 
@@ -121,6 +115,10 @@
    call self%add_to_aggregate_variable(standard_variables%total_phosphorus, self%id_dnl, scale_factor=self%r_p_n_redfield)
    call self%add_to_aggregate_variable(standard_variables%total_phosphorus, self%id_dns, scale_factor=self%r_p_n_redfield)
    call self%add_to_aggregate_variable(standard_variables%total_phosphorus, self%id_pon, scale_factor=self%r_p_n_redfield)
+
+   call self%add_to_aggregate_variable(standard_variables%attenuation_coefficient_of_photosynthetic_radiative_flux, self%id_dnl, scale_factor=self%k_d)
+   call self%add_to_aggregate_variable(standard_variables%attenuation_coefficient_of_photosynthetic_radiative_flux, self%id_dns, scale_factor=self%k_d)
+   call self%add_to_aggregate_variable(standard_variables%attenuation_coefficient_of_photosynthetic_radiative_flux, self%id_pon, scale_factor=self%k_d)
 
    return 
 
@@ -208,28 +206,6 @@
    _HORIZONTAL_LOOP_END_
 
    end subroutine do_bottom
-
-
-   subroutine get_light_extinction(self,_ARGUMENTS_GET_EXTINCTION_)
-
-! Temporary light extintion function (from Jorn's)
-   class (type_ulg_dom), intent(in) :: self
-   _DECLARE_ARGUMENTS_GET_EXTINCTION_
-
-   real(rk)                     :: dnl, dns, pon
-
-   _LOOP_BEGIN_
-
-   _GET_(self%id_dnl,DNL)
-   _GET_(self%id_dns,DNS)
-   _GET_(self%id_pon,PON)
-
-   ! Self-shading with explicit contribution from background detritus concentration
-   _SET_EXTINCTION_(self%k_d*(dnl+dns+pon))
-
-   _LOOP_END_
-
-   end subroutine get_light_extinction
 
 
    end module fabm_ulg_dom
