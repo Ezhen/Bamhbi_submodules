@@ -93,6 +93,20 @@
    end function mortality_consument
 
 
+   pure real(rk) function mortality_jelly(mortnonlinzoo,DOXsatmortality,mortalityanoxic,DOX)
+   implicit none
+   ! Mortality rate : sum of a linear mortality, a quadratic mortality and an oxygen dependent term
+      real(rk),intent(in) :: mortnonlinzoo 	! mmolC m-3 d-1, Non-linear mortality rate
+      real(rk),intent(in) :: DOXsatmortality 	! mmol O m-3, Percentage of saturation where metabolic respiration is half the one under oxygen satyrated conditions
+      real(rk),intent(in) :: mortalityanoxic 	! d-1, Anoxic mortality of zooplankton 
+      real(rk),intent(in) :: DOX 	 		! mmol O m-3, Oxygen concentration
+      real(rk) :: foxygen 			! Oxygen limitation function
+      foxygen = Michaelis(DOX,DOXsatmortality)
+      mortality_jelly = mortnonlinzoo+(1.0-foxygen)*mortalityanoxic
+   return
+   end function mortality_jelly
+
+
    pure real(rk) function respiration_jelly(tf,Asszoo,Effzoo,bzoo,ZOO,grazing_carbonZoo)
    implicit none
   ! Calculates the respiration rate of zooplankton as a sum of a basal respiration and an activity respiration
@@ -112,7 +126,6 @@
       respiration_jelly = basalrespiration + activityrespiration
    return
    end function respiration_jelly
-
 
    pure real(rk) function ratio_chl_c_phyt(NCratio,MaxNCr,MinNCr,MinChlNr,MaxChlNr)
    implicit none

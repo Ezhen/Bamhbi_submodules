@@ -17,6 +17,7 @@ contains
 
    subroutine create(self,name,model)
 
+      use fabm_ulg_light
       use fabm_ulg_chemical
       use fabm_ulg_diatoms
       use fabm_ulg_emiliana
@@ -33,6 +34,7 @@ contains
       class (type_base_model),pointer :: model
 
       select case (name)
+         case ('light');        allocate(type_ulg_light::model)
          case ('chemical');     allocate(type_ulg_chemical::model)
          case ('diatoms');      allocate(type_ulg_diatoms::model)
          case ('emiliana');	allocate(type_ulg_emiliana::model)

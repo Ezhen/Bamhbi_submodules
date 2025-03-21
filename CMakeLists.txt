@@ -1,6 +1,7 @@
 add_library(fabm_models_ulg OBJECT
             ulg_model_library.F90
             bamhbi_utilities.F90
+            light_fulloptics.F90
             chem/chemical.F90
             phytoplankton/diatoms.F90
             phytoplankton/emiliana.F90
