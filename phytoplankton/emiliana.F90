@@ -235,7 +235,7 @@
     
    ! Compute nutrient and light limitation 
     Limitation_nutrient = limitation_by_nutrient(self%rmin_n_c_emi,0.0_rk,Ratio_N_C,Ratio_Si_C)
-    Limitation_light = 1.0-exp(-self%pi_emi * par / self%mumax_emi)
+    Limitation_light = 1.0-exp(-self%pi_emi * par * 4.56 / self%mumax_emi) ! WattToPhoton = 4.56
     
    ! Compute carbon uptake 
     Uptake_C = self%mumax_emi  * CEM * tf * Limitation_nutrient * Limitation_light 

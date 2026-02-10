@@ -34,6 +34,8 @@
       type (type_state_variable_id)         :: id_cdi,id_ndi,id_sid,id_sio
       type (type_state_variable_id)         :: id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_nhs,id_nos,id_pho,id_poc,id_pon
       type (type_dependency_id)             :: id_par,id_temp 
+      !type (type_bottom_state_variable_id)  :: id_cflux, id_nflux, id_sflux
+      type (type_bottom_dependency_id)      :: id_taub
       type (type_diagnostic_variable_id)    :: id_uptake_c_dia,id_uptake_n_dia,id_npp,id_reduction_nitrate_phy,id_uptake_sio_dia,id_respiration_dia
       type (type_diagnostic_variable_id)    :: id_chla
 
@@ -45,7 +47,7 @@
       real(rk)     :: pi_dia, q10_dia, q10_si_diss, r_o2_c_resp
       real(rk)     :: r_o2_nhs_nitr, r_p_n_redfield, r_si_n_dia
       real(rk)     :: respb_dia, rmax_chl_n_dia, rmax_n_c_dia
-      real(rk)     :: rmin_chl_n_dia, rmin_n_c_dia, umax_nhs_dia
+      real(rk)     :: rmin_chl_n_dia, rmin_n_c_dia, taucr_dep, umax_nhs_dia
       real(rk)     :: umax_nos_dia, umax_po4_dia, umax_si_dia
       real(rk)     :: w_dia_min, w_dia_max, w_sid
 
@@ -99,6 +101,7 @@
    call self%get_parameter(self%rmax_n_c_dia, 'rmax_n_c_dia', 'molN molC-1', 'Maximum N:C ratio in DI', default=0.2_rk) 
    call self%get_parameter(self%rmin_chl_n_dia, 'rmin_chl_n_dia', 'g Chla molN-1', 'Minimum Chl:N ratio in DI', default=1.0_rk) 
    call self%get_parameter(self%rmin_n_c_dia, 'rmin_n_c_dia', 'molN molC-1', 'Minimum N:C ratio in DI', default=0.05_rk) 
+   call self%get_parameter(self%taucr_dep, 'taucr_dep', 'N m-2', 'critical shear stress for deposition', default=0.02_rk)
    call self%get_parameter(self%umax_nhs_dia, 'umax_nhs_dia', 'molN molC-1 d-1', 'Maximal NHS uptake rate by DI', default=1.0_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%umax_nos_dia, 'umax_nos_dia', 'molN molC-1 d-1', 'Maximal NOS uptake rate by DI', default=1.0_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%umax_po4_dia, 'umax_po4_dia', 'molP molC-1 d-1', 'Maximal PO4 uptake rate by DI', default=0.0625_rk, scale_factor=one_pr_day)
@@ -113,6 +116,13 @@
    call self%register_state_variable(self%id_ndi, 'NDI', 'mmol N m-3', 'Diatom biomass in nitrogen', minimum=0.0e-7_rk) !, vertical_movement=self%w_dia) 
    call self%register_state_variable(self%id_sid, 'SID', 'mmol Si m-3', 'Detrital silicate concentration', minimum=0.0e-7_rk, vertical_movement=self%w_sid) 
    call self%register_state_variable(self%id_sio, 'SIO', 'mmol Si m-3', 'Silicilic acid concentration', minimum=0.0e-7_rk)
+
+   ! Couple to benthic pools to deposit sinking material in.
+   !call self%register_state_dependency(self%id_cflux, 'cflux', '??', 'not a flux but a pool C')
+   !call self%register_state_dependency(self%id_nflux, 'nflux', '??', 'not a flux but a pool N')
+   !call self%register_state_dependency(self%id_sflux, 'sflux', '??', 'not a flux but a pool Si')
+
+   call self%register_dependency(self%id_taub, standard_variables%bottom_stress)
 
    call self%register_state_dependency(self%id_dcl, 'DCL', 'Labile detritus concentration in carbon', 'mmol C m-3') 
    call self%register_state_dependency(self%id_dcs, 'DCS', 'Semi-labile detritus concentration in carbon', 'mmol C m-3') 
@@ -253,7 +263,7 @@
     
    ! Compute nutrient and light limitation 
     Limitation_nutrient = limitation_by_nutrient(self%rmin_n_c_dia,Ratio_min_SiO_C,Ratio_N_C,Ratio_Si_C)
-    Limitation_light = 1.-exp(-self%pi_dia * par / self%mumax_dia)
+    Limitation_light = 1.-exp(-self%pi_dia * par * 4.56 / self%mumax_dia) ! WattToPhoton = 4.56
     
    ! Compute carbon uptake 
     Uptake_C = self%mumax_dia  * Limitation_nutrient * Limitation_light * CDI * tf 
@@ -344,13 +354,14 @@
    end subroutine get_vertical_movement
 
 
-
+   ! Uncomment the commented lines to get benthic-pelagic coupling
 
    subroutine do_bottom(self,_ARGUMENTS_DO_BOTTOM_)
    class (type_ulg_diatoms), intent(in) :: self
    _DECLARE_ARGUMENTS_DO_BOTTOM_
 
    real(rk),save :: cdi, ndi, sid
+   real(rk) :: taub, f_resp
 
    _HORIZONTAL_LOOP_BEGIN_
 
@@ -358,9 +369,33 @@
    _GET_(self%id_ndi,ndi) 
    _GET_(self%id_sid,sid)    
 
+   !_GET_BOTTOM_(self%id_taub,  taub)
+
+   !f_resp = taub / self%taucr_dep
+
+   ! if (f_resp .le. 1.0_rk) THEN
+
+   !  f_resp = 1.0_rk - f_resp
+   
+   ! default if no betnhic-pelagic coupling defined
    _ADD_BOTTOM_FLUX_(self%id_cdi,-self%dr_dia*cdi*cdi)   
    _ADD_BOTTOM_FLUX_(self%id_ndi,-self%dr_dia*ndi*ndi)
    _ADD_BOTTOM_FLUX_(self%id_sid,-self%dr_sid*sid*sid)   
+
+   !  _ADD_BOTTOM_FLUX_(self%id_cdi,-self%dr_dia*cdi*f_resp)
+   !  _ADD_BOTTOM_FLUX_(self%id_ndi,-self%dr_dia*ndi*f_resp)
+   !  _ADD_BOTTOM_FLUX_(self%id_sid,-self%dr_sid*sid*f_resp)
+ 
+   !  _ADD_BOTTOM_SOURCE_(self%id_cflux, self%dr_dia*cdi*f_resp)
+   !  _ADD_BOTTOM_SOURCE_(self%id_nflux, self%dr_dia*ndi*f_resp)
+   !  _ADD_BOTTOM_SOURCE_(self%id_sflux, (self%dr_sid*sid + self%r_si_n_dia*self%dr_dia*ndi) * f_resp)
+
+   ! else
+   !  _ADD_BOTTOM_SOURCE_(self%id_cflux, 0.0_rk)
+   !  _ADD_BOTTOM_SOURCE_(self%id_nflux, 0.0_rk)
+   !  _ADD_BOTTOM_SOURCE_(self%id_sflux, 0.0_rk)
+
+   ! endif
 
    _HORIZONTAL_LOOP_END_
 
