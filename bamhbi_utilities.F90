@@ -226,9 +226,11 @@
       real(rk),intent(in) :: NCratio		! -, Actual N:C ratio
       real(rk) :: Lim1				! -, Limitation N1
       real(rk) :: Lim2				! -, Limitation N2
-      Lim1 = min(LightLim,(1.0 - MinNCrPHYT  / MaxNCrPHYT))
-      Lim2 = min(LightLim,(1.0 - MinNCrPHYT  / NCratio))
-      extra_excretion = abs(Lim1 - Lim2)
+      !Lim1 = min(LightLim,(1.0 - MinNCrPHYT  / MaxNCrPHYT))
+      !Lim2 = min(LightLim,(1.0 - MinNCrPHYT  / NCratio))
+      Lim1 = 1.0 - MinNCrPHYT  / MaxNCrPHYT
+      Lim2 = 1.0 - MinNCrPHYT  / NCratio
+      extra_excretion = LightLim * abs(Lim1 - Lim2)
    return
    end function extra_excretion
 

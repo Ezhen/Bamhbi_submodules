@@ -3,68 +3,70 @@ instances:
   light:
     model: ulg_light
     parameters:
-      ab_cdom_itc_s: 0.2522	# default = 0.2522
-      ab_cdom_slp_s: -0.0122	# default = -0.0122
-      ab_cdom_itc_l: 0.2155	# default = 0.2155
-      ab_cdom_slp_l: -0.0113	# default = -0.0113
-      ab_chl_s1: 0.029		# default = 0.029
-      ab_chl_s2: 0.6		# default = 0.6
-      ab_chl_l1: 0.0066		# default = 0.0066
-      ab_chl_l2: 0.8		# default = 0.8
-      ab_poc_s: 0.05		# default = 0.05
-      ab_poc_l: 0.0195		# default = 0.0195
-      ab_water_s: 0.0196	# default = 0.0196
-      ab_water_l: 0.24		# default = 0.24
-      bs_dia_s: 5.8e-06		# Backscattering by DI, shortwave
-      bs_dia_l: 4.41e-06	# Backscattering by DI, longwave
-      bs_emi_s: 1.008e-05	# Backscattering by EM, shortwave
-      bs_emi_l: 7.56e-06	# Backscattering by EM, longwave
-      bs_fla_s: 8.17e-06	# Backscattering by FL, shortwave
-      bs_fla_l: 6.12e-06	# Backscattering by FL, longwave
-      bs_poc_s: 0.0055		# Backscattering by POM, shortwave
-      bs_poc_l: 0.005		# Backscattering by POM, longwave
-      bs_water_s: 0.0015	# default = 0.0015
-      bs_water_l: 0.0007	# default = 0.0007
+      ab_cdom_itc_s: 0.2522	# default = 0.2522   //
+      ab_cdom_slp_s: -0.0122	# default = -0.0122  // 
+      ab_cdom_itc_l: 0.2155	# default = 0.2155   // 
+      ab_cdom_slp_l: -0.0113	# default = -0.0113  // 
+      ab_chl_s1: 0.029		# default = 0.029    // Absorption CHL A short
+      ab_chl_s2: 0.6		# default = 0.6      // Absorption CHL B short
+      ab_chl_l1: 0.0066		# default = 0.0066   // Absorption CHL A long
+      ab_chl_l2: 0.8		# default = 0.8      // Absorption CHL B long
+      ab_poc_s: 0.5 #0.05	# default = 0.05     // Absorption POC short
+      ab_poc_l: 0.5 #0.0195	# default = 0.0195   // Absorption POC long
+      ab_water_s: 0.0196	# default = 0.0196   // Absorption by pure sea water, short
+      ab_water_l: 0.24		# default = 0.24     // Absorption by pure sea water, long
+      bs_dia_s: 5.8e-06		# // Backscattering by DI, shortwave
+      bs_dia_l: 4.41e-06	# // Backscattering by DI, longwave
+      bs_emi_s: 1.008e-05	# // Backscattering by EM, shortwave
+      bs_emi_l: 7.56e-06	# // Backscattering by EM, longwave
+      bs_fla_s: 8.17e-06	# // Backscattering by FL, shortwave
+      bs_fla_l: 6.12e-06	# // Backscattering by FL, longwave
+      bs_poc_s: 0.0055		# // Backscattering by POM, shortwave
+      bs_poc_l: 0.005		# // Backscattering by POM, longwave
+      bs_water_s: 0.0015	# default = 0.0015 // Backscatering by pure sea water, shortwave
+      bs_water_l: 0.0007	# default = 0.0007 // Backscatering by pure sea water, longwave
       light_a: 0.54		# default = 0.54
       light_b: 0.63		# default = 0.63
-      rmax_chl_n_dia: 2.0	# default = 2.0 g Chla molN-1	
-      rmax_n_c_dia: 0.2		# default = 0.2 molN molC-1	
-      rmin_chl_n_dia: 1.0	# default = 1.0 g Chla molN-1	
-      rmin_n_c_dia: 0.05	# default = 0.05 molN molC-1
-      rmax_chl_n_emi: 2.0	# default = 2.0 g Chla molN-1	
-      rmax_n_c_emi: 0.2		# default = 0.2 molN molC-1	
-      rmin_chl_n_emi: 1.0	# default = 1.0 g Chla molN-1	
-      rmin_n_c_emi: 0.05	# default = 0.05 molN molC-1	
-      rmax_chl_n_fla: 2.0	# default = 2.0 g Chla molN-1	
-      rmax_n_c_fla: 0.2		# default = 0.2 mol N molC-1	
-      rmin_chl_n_fla: 1.0	# default = 1.0 g Chla molN-1	
-      rmin_n_c_fla: 0.05	# default = 0.05 molN molC-1	
+      rmax_chl_n_dia: 2.0	# default = 2.0 g Chla molN-1	// Maximum Chl:N ratio in DI
+      rmax_n_c_dia: 0.2		# default = 0.2 molN molC-1	// Maximum N:C ratio in DI
+      rmin_chl_n_dia: 1.0	# default = 1.0 g Chla molN-1	// Minimum Chl:N ratio in DI
+      rmin_n_c_dia: 0.05	# default = 0.05 molN molC-1	// Minimum N:C ratio in DI
+      rmax_chl_n_emi: 2.0	# default = 2.0 g Chla molN-1	// Maximum Chl:N ratio in EM
+      rmax_n_c_emi: 0.2		# default = 0.2 molN molC-1	// Maximum N:C ratio in EM
+      rmin_chl_n_emi: 1.0	# default = 1.0 g Chla molN-1	// Minimum Chl:N ratio in EM
+      rmin_n_c_emi: 0.05	# default = 0.05 molN molC-1	// Minimum N:C ratio in EM
+      rmax_chl_n_fla: 2.0	# default = 2.0 g Chla molN-1	// Maximum Chl:N ratio in FL
+      rmax_n_c_fla: 0.2		# default = 0.2 mol N molC-1	// Maximum N:C ratio in FL	
+      rmin_chl_n_fla: 1.0	# default = 1.0 g Chla molN-1	// Minimum Chl:N ratio in FL
+      rmin_n_c_fla: 0.05	# default = 0.05 molN molC-1	// Minimum N:C ratio in FL
   bacteria:
     model: ulg_bacteria
     parameters:
-      eff_gr_bac_c: 0.17	# default = 0.17 	
-      f_dl_dom: 0.7		# default = 0.7 	(also in Diatoms,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo)
-      f_solid_odu: 0.2		# default = 0.2 	
-      i1_curve: 25000.0		# default = 25000.0 	
-      i2_curve: 50.0		# default = 50.0 	
-      iron: 10.0		# default = 10.0 mmolFe m-3	
-      ki_anox_nos: 0.0005	# default = 0.0005 mmolN m-3	
-      ki_anox_o2: 0.0005	# default = 0.0005 mmolO2 m-3	
-      ki_denit_o2: 0.5		# default = 0.5 mmolO2 m-3	
-      ks_denitr_nos: 0.3	# default = 0.3 mmolN m-3	
-      ks_dcl_bac: 25.0		# default = 25.0 mmolC m-3	
-      ks_nhs_bac: 0.5		# default = 0.5 mmolN m-3	
-      ks_odu_iron: 100.0	# default = 100.0 mmolFe m-3	
-      ks_oxic_o2: 3.0		# default = 3.0 mmolO2 m-3	
-      ks_po4_bac: 0.03125	# default = 0.031 mmolP m-3	
-      mo_bac: 0.05		# default = 0.05 d-1	
-      mumax_bac: 13.3		# default = 0.000154 d-1 (error in conversion)
-      q10_bac: 2.0		# default = 2.0 	
-      r_n_c_bac: 0.196		# default = 0.196 molN molC-1	(also in Mesozoo,MicroZoo)
-      r_n_c_denit: 0.8		# default = 0.8 molN molC-1	
-      r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
-      r_odu_c_anox: 1.0		# default = 1.0 molODU molC-1	
-      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Chemical,Diatoms,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
+      dens_Fe3_Mn3: 16.1        # default = 16.1  // Density at which Fe3 and Mn3 are maximum, so phosphate precipitation occurs
+      eff_gr_bac_c: 0.17	# default = 0.17  // BAC gross growth efficiency on C
+      f_dl_dom: 0.7		# default = 0.7 (also in Diatoms,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo) // Labile fraction of PHY- and nonPHY-produced DOM
+      f_precip_PHO: 0.0 #0.001       # default = 0.001 d-1 // PHO precipitation rate (?) 
+      f_solid_odu: 0.2		# default = 0.2  // Percentage of solid ODU formation	
+      i1_curve: 25000.0		# default = 25000.0 	// Parameter of the curve simulating the iron concentration
+      i2_curve: 50.0		# default = 50.0  // 	Parameter of the curve simulating the iron c
+      iron: 10.0		# default = 10.0 mmolFe m-3	// Concentration of iron in surface water
+      ki_anox_nos: 0.0005	# default = 0.0005 mmolN m-3 //	Half-sat. constant for NOS inhibition in anoxic remineralization
+      ki_anox_o2: 0.0005	# default = 0.0005 mmolO2 m-3 // Half-sat. constant for O2 inhibition in anoxic remineralization	
+      ki_denit_o2: 0.5		# default = 0.5 mmolO2 m-3 // Half-sat. constant for O2 inhibition in denitrification
+      ks_denitr_nos: 0.3	# default = 0.3 mmolN m-3 // Half-sat. constant for NOS lim. in denitrif.	
+      ks_dcl_bac: 25.0		# default = 25.0 mmolC m-3 // Half-sat. constant for DLC uptake by BAC	
+      ks_nhs_bac: 0.5		# default = 0.5 mmolN m-3  // Half-sat. constant for NHS uptake by BAC	
+      ks_odu_iron: 100.0	# default = 100.0 mmolFe m-3	// Half-sat. constant for iron lim. in solid ODU formation
+      ks_oxic_o2: 3.0		# default = 3.0 mmolO2 m-3 // Half-sat. constant for O2 lim. in oxic min.	
+      ks_po4_bac: 0.03125	# default = 0.031 mmolP m-3  // Half-saturation constant for PO4 uptake by BAC
+      mo_bac: 0.05		# default = 0.05 d-1	// Bacteria natural mortality
+      mumax_bac: 13.3		# default = 13.3 d-1 // Maximum labile DOC or NHS uptake by BAC 
+      q10_bac: 2.0		# default = 2.0  // Temperature factor for BAC	
+      r_n_c_bac: 0.196		# default = 0.196 molN molC-1	(also in Mesozoo,MicroZoo) // N:C (Goldman) ratio in BAC
+      r_n_c_denit: 0.8		# default = 0.8 molN molC-1	// N:C ratio of denitrification
+      r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca) // Oxygen to carbon ratio of respiration process
+      r_odu_c_anox: 1.0		# default = 1.0 molODU molC-1	// ODU:C ratio in anoxic remineralization
+      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Chemical,Diatoms,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca) // N:P Redfield rati
     coupling:
       DCL: dom/DCL              # 
       DNL: dom/DNL              # 
@@ -79,61 +81,62 @@ instances:
   chemical:
     model: ulg_chemical
     parameters:
-      ki_nhs_o2: 8.0		# default = 8.0 mmolO2 m-3	
-      ki_nhs_odu: 0.5		# default = 0.5 mmolO2 m-3	
-      ki_odu_o2: 5.0		# default = 5.0 mmolO2 m-3	
-      ks_nhs_o2: 3.0		# default = 3.0 mmolO2 m-3	
-      ks_odu_nos: 2.0		# default = 2.0 mmolN m-3	
-      ks_odu_o2: 1.0		# default = 1.0 mmolO2 m-3	
-      q10_che: 2.0		# default = 2.0 	(also in DOM)
-      r_nos_nhs_oxid: 0.6	# default = 0.6 molNOS molNHS-1	
-      r_nos_odu_oxid: 0.8	# default = 0.8 molNOS molODU-1	
-      r_o2_nhs_nitr: 2.0	# default = 2.0 molO2 molNS-1	(also in Diatoms,Emiliana,Flagellates)
-      r_o2_odu_oxid: 1.0	# default = 1.0 molO2 molODU-1	
-      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Diatoms,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
-      rox_nhs_nos: 0.0 #0.05		# default = 0.05 d-1	
-      rox_nhs_o2: 0.03 # 		# default = 0.03 d-1	
-      rox_odu_nos: 0.0 #0.05		# default = 0.05 d-1	
-      rox_odu_o2: 0.0 #0.1		# default = 0.1 d-1
+      ki_nhs_o2: 8.0		# default = 8.0 mmolO2 m-3	// Half-sat. constant for O2 inhibition in NHS oxidation by NOS
+      ki_nhs_odu: 0.5		# default = 0.5 mmolO2 m-3	// Half-sat. constant for O2 inhibition in NHS oxidation by ODU
+      ki_odu_o2: 5.0		# default = 5.0 mmolO2 m-3	// Half-sat. constant for O2 inhibition in ODU oxidation by NOS
+      ks_nhs_o2: 3.0		# default = 3.0 mmolO2 m-3	// Half-sat. constant for O2 lim. in NHS oxidation by O2
+      ks_odu_nos: 2.0		# default = 2.0 mmolN m-3	// Half-sat. constant for NOS lim. in ODU oxidation by NOS
+      ks_odu_o2: 1.0		# default = 1.0 mmolO2 m-3	// Half-sat. constant for O2 lim. in ODU oxidation
+      q10_che: 2.0		# default = 2.0 	(also in DOM) // Temperature factor for chemical processes
+      r_nos_nhs_oxid: 0.6	# default = 0.6 molNOS molNHS-1	// NOS:NHS ratio in NHS oxidation
+      r_nos_odu_oxid: 0.8	# default = 0.8 molNOS molODU-1	// NOS:ODU ratio in ODU oxidation
+      r_o2_nhs_nitr: 2.0	# default = 2.0 molO2 molNS-1	(also in Diatoms,Emiliana,Flagellates) // O2:NHS ratio in NHS oxidation in nitrification
+      r_o2_odu_oxid: 1.0	# default = 1.0 molO2 molODU-1	// O2:ODU ratio in ODU oxidation
+      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Diatoms,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca) // N:P Redfield rati
+      rox_nhs_nos: 0.0 #0.05		# default = 0.05 d-1 // Maximum NHS oxidation rate by NOS
+      rox_nhs_o2: 0.03 # 		# default = 0.03 d-1 // Maximum NHS oxidation rate of NHS by O2	
+      rox_odu_nos: 0.0 #0.05		# default = 0.05 d-1 // Maximum ODU oxidation rate by NOS	
+      rox_odu_o2: 0.0 #0.1		# default = 0.1 d-1 // Maximum ODU oxidation rate by O2
   diatoms:
     model: ulg_diatoms
     parameters:
-      dr_dia: 0.0 #5.8e-06		# default = 5.8e-06 mol d-1	(also in Flagellates)
-      dr_sid: 0.0 #5.5e-06		# default = 5.5e-06 mol d-1	
-      exc_extra_doc: 0.05	# default = 0.05 	(also in Emiliana,Flagellates)
-      f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo)
-      f_dl_phy_ex: 0.65		# default = 0.65 	(also in Emiliana,Flagellates)
-      f_dl_phy_mo: 0.34		# default = 0.34 	(also in Emiliana,Flagellates)
-      f_leak_phy: 0.02		# default = 0.02 	(also in Emiliana,Flagellates)
-      f_pp_resp_dia: 0.1	# default = 0.1 	
-      hmax_sid: 0.08		# default = 0.08 d-1	
+      dr_dia: 0.0 #5.8e-06	# default = 5.8e-06 mol d-1	(also in Flagellates)
+      dr_sid: 0.0 #5.5e-06	# default = 5.5e-06 mol d-1	
+      exc_extra_doc: 0.05	# default = 0.05 	(also in Emiliana,Flagellates) // Extra-photosynthetic DOC excretion
+      f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo) // Labile fraction of PHY- and nonPHY-produced DOM
+      f_dl_phy_ex: 0.65		# default = 0.65 	(also in Emiliana,Flagellates) // Labile fraction phytoxcreted DOC
+      f_dl_phy_mo: 0.34		# default = 0.34 	(also in Emiliana,Flagellates) // DOM fraction of phytoplankton mortality
+      f_leak_phy: 0.02		# default = 0.02 	(also in Emiliana,Flagellates) // Phytoplankton leakage fraction
+      f_pp_resp_dia: 0.1	# default = 0.1   // Part of primary production used for respiration by DI
+      hmax_sid: 0.08		# default = 0.08 d-1	// Rate of dissolution of silicious detritus
       k_d: 0.03			# default = 0.03 m-1	(also in DOM,Emiliana,Flagellates)
-      ki_nhs_phy: 0.5		# default = 0.5 mmolN m-3	(also in Emiliana,Flagellates)
-      ks_nhs_dia: 1.0		# default = 1.0 mmolN m-3	
-      ks_nos_dia: 1.0		# default = 1.0 mmolN m-3	
-      ks_po4_dia: 0.1		# default = 0.1 mmolP m-3	
-      ks_sio_dia: 3.5		# default = 3.5 mmolSi m-3	
-      mo_dia: 0.03		# default = 0.03 d-1	
-      mumax_dia: 3.5		# default = 3.5 d-1	
-      pi_dia: 0.3312		# default = 0.3312 m2 W-1 d-1	
-      q10_dia: 1.8		# default = 1.8 	
-      q10_si_diss: 3.3		# default = 3.3 	
-      r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
-      r_o2_nhs_nitr: 2.0	# default = 2.0 molO2 molNS-1	(also in Chemical,Emiliana,Flagellates)
-      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Chemical,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
-      r_si_n_dia: 0.83		# default = 0.83 molSi molN-1	(also in Mesozoo,MicroZoo,Gelatinous,Noctiluca)
-      respb_dia: 0.009		# default = 0.009 d-1	
-      rmax_chl_n_dia: 2.0	# default = 2.0 g Chla molN-1	
-      rmax_n_c_dia: 0.2		# default = 0.2 molN molC-1	
-      rmin_chl_n_dia: 1.0	# default = 1.0 g Chla molN-1	
-      rmin_n_c_dia: 0.05	# default = 0.05 molN molC-1	
-      umax_nhs_dia: 1.0		# default = 1.0 molN molC-1 d-1	
-      umax_nos_dia: 1.0		# default = 1.0 molN molC-1 d-1	
-      umax_po4_dia: 0.0625	# default = 0.0625 molP molC-1 d-1	
-      umax_si_dia: 0.5		# default = 0.5 molSi molC-1 d-1
+      ki_nhs_phy: 0.5		# default = 0.5 mmolN m-3	(also in Emiliana,Flagellates) // Inhib. constant of NHS for NOS uptake by PHY
+      ks_nhs_dia: 1.0		# default = 1.0 mmolN m-3  // Half-saturation constant for NHS uptake by DI
+      ks_nos_dia: 1.0		# default = 1.0 mmolN m-3  // Half-saturation constant for NOS uptake by DI
+      ks_po4_dia: 0.1		# default = 0.1 mmolP m-3  // Half-saturation constant for PO4 uptake by DI	
+      ks_sio_dia: 3.5		# default = 3.5 mmolSi m-3 // Half-saturation constant for SiOs uptake by DI
+      mo_dia: 0.03		# default = 0.03 d-1	// Mortality rate of DI
+      mumax_dia: 3.5		# default = 3.5 d-1 // Maximum specific growth rate of DI
+      pi_dia: 0.3312		# default = 0.3312 m2 W-1 d-1	// Initial slope of photosynthesis-light curve for DI
+      q10_dia: 1.8		# default = 1.8  // Temperature factor for DI	
+      q10_si_diss: 3.3		# default = 3.3  // Temperature factor for chemical processes
+      r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca) // Oxygen to carbon ratio of respiration process
+      r_o2_nhs_nitr: 2.0	# default = 2.0 molO2 molNS-1	(also in Chemical,Emiliana,Flagellates) // O2:NHS ratio in NHS oxidation in nitrification
+      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Chemical,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca) // N:P Redfield rati
+      r_si_n_dia: 0.83		# default = 0.83 molSi molN-1	(also in Mesozoo,MicroZoo,Gelatinous,Noctiluca) // Si:N ratio in DI
+      respb_dia: 0.009		# default = 0.009 d-1	// Basal respiration rate of DI
+      rmax_chl_n_dia: 2.0	# default = 2.0 g Chla molN-1	// Maximum Chl:N ratio in DI
+      rmax_n_c_dia: 0.2		# default = 0.2 molN molC-1	// Maximum N:C ratio in DI
+      rmin_chl_n_dia: 1.0	# default = 1.0 g Chla molN-1	// Minimum Chl:N ratio in DI
+      rmin_n_c_dia: 0.05	# default = 0.05 molN molC-1	// Minimum N:C ratio in DI
+      taucr_dep: 0.02		# default = 0.02 (N m-2)
+      umax_nhs_dia: 1.0		# default = 1.0 molN molC-1 d-1	 // Maximal NHS uptake rate by DI
+      umax_nos_dia: 1.0		# default = 1.0 molN molC-1 d-1	 // Maximal NOS uptake rate by DI
+      umax_po4_dia: 0.0625	# default = 0.0625 molP molC-1 d-1  // Maximal PO4 uptake rate by DI
+      umax_si_dia: 0.5		# default = 0.5 molSi molC-1 d-1 // Maximal SiOs uptake rate by DI
 #      w_dia: 1.0		#	
-      w_dia_min: 0.0 #14mars -0.1 		# default = -1.0 m d-1	
-      w_dia_max: 0.0 #14mars -1.0 		# default = -1.0 m d-1	
+      w_dia_min: 0.0 #14mars -0.1 		# default = -1.0 m d-1	 // Minimum sinking rate DIA
+      w_dia_max: 0.0 #14mars -1.0 		# default = -1.0 m d-1	 // Maximum sinking rate DIA
       w_sid: 0.0 #14mars -2.0		# default = -2.0 m d-1	
     coupling:
       DCL: dom/DCL              # 
@@ -147,55 +150,61 @@ instances:
       PHO: chemical/PHO         # 
       POC: dom/POC              # 
       PON: dom/PON              # 
+#      cflux: benthic/cbot_fake 
+#      nflux: benthic/nbot_fake
+#      sflux: benthic/sbot_fake 
   dom:
     model: ulg_dom
     parameters:
-      dr_dom: 0.0 #5.5e-06		# default = 5.5e-06 mol d-1	
-      dr_pom: 0.0 #5.6e-06		# default = 5.6e-06 mol d-1	
-      f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo)
-      hmax_dsl: 4.0	# !	# default = 4.0 d-1	
-      hmax_poc: 0.04		# default = 0.04 d-1	
-      hmax_pon: 0.055		# default = 0.055 d-1	
+      dr_dom: 0.0 #5.5e-06	# default = 5.5e-06 mol d-1	
+      dr_pom: 0.0 #5.6e-06	# default = 5.6e-06 mol d-1	
+      f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo) // Labile fraction of PHY- and nonPHY-produced DOM
+      hmax_dsl: 4.0	# !	# default = 4.0 d-1	 // Maximum DSL hydrolysis
+      hmax_poc: 0.04		# default = 0.04 d-1	// POC hydrolysis rate
+      hmax_pon: 0.055		# default = 0.055 d-1	// PON hydrolysis rate
       k_d: 0.03			# default = 0.03 m-1	(also in Diatoms,Emiliana,Flagellates)
-      ks_dsc_bac: 417.0		# default = 417.0 mmolC m-3	
-      ks_hydr_o2: 2.7		# default = 2.7 mmolO2 m-3	
-      q10_che: 2.0		# default = 2.0 	(also in Chemical)
-      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Chemical,Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
+      ks_dsc_bac: 417.0		# default = 417.0 mmolC m-3 // Half-sat. constant for DSC uptake by BAC
+      ks_hydr_o2: 2.7		# default = 2.7 mmolO2 m-3  // Half-saturation constant for oxic hydrolysis rate
+      q10_che: 2.0		# default = 2.0 	(also in Chemical)  // Temperature factor for chemical processes
+      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Chemical,Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca) // N:P Redfield rati
+      taucr_dep: 0.02		# default = 0.02 (N m-2)
       w_dom: 0.0 		# default = -1.0 m d-1	
-      w_pom: 0.0 #14mars -2.0 		# default = -2.0 m d-1	
+      w_pom: 0.0 #14mars -2.0 	# default = -2.0 m d-1	
     coupling:
       BAC: bacteria/BAC         # 
       DOX: chemical/DOX         # 
+#      cflux: benthic/cbot_fake 
+#      nflux: benthic/nbot_fake
   emiliana:
     model: ulg_emiliana
     parameters:
-      dr_emi: 0.0 #5.7e-06		# default = 5.7e-06 mol d-1	
-      exc_extra_doc: 0.05	# default = 0.05 	(also in Diatoms,Flagellates)
-      f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,DOM,Flagellates,Mesozoo,MicroZoo)
-      f_dl_phy_ex: 0.65		# default = 0.65 	(also in Diatoms,Flagellates)
-      f_dl_phy_mo: 0.34		# default = 0.34 	(also in Diatoms,Flagellates)
-      f_leak_phy: 0.02		# default = 0.02 	(also in Diatoms,Flagellates)
-      f_pp_resp_emi: 0.1	# default = 0.1 	
+      dr_emi: 0.0 #5.7e-06	# default = 5.7e-06 mol d-1	
+      exc_extra_doc: 0.05	# default = 0.05 	(also in Diatoms,Flagellates) // Extra-photosynthetic DOC excretion
+      f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,DOM,Flagellates,Mesozoo,MicroZoo) // Labile fraction of PHY- and nonPHY-produced DOM
+      f_dl_phy_ex: 0.65		# default = 0.65 	(also in Diatoms,Flagellates) // Labile fraction phytoxcreted DOC
+      f_dl_phy_mo: 0.34		# default = 0.34 	(also in Diatoms,Flagellates) // DOM fraction of phytoplankton mortality
+      f_leak_phy: 0.02		# default = 0.02 	(also in Diatoms,Flagellates) // Phytoplankton leakage fraction
+      f_pp_resp_emi: 0.1	# default = 0.1  // Part of primary production used for respiration by EM
       k_d: 0.03			# default = 0.03 m-1	(also in Diatoms,DOM,Flagellates)
-      ki_nhs_phy: 0.5		# default = 0.5 mmolN m-3	(also in Diatoms,Flagellates)
-      ks_nhs_emi: 0.05		# default = 0.05 mmolN m-3	
-      ks_nos_emi: 0.05		# default = 0.05 mmolN m-3	
-      ks_po4_emi: 0.02		# default = 0.02 mmolP m-3	
-      mo_emi: 0.03		# default = 0.03 d-1	
-      mumax_emi: 2.5		# default = 2.5 d-1	
-      pi_emi: 0.3		# default = 0.3 m2 W-1 d-1	
-      q10_phy: 2.0		# default = 2.0 	(also in Flagellates)
-      r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
-      r_o2_nhs_nitr: 2.0	# default = 2.0 molO2 molNS-1	(also in Chemical,Diatoms,Flagellates)
-      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Chemical,Diatoms,DOM,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
-      respb_emi: 0.009	# default = 0.009 d-1	
-      rmax_chl_n_emi: 2.0	# default = 2.0 g Chla molN-1	
-      rmax_n_c_emi: 0.2		# default = 0.2 molN molC-1	
-      rmin_chl_n_emi: 1.0	# default = 1.0 g Chla molN-1	
-      rmin_n_c_emi: 0.05	# default = 0.05 molN molC-1	
-      umax_nhs_emi: 1.5		# default = 1.5 molN molC-1 d-1	
-      umax_nos_emi: 1.5		# default = 1.5 molN molC-1 d-1	
-      umax_po4_emi: 0.09375	# default = 0.09375 molP molC-1 d-1	
+      ki_nhs_phy: 0.5		# default = 0.5 mmolN m-3	(also in Diatoms,Flagellates) // Inhib. constant of NHS for NOS uptake by PHY
+      ks_nhs_emi: 0.05		# default = 0.05 mmolN m-3  // Half-saturation constant for NHS uptake by EM
+      ks_nos_emi: 0.05		# default = 0.05 mmolN m-3  // Half-saturation constant for NOS uptake by EM
+      ks_po4_emi: 0.02		# default = 0.02 mmolP m-3  // Half-saturation constant for PO4 uptake by EM
+      mo_emi: 0.03		# default = 0.03 d-1	// Mortality rate of EM
+      mumax_emi: 2.5		# default = 2.5 d-1 // 	Maximum specific growth rate of EM
+      pi_emi: 0.3		# default = 0.3 m2 W-1 d-1	// Initial slope of photosynthesis-light curve for EM
+      q10_phy: 2.0		# default = 2.0 	(also in Flagellates)  // Temperature factor
+      r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca) // Oxygen to carbon ratio of respiration process
+      r_o2_nhs_nitr: 2.0	# default = 2.0 molO2 molNS-1	(also in Chemical,Diatoms,Flagellates) // O2:NHS ratio in NHS oxidation in nitrification
+      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Chemical,Diatoms,DOM,Flagellates,Mesozoo,MicroZoo,Gelatinous,Noctiluca) // N:P Redfield rati
+      respb_emi: 0.009	# default = 0.009 d-1	// Basal respiration rate of EM
+      rmax_chl_n_emi: 2.0	# default = 2.0 g Chla molN-1	// Maximum Chl:N ratio in EM
+      rmax_n_c_emi: 0.2		# default = 0.2 molN molC-1	// Maximum N:C ratio in EM
+      rmin_chl_n_emi: 1.0	# default = 1.0 g Chla molN-1	// Minimum Chl:N ratio in EM
+      rmin_n_c_emi: 0.05	# default = 0.05 molN molC-1	// Minimum N:C ratio in EM
+      umax_nhs_emi: 1.5		# default = 1.5 molN molC-1 d-1	 // Maximal NHS uptake rate by EM
+      umax_nos_emi: 1.5		# default = 1.5 molN molC-1 d-1	 // Maximal NOS uptake rate by EM
+      umax_po4_emi: 0.09375	# default = 0.09375 molP molC-1 d-1 // Maximal PO4 uptake rate by EM
       w_emi: 0.0 #-1.5 #-1.5		# default = -1.5 m d-1	
     coupling:
       DCL: dom/DCL              # 
@@ -212,33 +221,33 @@ instances:
   flagellates:
     model: ulg_flagellates
     parameters:
-      dr_fla: 0.0 #5.8e-06		# default = 5.8e-06 mol d-1	(also in Diatoms)
-      exc_extra_doc: 0.05	# default = 0.05 	(also in Diatoms,Emiliana)
-      f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,DOM,Emiliana,Mesozoo,MicroZoo)
-      f_dl_phy_ex: 0.65		# default = 0.65 	(also in Diatoms,Emiliana)
-      f_dl_phy_mo: 0.34		# default = 0.34 	(also in Diatoms,Emiliana)
-      f_leak_phy: 0.02		# default = 0.02 	(also in Diatoms,Emiliana)
-      f_pp_resp_fla: 0.1	# default = 0.1 	
+      dr_fla: 0.0 #5.8e-06	# default = 5.8e-06 mol d-1	(also in Diatoms)
+      exc_extra_doc: 0.05	# default = 0.05 	(also in Diatoms,Emiliana) // Extra-photosynthetic DOC excretion
+      f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,DOM,Emiliana,Mesozoo,MicroZoo) // Labile fraction of PHY- and nonPHY-produced DOM
+      f_dl_phy_ex: 0.65		# default = 0.65 	(also in Diatoms,Emiliana)  // Labile fraction phytoxcreted DOC
+      f_dl_phy_mo: 0.34		# default = 0.34 	(also in Diatoms,Emiliana)  // DOM fraction of phytoplankton mortality
+      f_leak_phy: 0.02		# default = 0.02 	(also in Diatoms,Emiliana)  // Phytoplankton leakage fraction
+      f_pp_resp_fla: 0.1	# default = 0.1  // Part of primary production used for respiration by FL
       k_d: 0.03			# default = 0.03 m-1	(also in Diatoms,DOM,Emiliana)
-      ki_nhs_phy: 0.5		# default = 0.5 mmolN m-3	(also in Diatoms,Emiliana)
-      ks_nhs_fla: 3.0		# default = 3.0 mmolN m-3	
-      ks_nos_fla: 3.0		# default = 3.0 mmolN m-3	
-      ks_po4_fla: 0.2		# default = 0.2 mmolP m-3	
-      mo_fla: 0.03		# default = 0.03 d-1	
-      mumax_fla: 1.0		# default = 1.0 d-1	
-      pi_fla: 0.2153		# default = 0.2153 m2 W-1 d-1	
-      q10_phy: 2.0		# default = 2.0 	(also in Emiliana)
-      r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Emiliana,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
-      r_o2_nhs_nitr: 2.0	# default = 2.0 molO2 molNS-1	(also in Chemical,Diatoms,Emiliana)
-      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Chemical,Diatoms,DOM,Emiliana,Mesozoo,MicroZoo,Gelatinous,Noctiluca)
-      respb_fla: 0.009		# default = 0.009 d-1	
-      rmax_chl_n_fla: 2.0	# default = 2.0 g Chla molN-1	
-      rmax_n_c_fla: 0.2		# default = 0.2 mol N molC-1	
-      rmin_chl_n_fla: 1.0	# default = 1.0 g Chla molN-1	
-      rmin_n_c_fla: 0.05	# default = 0.05 molN molC-1	
-      umax_nhs_fla: 0.5		# default = 0.5 molN molC-1 d-1	
-      umax_nos_fla: 0.50	# default = 0.50 molN molC-1 d-1	
-      umax_po4_fla: 0.03125	# default = 0.03125 molP molC-1 d-1	
+      ki_nhs_phy: 0.5		# default = 0.5 mmolN m-3	(also in Diatoms,Emiliana) // Inhib. constant of NHS for NOS uptake by PHY
+      ks_nhs_fla: 3.0		# default = 3.0 mmolN m-3   // Half-saturation constant for NHS uptake by FL
+      ks_nos_fla: 3.0		# default = 3.0 mmolN m-3   // Half-saturation constant for NOS uptake by FL
+      ks_po4_fla: 0.2		# default = 0.2 mmolP m-3  // Half-saturation constant for PO4 uptake by FL
+      mo_fla: 0.03		# default = 0.03 d-1	// Mortality rate of FL
+      mumax_fla: 1.0		# default = 1.0 d-1	// Maximum specific growth rate of FL
+      pi_fla: 0.2153		# default = 0.2153 m2 W-1 d-1	// Initial slope of photosynthesis-light curve for FL
+      q10_phy: 2.0		# default = 2.0 	(also in Emiliana) // Temperature factor
+      r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Emiliana,Mesozoo,MicroZoo,Gelatinous,Noctiluca) // Oxygen to carbon ratio of respiration process
+      r_o2_nhs_nitr: 2.0	# default = 2.0 molO2 molNS-1	(also in Chemical,Diatoms,Emiliana) // O2:NHS ratio in NHS oxidation in nitrification
+      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Chemical,Diatoms,DOM,Emiliana,Mesozoo,MicroZoo,Gelatinous,Noctiluca) // N:P Redfield ratio
+      respb_fla: 0.009		# default = 0.009 d-1	// Basal respiration rate of FL
+      rmax_chl_n_fla: 2.0	# default = 2.0 g Chla molN-1	// Maximum Chl:N ratio in FL
+      rmax_n_c_fla: 0.2		# default = 0.2 mol N molC-1 // Maximum N:C ratio in FL	
+      rmin_chl_n_fla: 1.0	# default = 1.0 g Chla molN-1	// Minimum Chl:N ratio in FL
+      rmin_n_c_fla: 0.05	# default = 0.05 molN molC-1	// Minimum N:C ratio in FL
+      umax_nhs_fla: 0.5		# default = 0.5 molN molC-1 d-1	 // Maximal NHS uptake rate by FL
+      umax_nos_fla: 0.50	# default = 0.50 molN molC-1 d-1  // Maximal NOS uptake rate by FL	
+      umax_po4_fla: 0.03125	# default = 0.03125 molP molC-1 d-1  // Maximal PO4 uptake rate by FL
       w_fla: 0.0 #-2.0 #-2.0		# default = -2.0 m d-1	
     coupling:
       DCL: dom/DCL              # 
@@ -253,34 +262,34 @@ instances:
       POC: dom/POC              #
       PON: dom/PON              #
   mesozoo:
-    model: ulg_mesozoo
+    model: ulg_mesozoo          # CONSISTENT WITH BAMHBI CONFIG
     parameters:
-      doxsatmort: 7.8125	# default = 7.8125 mmolO2 m-3 (?)	(also in MicroZoo,Gelatinous,Noctiluca)
-      eff_ass_zoo_c: 0.64	# default = 0.64 	(also in MicroZoo)
-      eff_ass_zoo_n: 0.77	# default = 0.77 	(also in MicroZoo)
-      eff_gr_mes_c: 0.8		# default = 0.8 	
-      eff_mes_bac: 0.0		# default = 0.0 	
-      eff_mes_dia: 1.0		# default = 1.0 	
-      eff_mes_emi: 0.4		# default = 0.4 	
-      eff_mes_fla: 0.4		# default = 0.4 	
-      eff_mes_mes: 0.0		# default = 0.0 	
-      eff_mes_mic: 1.0		# default = 1.0 	
-      eff_mes_pom: 0.8		# default = 0.8 	
-      f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,DOM,Emiliana,Flagellates,MicroZoo)
-      gmax_mes: 1.2		# default = 1.2 d-1	
-      ks_mort_mes: 1.0		# default = 1.0 mmolC m-3	
-      ks_prey_mec: 5.0		# default = 5.0 mmolC m-3	
-      mess_prey_mes: 0.23	# default = 0.23 	
-      mo_anox_pred: 0.25	# default = 0.25 d-1	(also in MicroZoo,Gelatinous,Noctiluca)
-      moexp_mes: 2.0		# default = 2.0 	
-      momax_mes: 0.3		# default = 0.3 d-1	
-      q10_zoo: 2.0		# default = 2.0 	(also in MicroZoo,Noctiluca)
-      r_n_c_bac: 0.196		# default = 0.196 molN molC-1	(also in Bacteria,MicroZoo)
-      r_n_c_mes: 0.21		# default = 0.21 molN molC-1	(also in Gelatinous,Noctiluca)
-      r_n_c_mic: 0.18		# default = 0.18 molN molC-1	(also in Mesozoo,Microzoo,Noctiluca)
-      r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Emiliana,Flagellates,MicroZoo,Gelatinous,Noctiluca)
-      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Chemical,Diatoms,DOM,Emiliana,Flagellates,MicroZoo,Gelatinous,Noctiluca)
-      r_si_n_dia: 0.83		# default = 0.83 molSi molN-1	(also in Diatoms,MicroZoo,Gelatinous,Noctiluca)
+      doxsatmort: 7.8125	# default = 7.8125 mmolO2 m-3 (?) (also in MicroZoo,Gelatinous,Noctiluca) // Perc. of sat. where metabolic respiration is 1/2 the one under O2 sat.
+      eff_ass_zoo_c: 0.64	# default = 0.64 	(also in MicroZoo)  // ZOO assimilation efficiency on C
+      eff_ass_zoo_n: 0.77	# default = 0.77 	(also in MicroZoo) // ZOO assimilation efficiencies on N
+      eff_gr_mes_c: 0.8		# default = 0.8  // MES net growth efficiency on C
+      eff_mes_bac: 0.0		# default = 0.0  // Capture efficiency of MES on BAC		
+      eff_mes_dia: 1.0		# default = 1.0  // Capture efficiency of MES on DIA		
+      eff_mes_emi: 0.4		# default = 0.4  // Capture efficiency of MES on EMI		
+      eff_mes_fla: 0.4		# default = 0.4  // Capture efficiency of MES on FLA		
+      eff_mes_mes: 0.0		# default = 0.0  // Capture efficiency of MES on MES		
+      eff_mes_mic: 1.0		# default = 1.0  // Capture efficiency of MES on MIC		
+      eff_mes_pom: 0.8		# default = 0.8  // Capture efficiency of MES on BAC	
+      f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,DOM,Emiliana,Flagellates,MicroZoo) // Labile fraction of PHY- and nonPHY-produced DOM
+      gmax_mes: 1.2		# default = 1.2 d-1	// Maximum grazing rate of MES
+      ks_mort_mes: 1.0		# default = 1.0 mmolC m-3  // Mortality half-saturation rate of MES
+      ks_prey_mec: 5.0		# default = 5.0 mmolC m-3  // Half-saturation constant for MEC grazing	
+      mess_prey_mes: 0.23	# default = 0.23  // Messy feeding fraction of MES grazing
+      mo_anox_pred: 0.25	# default = 0.25 d-1	(also in MicroZoo,Gelatinous,Noctiluca) // Mortality rate in anoxia
+      moexp_mes: 2.0		# default = 2.0  // Order of the non-linearity of mortality rate for MES
+      momax_mes: 0.3		# default = 0.3 d-1  // Maximum mortality rate of MES
+      q10_zoo: 2.0		# default = 2.0 	(also in MicroZoo,Noctiluca) // Temperature factor
+      r_n_c_bac: 0.196		# default = 0.196 molN molC-1	(also in Bacteria,MicroZoo) // N:C (Goldman) ratio in BAC
+      r_n_c_mes: 0.21		# default = 0.21 molN molC-1	(also in Gelatinous,Noctiluca) // N:C molar ratio in MES
+      r_n_c_mic: 0.18		# default = 0.18 molN molC-1	(also in Mesozoo,Microzoo,Noctiluca) // N:C molar ratio in MIC
+      r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Emiliana,Flagellates,MicroZoo,Gelatinous,Noctiluca) // Oxygen to carbon ratio of respiration process
+      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Chemical,Diatoms,DOM,Emiliana,Flagellates,MicroZoo,Gelatinous,Noctiluca) // N:P Redfield rati
+      r_si_n_dia: 0.83		# default = 0.83 molSi molN-1	(also in Diatoms,MicroZoo,Gelatinous,Noctiluca) // Si:N ratio in DI
     coupling:
       BAC: bacteria/BAC         # 
       CDI: diatoms/CDI          # 
@@ -302,34 +311,34 @@ instances:
       PON: dom/PON              #
       SID: diatoms/SID          # 
   microzoo:
-    model: ulg_microzoo
+    model: ulg_microzoo         # CONSISTENT WITH BAMHBI CONFIG
     parameters:
-      doxsatmort: 7.8125	# default = 7.8125 mmolO2 m-3 (?)	(also in Mesozoo,Gelatinous,Noctiluca)
-      eff_ass_zoo_c: 0.64	# default = 0.64 	(also in Mesozoo)
-      eff_ass_zoo_n: 0.77	# default = 0.77 	(also in Mesozoo)
-      eff_gr_mic_c: 0.8		# default = 0.8 	
-      eff_mic_bac: 0.7		# default = 0.7 	
-      eff_mic_dia: 0.0		# default = 0.0 	
-      eff_mic_emi: 1.0		# default = 1.0 	
-      eff_mic_fla: 0.0		# default = 0.0 	
-      eff_mic_mes: 0.0		# default = 0.0 	
-      eff_mic_mic: 0.0		# default = 0.0 	
-      eff_mic_pom: 0.0		# default = 0.0 	
-      f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,DOM,Emiliana,Flagellates,Mesozoo)
-      gmax_mic: 3.6		# default = 3.6 d-1	
-      ks_mort_mic: 1.0		# default = 1.0 mmolC m-3	
-      ks_prey_mic: 5.0		# default = 5.0 mmolC m-3	
-      mess_prey_mic: 0.23	# default = 0.23 	
-      mo_anox_pred: 0.25	# default = 0.25 d-1	(also in Mesozoo,Gelatinous,Noctiluca)
-      moexp_mic: 2.0		# default = 2.0 	
-      momax_mic: 0.3		# default = 0.3 d-1	
-      q10_zoo: 2.0		# default = 2.0 	(also in Mesozoo,Noctiluca)
-      r_n_c_bac: 0.196		# default = 0.196 molN molC-1	(also in Bacteria,Mesozoo)
-      r_n_c_mes: 0.21		# default = 0.21 molN molC-1	(also in Gelatinous,Microzoo,Noctiluca)
-      r_n_c_mic: 0.18		# default = 0.18 molN molC-1	(also in Bacteria,Mesozoo,Microzoo)	
-      r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Emiliana,Flagellates,Mesozoo,Gelatinous,Noctiluca)
-      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Chemical,Diatoms,DOM,Emiliana,Flagellates,Mesozoo,Gelatinous,Noctiluca)
-      r_si_n_dia: 0.83		# default = 0.83 molSi molN-1	(also in Diatoms,Mesozoo,Gelatinous,Noctiluca)
+      doxsatmort: 7.8125	# default = 7.8125 mmolO2 m-3 (?) (also in Mesozoo,Gelatinous,Noctiluca) // Perc. of sat. where metabolic respiration is 1/2 the one under O2 sat.
+      eff_ass_zoo_c: 0.64	# default = 0.64 	(also in Mesozoo)  // ZOO assimilation efficiency on C
+      eff_ass_zoo_n: 0.77	# default = 0.77 	(also in Mesozoo)  // ZOO assimilation efficiencies on N
+      eff_gr_mic_c: 0.8		# default = 0.8   // MIC net growth efficiency on C	
+      eff_mic_bac: 0.7		# default = 0.7  // Capture efficiency of MIC on BAC 	
+      eff_mic_dia: 0.0		# default = 0.0  // Capture efficiency of MIC on DIA	
+      eff_mic_emi: 1.0		# default = 1.0  // Capture efficiency of MIC on EMI	
+      eff_mic_fla: 0.0		# default = 0.0  // Capture efficiency of MIC on FLA	
+      eff_mic_mes: 0.0		# default = 0.0  // Capture efficiency of MIC on MES	
+      eff_mic_mic: 0.0		# default = 0.0  // Capture efficiency of MIC on MIC	
+      eff_mic_pom: 0.0		# default = 0.0  // Capture efficiency of MIC on POM
+      f_dl_dom: 0.7		# default = 0.7 	(also in Bacteria,Diatoms,DOM,Emiliana,Flagellates,Mesozoo) // Labile fraction of PHY- and nonPHY-produced DOM
+      gmax_mic: 3.6		# default = 3.6 d-1	// Maximum grazing rate of MIC
+      ks_mort_mic: 1.0		# default = 1.0 mmolC m-3  // Mortality half-saturation rate of MIC	
+      ks_prey_mic: 5.0		# default = 5.0 mmolC m-3  // Half-saturation constant for MIC grazing	
+      mess_prey_mic: 0.23	# default = 0.23   // Messy feeding fraction of MIC grazing
+      mo_anox_pred: 0.25	# default = 0.25 d-1	(also in Mesozoo,Gelatinous,Noctiluca) // Mortality rate in anoxia
+      moexp_mic: 2.0		# default = 2.0  // Order of the non-linearity of mortality rate for MIC	
+      momax_mic: 0.3		# default = 0.3 d-1  // Maximum mortality rate of MIC
+      q10_zoo: 2.0		# default = 2.0 	(also in Mesozoo,Noctiluca) // Temperature factor
+      r_n_c_bac: 0.196		# default = 0.196 molN molC-1	(also in Bacteria,Mesozoo)  // N:C (Goldman) ratio in BAC
+      r_n_c_mes: 0.21		# default = 0.21 molN molC-1	(also in Gelatinous,Microzoo,Noctiluca) // N:C molar ratio in MES
+      r_n_c_mic: 0.18		# default = 0.18 molN molC-1	(also in Bacteria,Mesozoo,Microzoo)  // N:C molar ratio in MIC
+      r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Emiliana,Flagellates,Mesozoo,Gelatinous,Noctiluca) // Oxygen to carbon ratio of respiration process
+      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Chemical,Diatoms,DOM,Emiliana,Flagellates,Mesozoo,Gelatinous,Noctiluca) // N:P Redfield rati
+      r_si_n_dia: 0.83		# default = 0.83 molSi molN-1	(also in Diatoms,Mesozoo,Gelatinous,Noctiluca) // Si:N ratio in DI
     coupling:
       BAC: bacteria/BAC         # 
       CDI: diatoms/CDI          # 
@@ -351,30 +360,30 @@ instances:
       PON: dom/PON              #
       SID: diatoms/SID          # 
   gelatinous:
-    model: ulg_gelatinous
+    model: ulg_gelatinous       # CONSISTENT WITH BAMHBI CONFIG
     parameters:
-      doxsatmort: 7.8125	# default = 7.8125 mmolO2 m-3 (?)	(also in Mesozoo,MicroZoo,Noctiluca)
-      eff_ass_gel_prey: 0.75	# default = 0.75 	
-      eff_gel_dia: 0.0		# default = 0.0 	
-      eff_gel_emi: 0.0		# default = 0.0 	
-      eff_gel_fla: 0.0		# default = 0.0 	
-      eff_gel_mes: 1.0		# default = 1.0 	
-      eff_gel_mic: 0.0		# default = 0.0 	
-      eff_gel_pom: 0.0		# default = 0.0 	
-      eff_gr_gel_c: 0.2		# default = 0.2 	
-      gmax_gel: 0.3		# default = 0.3 d-1	
-      ks_mort_gel: 0.0		# default = 0.0 mmolC m-3	
-      mo_anox_pred: 0.25	# default = 0.25 d-1	(also in Mesozoo,MicroZoo,Noctiluca)
-      momax_gel: 0.009		# default = 0.009 d-1	
-      q10_gel: 3.5		# default = 3.5 	
-      r_n_c_gel: 0.25		# default = 0.25 molN molC-1	
-      r_n_c_mes: 0.21		# default = 0.21 molN molC-1	(also in Mesozoo,Noctiluca)
-      r_n_c_mic: 0.18		# default = 0.18 molN molC-1	(also in Mesozoo,Microzoo,Noctiluca)
-      r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo,Noctiluca)
-      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Chemical,Diatoms,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo,Noctiluca)
-      r_si_n_dia: 0.83		# default = 0.83 molSi molN-1	(also in Diatoms,Mesozoo,MicroZoo,Noctiluca)
-      respb_gel: 0.0		# default = 0.0001 d-1	
-      t_g_gel: 0.0		# default = 0 mmolC m-3	
+      doxsatmort: 7.8125	# default = 7.8125 mmolO2 m-3 (?)	(also in Mesozoo,MicroZoo,Noctiluca) // Perc. of sat. where metabolic respiration is 1/2 the one under O2 sat.
+      eff_ass_gel_prey: 0.75	# default = 0.75  // GEL assimilation efficiency on prey
+      eff_gel_dia: 0.0		# default = 0.0  // Capture efficiency of GEL on DIA
+      eff_gel_emi: 0.0		# default = 0.0  // Capture efficiency of GEL on EMI	
+      eff_gel_fla: 0.0		# default = 0.0  // Capture efficiency of GEL on FLA	
+      eff_gel_mes: 1.0		# default = 1.0  // Capture efficiency of GEL on MES	
+      eff_gel_mic: 0.0		# default = 0.0  // Capture efficiency of GEL on MIC
+      eff_gel_pom: 0.0		# default = 0.0  // Capture efficiency of GEL on POM
+      eff_gr_gel_c: 0.2		# default = 0.2  // Part of the assimil. food used for GEL growth
+      gmax_gel: 0.3		# default = 0.3 d-1  // Maximum grazing rate of GEL
+      ks_mort_gel: 0.0		# default = 0.0 mmolC m-3 // Mortality half-saturation rate of GEL
+      mo_anox_pred: 0.25	# default = 0.25 d-1	(also in Mesozoo,MicroZoo,Noctiluca) // Mortality rate in anoxia
+      momax_gel: 0.009		# default = 0.009 d-1  // Maximum mortality rate of GEL	
+      q10_gel: 3.5		# default = 3.5  // Temperature dependency for GEL	
+      r_n_c_gel: 0.25		# default = 0.25 molN molC-1	// N:C molar ratio in GEL
+      r_n_c_mes: 0.21		# default = 0.21 molN molC-1	(also in Mesozoo,Noctiluca) // N:C molar ratio in MES
+      r_n_c_mic: 0.18		# default = 0.18 molN molC-1	(also in Mesozoo,Microzoo,Noctiluca) // N:C molar ratio in MIC
+      r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo,Noctiluca) // Oxygen to carbon ratio of respiration process
+      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Chemical,Diatoms,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo,Noctiluca) // N:P Redfield rati
+      r_si_n_dia: 0.83		# default = 0.83 molSi molN-1	(also in Diatoms,Mesozoo,MicroZoo,Noctiluca) // Si:N ratio in DI
+      respb_gel: 0.0		# default = 0.0001 d-1	// Basal respiration rate of GEL
+      t_g_gel: 0.0		# default = 0 mmolC m-3	 // Feeding threshold for GEL grazing
     coupling:
       CDI: diatoms/CDI          # 
       CEM: emiliana/CEM         # 
@@ -392,30 +401,30 @@ instances:
       PON: dom/PON              #
       SID: diatoms/SID          # 
   noctiluca:
-    model: ulg_noctiluca
+    model: ulg_noctiluca        # CONSISTENT WITH BAMHBI CONFIG
     parameters:
-      doxsatmort: 7.8125	# default = 7.8125 mmolO2 m-3 (?)	(also in Mesozoo,MicroZoo,Gelatinous)
-      eff_ass_noc_prey: 0.75	# default = 0.75 	
-      eff_gr_noc_c: 0.15 # !	# default = 0.2 
-      eff_noc_dia: 1.0		# default = 1.0 	
-      eff_noc_emi: 1.0		# default = 1.0 		
-      eff_noc_fla: 0.5		# default = 0.5 	
-      eff_noc_mes: 0.0		# default = 0.0 	
-      eff_noc_mic: 1.0		# default = 1.0 	
-      eff_noc_pom: 1.0		# default = 1.0 	
-      gmax_noc: 0.015 		# default = 0.06 d-1	
-      ks_mort_noc: 0.0		# default = 0.0 mmolC m-3	
-      mo_anox_pred: 0.25	# default = 0.25 d-1	(also in Mesozoo,MicroZoo,Gelatinous)
-      momax_noc: 0.06		# default = 0.06 d-1	
-      q10_zoo: 2.0		# default = 2.0 	(also in Mesozoo,MicroZoo)
-      r_n_c_mes: 0.21		# default = 0.21 molN molC-1	(also in Gelatinous,Mesozoo)
-      r_n_c_mic: 0.18		# default = 0.18 molN molC-1	(also in Gelatinous,Mesozoo,Microzoo)
-      r_n_c_noc: 0.21		# default = 0.21 molN molC-1	
-      r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous)
-      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Chemical,Diatoms,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous)
-      r_si_n_dia: 0.83		# default = 0.83 molSi molN-1	(also in Diatoms,Mesozoo,MicroZoo,Gelatinous)
-      respb_noc: 0.0001		# default = 0.0001 d-1	
-      t_g_noc: 0.833		# default = 0.0 mmolC m-3	
+      doxsatmort: 7.8125	# default = 7.8125 mmolO2 m-3 (?)	(also in Mesozoo,MicroZoo,Gelatinous) // Perc. of sat. where metabolic respiration is 1/2 the one under O2 sat.
+      eff_ass_noc_prey: 0.75	# default = 0.75  // NOC assimilation efficiency on prey
+      eff_gr_noc_c: 0.15 # !	# default = 0.2  // Part of the Assimilated food of zooplankton used for growth
+      eff_noc_dia: 1.0		# default = 1.0  // Capture efficiency of NOC on DI	
+      eff_noc_emi: 1.0		# default = 1.0  // Capture efficiency of NOC on EM		
+      eff_noc_fla: 0.5		# default = 0.5  // Capture efficiency of NOC on FL	
+      eff_noc_mes: 0.0		# default = 0.0  // Capture efficiency of NOC on MES
+      eff_noc_mic: 1.0		# default = 1.0  // Capture efficiency of NOC on MIC	
+      eff_noc_pom: 1.0		# default = 1.0  // Capture efficiency of NOC on POM	
+      gmax_noc: 0.015 		# default = 0.06 d-1	// Maximum grazing rate of NOC
+      ks_mort_noc: 0.0		# default = 0.0 mmolC m-3 // Mortality half-saturation rate of NOC	
+      mo_anox_pred: 0.25	# default = 0.25 d-1	(also in Mesozoo,MicroZoo,Gelatinous) // Mortality rate in anoxia
+      momax_noc: 0.06		# default = 0.06 d-1	//  Maximum mortality rate of NOC
+      q10_zoo: 2.0		# default = 2.0 	(also in Mesozoo,MicroZoo) // Temperature factor
+      r_n_c_mes: 0.21		# default = 0.21 molN molC-1	(also in Gelatinous,Mesozoo) // N:C molar ratio in MES
+      r_n_c_mic: 0.18		# default = 0.18 molN molC-1	(also in Gelatinous,Mesozoo,Microzoo) // N:C molar ratio in MIC
+      r_n_c_noc: 0.21		# default = 0.21 molN molC-1	// N:C molar ratio in NOC
+      r_o2_c_resp: 1.0		# default = 1.0 molO2 molC-1	(also in Bacteria,Diatoms,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous) // Oxygen to carbon ratio of respiration process
+      r_p_n_redfield: 0.0625	# default = 0.0625 molP molN-1	(also in Bacteria,Chemical,Diatoms,DOM,Emiliana,Flagellates,Mesozoo,MicroZoo,Gelatinous) // N:P Redfield rati
+      r_si_n_dia: 0.83		# default = 0.83 molSi molN-1	(also in Diatoms,Mesozoo,MicroZoo,Gelatinous) // Si:N ratio in DI
+      respb_noc: 0.0001		# default = 0.0001 d-1	// Basal respiration rate of NOC
+      t_g_noc: 0.833		# default = 0.0 mmolC m-3  // Feeding threshold for NOC grazing
     coupling:
       CDI: diatoms/CDI          #
       CEM: emiliana/CEM         # 
@@ -432,3 +441,46 @@ instances:
       POC: dom/POC              #
       PON: dom/PON              #
       SID: diatoms/SID          # 
+#  benthic:
+#    model: ulg_benthic
+#    parameters:
+#      a_susp: 1.0		# default = 1.0 (?)
+#      b_scs: 0.000216		# default = 0.000216 (d-1)
+###      b_sms: 8.64E-09		# default = 8.64E-09 (d-1)
+#      b_sss: 0.000216		# default = 0.000216 (d-1)
+#      c_ox_nit: 2.0		# default = 2.0 (molO molN-1)
+#      c_ox_pom: 1.0		# default = 1.0 (molO molC-1)
+#      e_sss: 0.864		# default = 0.864 (mmol Si m-2 d-1)
+#      e_fss: 0.864		# default = 0.864 (mmol Si m-2 d-1)
+#      e_scs: 0.864		# default = 0.864 (mmol C m-2 d-1)
+#      e_fcs: 0.864		# default = 0.864 (mmol C m-2 d-1)
+###      e_sms: 31.968		# default = 31.968 (g SMI m-2 d-1)
+#      f_fcs: 0.29		# default = 0.29 (-)
+#      f_fss: 0.5		# default = 0.5 (-)
+#      f_odu: 0.11		# default = 0.11 (-)
+#      h_fss: 0.014		# default = 0.014 (d-1)
+#      h_sss: 0.0014		# default = 0.0014 (d-1)
+#      q10_rc: 2.0		# default = 2.0 (-)
+#      r_fcs: 0.0753		# default = 0.0753 (d-1)
+#      r_scs: 0.003		# default = 0.003 (d-1)
+#      r_p_n_redfield: 0.0625	# default = 0.0625 (molP molN-1)
+#      r_si_n_dia: 0.83		# default = 0.83 molSi molN-1	(also in Mesozoo,MicroZoo,Gelatinous,Noctiluca)
+###      taucr_dep_smi: 0.05	# default = 0.05 (N m-2)
+###      taucr_ero_smi: 0.05	# default = 0.05 (N m-2)
+#      taucr_ero_f: 0.02		# default = 0.02 (N m-2)
+#      taucr_ero_s: 0.05		# default = 0.05 (N m-2)
+#      unit_c1: 3600		# default = 3600 (- ?)
+#      unit_c2: 1.0		# default = 1.0 (-)
+#      unit_c3: 1.0		# default = 1.0 (-)
+###      w_smi: -0.864		# default = -0.864 m d-1
+#    coupling:
+#      DIC: chemical/DIC         #
+#      DOX: chemical/DOX         #
+#      NHS: chemical/NHS         #
+#      NOS: chemical/NOS         #
+#      ODU: chemical/ODU         #
+#      PHO: chemical/PHO         #
+#      POC: dom/POC              #
+#      PON: dom/PON              #
+#      SID: diatoms/SID          #
+#      SIO: diatoms/SIO          #
