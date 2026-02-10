@@ -44,10 +44,11 @@
    type,extends(type_base_model),public :: type_ulg_bacteria 
       type (type_state_variable_id)         :: id_bac
       type (type_state_variable_id)         :: id_dcl,id_dcs,id_dic,id_dnl,id_dns,id_dox,id_nhs,id_nos,id_odu,id_pho
-      type (type_dependency_id)             :: id_temp,id_z_r
+      type (type_dependency_id)             :: id_temp,id_z_r,id_rho
       type (type_diagnostic_variable_id)    :: id_remineralization_anoxic_bac,id_oxygen_consumption_bac,id_respiration_bac,id_denitrification,id_uptake_dcl_bac
 
 !     Model parameters 
+      real(rk)     :: dens_Fe3_Mn3, f_precip_pho
       real(rk)     :: eff_gr_bac_c, f_dl_dom, f_solid_odu, i1_curve
       real(rk)     :: i2_curve, iron, ki_anox_nos, ki_anox_o2
       real(rk)     :: ki_denit_o2, ks_denitr_nos, ks_dcl_bac, ks_nhs_bac
@@ -75,6 +76,7 @@
    real(rk), parameter :: one_pr_day = 1.0_rk/86400.0_rk
 
 !     Model parameters 
+      real(rk)     :: dens_Fe3_Mn3, f_precip_pho
       real(rk)     :: eff_gr_bac_c, f_dl_dom, f_solid_odu, i1_curve
       real(rk)     :: i2_curve, iron, ki_anox_nos, ki_anox_o2
       real(rk)     :: ki_denit_o2, ks_denitr_nos, ks_dcl_bac, ks_nhs_bac
@@ -85,8 +87,10 @@
    ! Store parameter values in our own derived type 
    ! NB: all rates must be provided in values per day, 
    ! and are converted here to values per second. 
+   call self%get_parameter(self%dens_Fe3_Mn3, 'dens_Fe3_Mn3', '-', 'Density at which Fe3 and Mn3 are maximum, so phosphate precipitation occurs', default=16.1_rk)
    call self%get_parameter(self%eff_gr_bac_c, 'eff_gr_bac_c', '-', 'BAC gross growth efficiency on C', default=0.17_rk) 
    call self%get_parameter(self%f_dl_dom, 'f_dl_dom', '-', 'Labile fraction of PHY- and nonPHY-produced DOM', default=0.7_rk) 
+   call self%get_parameter(self%f_precip_pho, 'f_precip_pho', '-', 'PHO precipitation rate', default=0.001_rk, scale_factor=one_pr_day)
    call self%get_parameter(self%f_solid_odu, 'f_solid_odu', '-', 'Percentage of solid ODU formation', default=0.2_rk) 
    call self%get_parameter(self%i1_curve, 'i1_curve', '-', 'Parameter of the curve simulating the iron concentration', default=25000.0_rk) 
    call self%get_parameter(self%i2_curve, 'i2_curve', '-', 'Parameter of the curve simulating the iron c', default=50.0_rk) 
@@ -128,6 +132,7 @@
     ! Register environmental dependencies 
    call self%register_dependency(self%id_temp, standard_variables%temperature) 
    call self%register_dependency(self%id_z_r, standard_variables%depth) 
+   call self%register_dependency(self%id_rho,standard_variables%density)
 
     ! Add to aggregate variables 
    call self%add_to_aggregate_variable(standard_variables%total_carbon, self%id_bac)
@@ -156,7 +161,7 @@
    _DECLARE_ARGUMENTS_DO_
 
       real(rk) ::  DCL,DCS,DIC,DNL,DNS,DOX,NHS,NOS,ODU,PHO
-      real(rk) ::  temp, z_r
+      real(rk) ::  temp, z_r, rho
       real(rk) ::  BAC
       real(rk) ::   Denitrification	  	! mmol N m-3, Denitrification flux
       real(rk) ::   Excretion	  		! mmol N m-3, Excretion of ammonium
@@ -175,6 +180,9 @@
       real(rk) ::   Uptake_NHS_pot	 	! mmol N m-3, Uptake of NHs (potential)
       real(rk) ::   testratio	  		! mmol N m-3, Value determining if growth limited by C or N
       real(rk) ::   tf	  			! -, Temperature factor
+      real(rk) ::   limit_FeMn
+      real(rk) ::   FeMnLim
+      real(rk) ::   PHO_precip
 
    _LOOP_BEGIN_
 
@@ -194,6 +202,7 @@
    ! Retrieve current environmental conditions.
     _GET_(self%id_temp,temp)           	 ! local temperature
     _GET_(self%id_z_r,z_r) ! depth of layer midpoints (m)
+    _GET_(self%id_rho,rho)		! local water density
     
     tf = Q10Factor(temp,self%q10_bac) 
     
@@ -242,11 +251,16 @@
     Respiration_loc = Respiration * Michaelis(DOX,self%ks_oxic_o2) * self%r_o2_c_resp
     Remineralization_anoxic_loc = Respiration * Inhibition(NOS,self%ki_anox_nos) * Inhibition(DOX,self%ki_anox_o2) * self%r_odu_c_anox
     
+    ! Phosphate removal at the Iron-Mangase depth
+    limit_FeMn = exp(-((rho-1000.0 - self%dens_Fe3_Mn3) * 8.0_rk)**2.0_rk)                          ! a peak around 16.1 kg/m3
+    FeMnLim = limit_FeMn * (1.0_rk-1.0_rk/(1.0_rk + exp(-2.0_rk * (z_r - 190.0_rk) / 5.0_rk)))  	 ! also limit to depths above ~200 meter
+    PHO_precip = FeMnLIM * self%f_precip_pho * PHO
+
    ! Carbon content increases by intake of nutrients and decreases by mortality (and predation) 
    _ADD_SOURCE_(self%id_bac, Growth - Mortality_C)
    ! Ammonium is excreted or can be taken up 
    _ADD_SOURCE_(self%id_nhs, Excretion - Uptake_NHS) 
-   _ADD_SOURCE_(self%id_pho, (Excretion - Uptake_NHS) *self%r_p_n_redfield) 
+   _ADD_SOURCE_(self%id_pho, (Excretion - Uptake_NHS) *self%r_p_n_redfield - PHO_precip) 
    _ADD_SOURCE_(self%id_dcl, self%f_dl_dom * Mortality_C - Growth - Respiration) 
    _ADD_SOURCE_(self%id_dnl, self%f_dl_dom * Mortality_N - Uptake_DNL) 
    _ADD_SOURCE_(self%id_dcs, (1.0 - self%f_dl_dom) * Mortality_C) 
